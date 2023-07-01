@@ -1,11 +1,13 @@
-import { Button, Text } from '@mantine/core';
+import { AppShell } from '@mantine/core';
+import { RouterProvider } from 'react-router-dom';
+import MyHeader from './components/common/Header';
+import router from './routes';
 
 function App() {
   return (
-    <>
-      <Button>Click me!</Button>
-      <Text className="font-bold p-10 text-blue-500">Welcome to Mantine!</Text>
-    </>
+    <AppShell padding="md" header={<MyHeader />}>
+      <RouterProvider router={router} />
+    </AppShell>
   );
 }
 
