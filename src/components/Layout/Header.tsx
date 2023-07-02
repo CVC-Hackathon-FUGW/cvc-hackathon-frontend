@@ -20,7 +20,8 @@ import {
 import { useWeb3Modal } from '@web3modal/react';
 import { useCallback, useEffect } from 'react';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { useAccount, useDisconnect, useNetwork, useSwitchNetwork } from 'wagmi';
+import { useAccount, useDisconnect, useNetwork } from 'wagmi';
+import SwitchNetworkModal from './SwitchNetworkModal';
 
 const HEADER_HEIGHT = rem(60);
 
@@ -81,17 +82,15 @@ const links = [
 
 const MyHeader = () => {
   const { classes } = useStyles();
-  const [opened, { toggle }] = useDisclosure(false);
+  const [openedBurger, { toggle: toggleBurger }] = useDisclosure(false);
+  const [openedModal, { open: openModal, close: closeModal }] =
+    useDisclosure(false);
   const { copy } = useClipboard();
 
   const { open } = useWeb3Modal();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { chain } = useNetwork();
-  const { chains } = useSwitchNetwork();
-
-  console.log('connected chain', chain);
-  console.log('chains', chains);
 
   const handleCopyAddress = useCallback(() => {
     copy(address);
@@ -102,20 +101,17 @@ const MyHeader = () => {
 
   useEffect(() => {
     if (chain?.unsupported) {
-      notifications.show({
-        message: `Unsupported network: ${chain.name}`,
-        color: 'red',
-      });
+      openModal();
     }
-  }, [chain, chains]);
+  }, [chain, openModal]);
 
   return (
     <Header height={HEADER_HEIGHT} mb={120}>
       <Container className={classes.inner} fluid>
         <Group>
           <Burger
-            opened={opened}
-            onClick={toggle}
+            opened={openedBurger}
+            onClick={toggleBurger}
             className={classes.burger}
             size="sm"
           />
@@ -192,6 +188,11 @@ const MyHeader = () => {
           </Menu.Dropdown>
         </Menu>
       </Container>
+      <SwitchNetworkModal
+        opened={openedModal}
+        onClose={closeModal}
+        disconnect={disconnect}
+      />
     </Header>
   );
 };
