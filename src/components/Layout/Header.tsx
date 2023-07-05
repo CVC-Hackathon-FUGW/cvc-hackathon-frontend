@@ -69,7 +69,6 @@ const MyHeader = () => {
       openModal();
     }
   }, [chain, openModal]);
-  console.log(location);
 
   return (
     <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT}>
