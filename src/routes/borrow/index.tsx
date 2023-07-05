@@ -1,5 +1,7 @@
+import Borrow from "src/components/Borrow/Borrow";
+
 const BorrowPage = () => {
-  return <div>BorrowPage</div>;
+  return <Borrow/>;
 };
 
 export default BorrowPage;

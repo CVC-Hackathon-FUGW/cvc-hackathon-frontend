@@ -1,5 +1,7 @@
+import Lend from "src/components/Lend/Lend";
+
 const LendPage = () => {
-  return <div>Lend</div>;
+  return <Lend/>;
 };
 
 export default LendPage;
