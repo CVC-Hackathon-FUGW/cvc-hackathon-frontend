@@ -6,7 +6,6 @@ import {
   createStyles,
   rem,
 } from '@mantine/core';
-import { IconBrandGithub } from '@tabler/icons-react';
 
 const HeroImage = () => {
   const { classes } = useStyles();
@@ -15,43 +14,42 @@ const HeroImage = () => {
     <div className={classes.wrapper}>
       <Container size={700} className={classes.inner}>
         <h1 className={classes.title}>
-          A{' '}
+          BORROW & LEND AGAINST YOUR{' '}
           <Text
             component="span"
             variant="gradient"
             gradient={{ from: 'blue', to: 'cyan' }}
             inherit
           >
-            fully featured
-          </Text>{' '}
-          React components and hooks library
+            NFTS
+          </Text>
+          , INSTANTLY.
         </h1>
 
         <Text className={classes.description} color="dimmed">
-          Build fully functional accessible web applications with ease – Mantine
-          includes more than 100 customizable components and hooks to cover you
-          in any situation
+          Rental is a decentralized lending protocol that allows you to borrow
         </Text>
 
         <Group className={classes.controls}>
           <Button
+            component="a"
             size="xl"
             className={classes.control}
             variant="gradient"
             gradient={{ from: 'blue', to: 'cyan' }}
+            href="/lend"
           >
-            Get started
+            Lend
           </Button>
 
           <Button
             component="a"
-            href="https://github.com/mantinedev/mantine"
+            href="/borrow"
             size="xl"
             variant="default"
             className={classes.control}
-            leftIcon={<IconBrandGithub size={20} />}
           >
-            GitHub
+            Borrow
           </Button>
         </Group>
       </Container>

@@ -6,6 +6,7 @@ import {
   Header,
   Menu,
   Text,
+  ThemeIcon,
   createStyles,
   rem,
 } from '@mantine/core';
@@ -68,7 +69,6 @@ const MyHeader = () => {
       openModal();
     }
   }, [chain, openModal]);
-  console.log(location);
 
   return (
     <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT}>
@@ -81,20 +81,24 @@ const MyHeader = () => {
             size="sm"
           />
           <a href="/">
-            <IconCurrencyEthereum size={28} color="black" />
+            <ThemeIcon variant="gradient" size={32}>
+              <IconCurrencyEthereum />
+            </ThemeIcon>
           </a>
         </Group>
         <Group spacing={5} className={classes.links}>
           {links.map(({ link, label }) => (
-            <a key={label} href={link} className={classes.link}>
-              <Text
-                variant={
-                  window?.location?.pathname === link ? 'gradient' : 'text'
-                }
-              >
-                {label}
-              </Text>
-            </a>
+            <Text
+              variant={
+                window?.location?.pathname === link ? 'gradient' : 'text'
+              }
+              key={label}
+              href={link}
+              className={classes.link}
+              component="a"
+            >
+              {label}
+            </Text>
           ))}
         </Group>
         <Menu shadow="md" trigger="hover">
