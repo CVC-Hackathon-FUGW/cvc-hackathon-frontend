@@ -80,7 +80,9 @@ const MyHeader = () => {
             className={classes.burger}
             size="sm"
           />
-          <IconCurrencyEthereum size={28} />
+          <a href="/">
+            <IconCurrencyEthereum size={28} color="black" />
+          </a>
         </Group>
         <Group spacing={5} className={classes.links}>
           {links.map(({ link, label }) => (

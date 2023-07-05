@@ -7,7 +7,7 @@ export default {
   },
   corePlugins: {
     preflight: false,
-    accentColor: false,
+    accentColor: true,
   },
   plugins: [],
 } satisfies Config;
