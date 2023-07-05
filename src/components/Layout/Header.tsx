@@ -1,18 +1,17 @@
 import {
   Burger,
   Button,
-  Center,
   Container,
   Group,
   Header,
   Menu,
+  Text,
   createStyles,
   rem,
 } from '@mantine/core';
 import { useClipboard, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import {
-  IconChevronDown,
   IconCopy,
   IconCurrencyEthereum,
   IconPlugConnectedX,
@@ -27,61 +26,26 @@ const HEADER_HEIGHT = rem(60);
 
 const links = [
   {
-    link: '/about',
-    label: 'Features',
+    link: '/lend',
+    label: 'Lend',
   },
   {
-    link: '#1',
-    label: 'Learn',
-    links: [
-      {
-        link: '/docs',
-        label: 'Documentation',
-      },
-      {
-        link: '/resources',
-        label: 'Resources',
-      },
-      {
-        link: '/community',
-        label: 'Community',
-      },
-      {
-        link: '/blog',
-        label: 'Blog',
-      },
-    ],
+    link: '/offers',
+    label: 'Offers',
   },
   {
-    link: '/about',
-    label: 'About',
+    link: '/borrow',
+    label: 'Borrow',
   },
   {
-    link: '/pricing',
-    label: 'Pricing',
-  },
-  {
-    link: '#2',
-    label: 'Support',
-    links: [
-      {
-        link: '/faq',
-        label: 'FAQ',
-      },
-      {
-        link: '/demo',
-        label: 'Book a demo',
-      },
-      {
-        link: '/forums',
-        label: 'Forums',
-      },
-    ],
+    link: '/loans',
+    label: 'Loans',
   },
 ];
 
 const MyHeader = () => {
   const { classes } = useStyles();
+
   const [openedBurger, { toggle: toggleBurger }] = useDisclosure(false);
   const [openedModal, { open: openModal, close: closeModal }] =
     useDisclosure(false);
@@ -104,9 +68,10 @@ const MyHeader = () => {
       openModal();
     }
   }, [chain, openModal]);
+  console.log(location);
 
   return (
-    <Header height={HEADER_HEIGHT} mb={120}>
+    <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT}>
       <Container className={classes.inner} fluid>
         <Group>
           <Burger
@@ -118,47 +83,17 @@ const MyHeader = () => {
           <IconCurrencyEthereum size={28} />
         </Group>
         <Group spacing={5} className={classes.links}>
-          {links.map((link) => {
-            const menuItems = link.links?.map((item) => (
-              <Menu.Item key={item.link}>{item.label}</Menu.Item>
-            ));
-
-            if (menuItems) {
-              return (
-                <Menu
-                  key={link.label}
-                  trigger="hover"
-                  transitionProps={{ exitDuration: 0 }}
-                  withinPortal
-                >
-                  <Menu.Target>
-                    <a
-                      href={link.link}
-                      className={classes.link}
-                      onClick={(event) => event.preventDefault()}
-                    >
-                      <Center>
-                        <span className={classes.linkLabel}>{link.label}</span>
-                        <IconChevronDown size={rem(12)} stroke={1.5} />
-                      </Center>
-                    </a>
-                  </Menu.Target>
-                  <Menu.Dropdown>{menuItems}</Menu.Dropdown>
-                </Menu>
-              );
-            }
-
-            return (
-              <a
-                key={link.label}
-                href={link.link}
-                className={classes.link}
-                onClick={(event) => event.preventDefault()}
+          {links.map(({ link, label }) => (
+            <a key={label} href={link} className={classes.link}>
+              <Text
+                variant={
+                  window?.location?.pathname === link ? 'gradient' : 'text'
+                }
               >
-                {link.label}
-              </a>
-            );
-          })}
+                {label}
+              </Text>
+            </a>
+          ))}
         </Group>
         <Menu shadow="md" trigger="hover">
           <Menu.Target>
@@ -229,8 +164,8 @@ const useStyles = createStyles((theme) => ({
       theme.colorScheme === 'dark'
         ? theme.colors.dark[0]
         : theme.colors.gray[7],
-    fontSize: theme.fontSizes.sm,
-    fontWeight: 500,
+    fontSize: theme.fontSizes.lg,
+    fontWeight: 'bold',
 
     '&:hover': {
       backgroundColor:
