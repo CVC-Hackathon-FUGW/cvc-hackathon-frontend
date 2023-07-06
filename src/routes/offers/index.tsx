@@ -1,5 +1,7 @@
+import Offers from "src/components/Offers/Offers";
+
 const OffersPage = () => {
-  return <div>OffersPage</div>;
+  return <Offers/>;
 };
 
 export default OffersPage;

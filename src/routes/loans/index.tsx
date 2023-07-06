@@ -1,5 +1,7 @@
+import Loans from "src/components/Loans/Loans"
+
 const LoansPage = () => {
-  return <div>LoansPage</div>;
+  return <Loans/>;
 };
 
 export default LoansPage;
