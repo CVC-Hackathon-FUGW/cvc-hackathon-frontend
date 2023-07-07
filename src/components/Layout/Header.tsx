@@ -46,7 +46,6 @@ const links = [
 
 const MyHeader = () => {
   const { classes } = useStyles();
-
   const [openedBurger, { toggle: toggleBurger }] = useDisclosure(false);
   const [openedModal, { open: openModal, close: closeModal }] =
     useDisclosure(false);
@@ -107,7 +106,7 @@ const MyHeader = () => {
               radius="xl"
               h={30}
               variant="gradient"
-              onClick={isConnected ? handleCopyAddress : open}
+              onClick={isConnected ? undefined : open}
             >
               {truncateMiddle(address) || `Connect Wallet`}
             </Button>

@@ -1,10 +1,9 @@
-import abiFile from './abi.json';
+import abimortgage from './abimortgage.json';
 
-export const address = import.meta.env.VITE_CONTRACT_ADDRESS;
+export const addressMortgage = import.meta.env.VITE_CONTRACT_ADDRESS_MORTGAGE;
+export const adminAddress = import.meta.env.VITE_ADMIN_ADDRESS;
 
-export const abi = abiFile.abi;
-
-export const contract = {
-  address,
-  abi,
+export const contractMortgage = {
+  address: addressMortgage,
+  abi: abimortgage,
 };

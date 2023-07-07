@@ -4,6 +4,7 @@ import LendPage from './lend';
 import OffersPage from './offers';
 import BorrowPage from './borrow';
 import LoansPage from './loans';
+import Admin from './admin/Index';
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: '/loans',
     element: <LoansPage />,
+  },
+  {
+    path: '/admin',
+    element: <Admin />,
   },
 ]);
 
