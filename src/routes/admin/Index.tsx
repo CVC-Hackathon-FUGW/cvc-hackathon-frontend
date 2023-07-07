@@ -18,7 +18,7 @@ const Admin = () => {
 
   return (
     <div>
-      <Group position="center">
+      <Group position="right">
         <Button onClick={open}>Create Pool</Button>
       </Group>
 
@@ -27,32 +27,28 @@ const Admin = () => {
         onRowClick={setEditingPool}
         columns={[
           {
+            accessor: 'tokenAddress',
+            width: '15%',
+          },
+          {
             accessor: 'APY',
             width: '25%',
-            titleStyle: { fontSize: '25px' },
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
             render: (value: Pool) => `${Number(value.APY)}%`,
           },
           {
             accessor: 'Duration',
             width: '20%',
-            titleStyle: { fontSize: '25px' },
             render: (value: Pool) => `${Number(value.duration)}`,
           },
           {
             accessor: 'poolId',
             width: '15%',
-            titleStyle: { fontSize: '25px' },
             render: (value: Pool) => `${Number(value.poolId)}`,
-          },
-          {
-            accessor: 'tokenAddress',
-            width: '15%',
-            titleStyle: { fontSize: '25px' },
           },
           {
             accessor: 'TotalPoolAmount',
             width: '15%',
-            titleStyle: { fontSize: '25px' },
             render: (value: Pool) => `${Number(value.totalPoolAmount)}`,
           },
         ]}
