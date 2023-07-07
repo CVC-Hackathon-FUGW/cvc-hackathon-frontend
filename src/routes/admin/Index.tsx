@@ -5,15 +5,16 @@ import { contractMortgage } from 'src/configs/contract';
 import { Pool } from 'src/types';
 import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
+import { useState } from 'react';
+import EditPool from './components/EditPool';
 
 const Admin = () => {
   const { data: pools } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllPool',
   });
-
+  const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
-  console.log(contractMortgage);
 
   return (
     <div>
@@ -23,6 +24,7 @@ const Admin = () => {
 
       <DataTable
         records={pools as Pool[]}
+        onRowClick={setEditingPool}
         columns={[
           {
             accessor: 'APY',
@@ -57,6 +59,11 @@ const Admin = () => {
       />
 
       <CreatePool opened={opened} close={close} />
+      <EditPool
+        opened={Boolean(editingPool)}
+        close={() => setEditingPool(null)}
+        editingPool={editingPool}
+      />
     </div>
   );
 };
