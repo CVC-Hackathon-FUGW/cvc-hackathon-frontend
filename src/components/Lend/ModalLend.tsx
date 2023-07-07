@@ -1,4 +1,4 @@
-import { Modal, Avatar, Title, Text, Input, Button, Container } from "@mantine/core";
+import { Modal, Avatar, Title, Text, Input, Button, Divider } from "@mantine/core";
 
 export default function ModalLend(props: any) {
     //Control modal
@@ -27,6 +27,7 @@ export default function ModalLend(props: any) {
                         <Text weight={700} size='26px'>17.45</Text>
                     </div>
                 </div>
+                <Divider my="sm" />
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '15px' }}>
                     <div>
                         <Text weight={500} pb={10}>Offer Amount</Text>
