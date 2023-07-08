@@ -9,7 +9,7 @@ import { useState } from 'react';
 import EditPool from './components/EditPool';
 
 const Admin = () => {
-  const { data: pools } = useContractRead({
+  const { data: pools, refetch } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllPool',
   });
@@ -54,11 +54,13 @@ const Admin = () => {
         ]}
       />
 
-      <CreatePool opened={opened} close={close} />
+      <CreatePool opened={opened} close={close} refetch={refetch} />
       <EditPool
         opened={Boolean(editingPool)}
         close={() => setEditingPool(null)}
         editingPool={editingPool}
+        refetch={refetch}
+        key={`${editingPool?.poolId}`}
       />
     </div>
   );

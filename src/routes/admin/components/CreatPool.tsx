@@ -6,15 +6,17 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { contractMortgage } from 'src/configs/contract';
 import { useContractWrite } from 'wagmi';
 
 interface CreatePoolProps {
   opened: boolean;
   close: () => void;
+  refetch: () => void;
 }
 
-const CreatePool = ({ opened, close }: CreatePoolProps) => {
+const CreatePool = ({ opened, close, refetch }: CreatePoolProps) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
       _tokenAddress: '',
@@ -26,6 +28,16 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
   const { write, isLoading } = useContractWrite({
     ...contractMortgage,
     functionName: 'CreatePool',
+    onSuccess: () => {
+      refetch();
+      close();
+    },
+    onError: (error) =>
+      notifications.show({
+        title: error.name,
+        message: error.message,
+        color: 'red',
+      }),
   });
 
   return (
