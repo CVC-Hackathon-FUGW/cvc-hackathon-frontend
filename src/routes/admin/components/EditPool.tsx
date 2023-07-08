@@ -10,7 +10,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { contractMortgage } from 'src/configs/contract';
 import { Pool } from 'src/types';
-import { useContractWrite } from 'wagmi';
+import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
 interface EditPoolProps {
   opened: boolean;
@@ -20,8 +20,6 @@ interface EditPoolProps {
 }
 
 const EditPool = ({ opened, close, editingPool, refetch }: EditPoolProps) => {
-  console.log(editingPool);
-
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
       _APY: Number(editingPool?.APY),
@@ -30,19 +28,22 @@ const EditPool = ({ opened, close, editingPool, refetch }: EditPoolProps) => {
     },
   });
 
-  const { write, isLoading } = useContractWrite({
+  const { write, isLoading, data } = useContractWrite({
     ...contractMortgage,
     functionName: 'UpdatePool',
-    onSuccess: () => {
-      refetch();
-      close();
-    },
     onError: (error) =>
       notifications.show({
         title: error.name,
         message: error.message,
         color: 'red',
       }),
+  });
+  useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess: () => {
+      refetch();
+      close();
+    },
   });
 
   return (

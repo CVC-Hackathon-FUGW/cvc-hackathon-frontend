@@ -12,6 +12,7 @@ const Admin = () => {
   const { data: pools, refetch } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllPool',
+    watch: true,
   });
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [opened, { open, close }] = useDisclosure(false);

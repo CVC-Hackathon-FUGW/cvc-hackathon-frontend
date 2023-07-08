@@ -8,7 +8,7 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { contractMortgage } from 'src/configs/contract';
-import { useContractWrite } from 'wagmi';
+import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
 interface CreatePoolProps {
   opened: boolean;
@@ -25,19 +25,23 @@ const CreatePool = ({ opened, close, refetch }: CreatePoolProps) => {
     },
   });
 
-  const { write, isLoading } = useContractWrite({
+  const { write, isLoading, data } = useContractWrite({
     ...contractMortgage,
     functionName: 'CreatePool',
-    onSuccess: () => {
-      refetch();
-      close();
-    },
     onError: (error) =>
       notifications.show({
         title: error.name,
         message: error.message,
         color: 'red',
       }),
+  });
+
+  useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess: () => {
+      refetch();
+      close();
+    },
   });
 
   return (
