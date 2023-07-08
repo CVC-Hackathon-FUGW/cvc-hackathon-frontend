@@ -11,6 +11,7 @@ import { useForm } from '@mantine/form';
 import { useMemo } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
+import { onError } from 'src/helpers/contract-call';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Pool } from 'src/types';
 import { formatEther, parseUnits } from 'viem';
@@ -42,6 +43,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     functionName: 'getFloorPrice',
     args: [tokenAddress],
     enabled: opened,
+    onError,
   });
   const floorPrice = useMemo(() => {
     if (floorPriceGwei) {

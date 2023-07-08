@@ -10,9 +10,61 @@ import { useContractRead } from 'wagmi';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
 import ModalLend from './ModalLend';
+import { tempImage } from 'src/utils/contains';
+import { onError } from 'src/helpers/contract-call';
 
-const tempImage =
-  'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg';
+const columns = [
+  {
+    accessor: 'collection',
+    width: '25%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ tokenAddress }: Pool) => (
+      <Collection img={tempImage} name={truncateMiddle(tokenAddress)} />
+    ),
+  },
+  {
+    accessor: 'totalPoolAmount',
+    width: '20%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ totalPoolAmount }: Pool) => (
+      <AvailablePool
+        number={formatEther(totalPoolAmount)}
+        description="1344 of 1410 offers taken"
+      />
+    ),
+  },
+  {
+    accessor: 'bestOffer',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: () => 'Pending',
+  },
+  {
+    accessor: 'APY',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ APY }: Pool) => (
+      <Text size="30px" weight={700} color="green">
+        {Number(APY)}%
+      </Text>
+    ),
+  },
+  {
+    accessor: 'duration',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ duration }: Pool) => (
+      <Text size="30px" weight={700}>
+        {Number(duration)}d
+      </Text>
+    ),
+  },
+];
 
 export default function Lend() {
   const [pool, setPool] = useState<Pool>();
@@ -21,41 +73,8 @@ export default function Lend() {
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
+    onError,
   });
-
-  // Mapping data to record
-  const dataRecord = (pools as Pool[])
-    .filter(({ state }) => state)
-    ?.map((dataPool) => {
-      const { APY, duration, tokenAddress, totalPoolAmount } = dataPool;
-      return {
-        collection: (
-          <Collection img={tempImage} name={truncateMiddle(tokenAddress)} />
-        ),
-        availablePool: (
-          <AvailablePool
-            number={formatEther(totalPoolAmount)}
-            description="1344 of 1410 offers taken"
-          />
-        ),
-        bestOffer: 'Pending',
-        apy: (
-          <Text size="30px" weight={700} color="green">
-            {Number(APY)}%
-          </Text>
-        ),
-        duration: (
-          <Text size="30px" weight={700}>
-            {Number(duration)}d
-          </Text>
-        ),
-        ' ': (
-          <Button onClick={() => setPool(dataPool)} color="red" size="md">
-            Lend
-          </Button>
-        ),
-      };
-    });
 
   return (
     <>
@@ -85,39 +104,18 @@ export default function Lend() {
         </div>
 
         <DataTable
-          records={dataRecord}
+          records={(pools as Pool[])?.filter(({ state }) => state) || []}
           columns={[
+            ...columns,
             {
-              accessor: 'collection',
-              width: '25%',
-              sortable: true,
-              titleStyle: { fontSize: '25px' },
+              accessor: ' ',
+              width: '10%',
+              render: (dataPool) => (
+                <Button onClick={() => setPool(dataPool)} size="md">
+                  Lend
+                </Button>
+              ),
             },
-            {
-              accessor: 'availablePool',
-              width: '20%',
-              sortable: true,
-              titleStyle: { fontSize: '25px' },
-            },
-            {
-              accessor: 'bestOffer',
-              width: '15%',
-              sortable: true,
-              titleStyle: { fontSize: '25px' },
-            },
-            {
-              accessor: 'apy',
-              width: '15%',
-              sortable: true,
-              titleStyle: { fontSize: '25px' },
-            },
-            {
-              accessor: 'duration',
-              width: '15%',
-              sortable: true,
-              titleStyle: { fontSize: '25px' },
-            },
-            { accessor: ' ', width: '10%' },
           ]}
         />
       </div>

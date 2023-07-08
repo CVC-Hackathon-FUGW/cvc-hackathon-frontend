@@ -7,8 +7,8 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { contractMortgage } from 'src/configs/contract';
+import { onError } from 'src/helpers/contract-call';
 import { Pool } from 'src/types';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
@@ -31,12 +31,7 @@ const EditPool = ({ opened, close, editingPool, refetch }: EditPoolProps) => {
   const { write, isLoading, data } = useContractWrite({
     ...contractMortgage,
     functionName: 'UpdatePool',
-    onError: (error) =>
-      notifications.show({
-        title: error.name,
-        message: error.message,
-        color: 'red',
-      }),
+    onError,
   });
   useWaitForTransaction({
     hash: data?.hash,

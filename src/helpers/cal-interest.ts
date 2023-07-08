@@ -6,3 +6,9 @@ export const calculateInterest = (
 ) => {
   return (amount * APY * duration) / 100 / 365;
 };
+
+// now > startTime + duration*86400
+export const isLoanEnded = (startTime: number, duration: number) => {
+  const now = Math.floor(Date.now() / 1000);
+  return now > startTime + duration * 86400;
+};
