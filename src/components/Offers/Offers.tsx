@@ -108,7 +108,7 @@ export default function Offers() {
         />
       </div>
       <DataTable
-        records={(loans as Loan[]).filter(
+        records={(loans as Loan[])?.filter(
           ({ lender }) => lender === address && lender !== zeroAddress
         )}
         columns={[
