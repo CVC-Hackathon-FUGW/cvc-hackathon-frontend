@@ -5,4 +5,5 @@ export interface Pool {
   tokenAddress: string;
   totalPoolAmount: bigint;
   state: boolean;
+  image?: string;
 }
