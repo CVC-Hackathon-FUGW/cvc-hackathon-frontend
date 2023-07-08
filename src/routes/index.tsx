@@ -5,6 +5,8 @@ import OffersPage from './offers';
 import BorrowPage from './borrow';
 import LoansPage from './loans';
 import Admin from './admin/Index';
+import MarketplacePage from './marketplace';
+import NftPage from './nft';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
   {
     path: '/loans',
     element: <LoansPage />,
+  },
+  {
+    path: '/marketplace',
+    element: <MarketplacePage/>
+  },
+  {
+    path: '/nft/id',
+    element: <NftPage/> 
   },
   {
     path: '/admin',

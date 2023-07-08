@@ -42,6 +42,10 @@ const links = [
     link: '/loans',
     label: 'Loans',
   },
+  {
+    link: '/marketplace',
+    label: 'Marketplace',
+  }
 ];
 
 const MyHeader = () => {
