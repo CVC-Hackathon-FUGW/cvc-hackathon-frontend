@@ -3,7 +3,6 @@ import abiMortgage from './abiMortgage.json';
 import abiNft from './abiNft.json';
 
 export const addressMortgage = import.meta.env.VITE_CONTRACT_ADDRESS_MORTGAGE;
-export const addressNft = import.meta.env.VITE_CONTRACT_ADDRESS_NFT;
 
 export const adminAddress = import.meta.env.VITE_ADMIN_ADDRESS;
 
@@ -12,5 +11,7 @@ export const contractMortgage = {
   abi: abiMortgage,
   onError,
 };
+
+export const borrowPrice = 1000000000000000n;
 
 export { abiMortgage, abiNft };

@@ -51,9 +51,10 @@ const columns = [
     ),
   },
 ];
+
 export default function Offers() {
   const { address } = useAccount();
-  const { data: pools } = useContractRead({
+  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
     ...contractMortgage,
     functionName: 'getAllPool',
   });
@@ -104,9 +105,7 @@ export default function Offers() {
         />
       </div>
       <DataTable
-        records={(loans as Loan[])?.filter(
-          ({ lender }) => lender === address && lender !== zeroAddress
-        )}
+        records={(loans as Loan[])?.filter(({ lender }) => lender === address)}
         columns={[
           {
             accessor: 'Collection',
@@ -155,18 +154,7 @@ export default function Offers() {
                   </Button>
                 );
               }
-
-              return (
-                <Button
-                  size="md"
-                  onClick={() => {
-                    console.log('view');
-                  }}
-                  color="blue"
-                >
-                  View
-                </Button>
-              );
+              return <></>;
             },
           },
         ]}

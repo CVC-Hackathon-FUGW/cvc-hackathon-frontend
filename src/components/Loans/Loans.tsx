@@ -1,82 +1,182 @@
-import { Title, Text, Card, Input, Button } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
-import { sortBy } from "lodash";
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { useEffect, useState } from "react";
-import Collection from "../Lend/Collection";
+import { Button, Card, Input, Text, Title } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
+import { borrowPrice, contractMortgage } from 'src/configs/contract';
+import { calculateInterest } from 'src/helpers/cal-interest';
+import { truncateMiddle } from 'src/helpers/truncate-middle';
+import { Loan, Pool } from 'src/types';
+import { formatEther, parseEther, zeroAddress } from 'viem';
+import { useAccount, useContractRead, useWalletClient } from 'wagmi';
+import { getPublicClient } from 'wagmi/actions';
+import Collection from '../Lend/Collection';
 
-const data = [
-    {
-        collection: <Collection img="https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg" name="Bear Market Beavers" />,
-        borrowed: <Text size="30px" weight={700}>◎0.05</Text>,
-        term: <Text size="24px" weight={700}>Repaid 125d ago</Text>,
-        repayment: <Text size="30px" weight={700}>◎0.051</Text>,
-    }, {
-        collection: <Collection img="https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg" name="Bear Market Beavers" />,
-        borrowed: <Text size="30px" weight={700}>◎0.05</Text>,
-        term: <Text size="24px" weight={700}>Repaid 125d ago</Text>,
-        repayment: <Text size="30px" weight={700}>◎0.051</Text>,
-    }, {
-        collection: <Collection img="https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg" name="Bear Market Beavers" />,
-        borrowed: <Text size="30px" weight={700}>◎0.05</Text>,
-        term: <Text size="24px" weight={700}>Repaid 125d ago</Text>,
-        repayment: <Text size="30px" weight={700}>◎0.051</Text>,
-    }
-]
+const columns = [
+  {
+    accessor: 'duration',
+    width: '15%',
+    titleStyle: { fontSize: '25px' },
+    render: ({ duration }: Loan) => (
+      <Text weight={700}>{Number(duration)}d</Text>
+    ),
+  },
+  {
+    accessor: 'startTime',
+    width: '15%',
+    titleStyle: { fontSize: '25px' },
+    render: ({ startTime }: Loan) => {
+      const unixTime = Number(startTime);
+      return (
+        <Text weight={700}>
+          {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
+        </Text>
+      );
+    },
+  },
+  {
+    accessor: 'borrower',
+    titleStyle: { fontSize: '25px' },
+    render: ({ borrower }: Loan) => (
+      <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
+    ),
+  },
+  {
+    accessor: 'Amount',
+    width: '20%',
+    titleStyle: { fontSize: '25px' },
+    render: ({ amount }: Loan) => (
+      <Text weight={700}>{formatEther(amount)}</Text>
+    ),
+  },
+];
 
 export default function Loans() {
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-    const [records, setRecords] = useState(sortBy(data, 'collection'));
+  const { address } = useAccount();
+  const { data: loans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
+    ...contractMortgage,
+    functionName: 'getAllLoans',
+  });
+  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
+    ...contractMortgage,
+    functionName: 'getAllPool',
+  });
+  const { data: walletClient } = useWalletClient();
+  const publicClient = getPublicClient();
+  console.log(loans);
 
-    useEffect(() => {
-        const result = sortBy(data, sortStatus.columnAccessor) as any;
-        setRecords(sortStatus.direction === 'desc' ? data.reverse() : result);
-    }, [sortStatus]);
-    return (
-        <div style={{ padding: "20px 70px" }}>
-            <div style={{ maxWidth: "1200px" }}>
-                <Title size="3.2rem">My loans</Title>
-                <Text fz="lg">
-                    Here are the NFTs you borrowed against. You must pay these in full by the expiration date in order to keep your NFT.
-                </Text>
-            </div>
-            <div style={{ marginTop: "40px", marginBottom: "40px" }}>
-                <div style={{ display: "flex", gap: "20px", paddingTop: "20px" }}>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: "300px" }}>
-                        <Text size="14px" weight={500} color="grey">TOTAL ACTIVE LOANS</Text>
-                        <Text size="36px" weight={700}>◎-2.123</Text>
-                    </Card>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: "300px" }}>
-                        <Text size="14px" weight={500} color="grey">TOTAL BORROWED</Text>
-                        <Text size="36px" weight={700}>◎-2.123</Text>
-                        <Text size="14px" weight={500} color="grey">0 open offers</Text>
-                    </Card>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: "300px" }}>
-                        <Text size="14px" weight={500} color="grey">TOTAL INTEREST OWED</Text>
-                        <Text size="36px" weight={700}>◎-2.123</Text>
-                    </Card>
+  const handlePay = async (loan: Loan) => {
+    const { startTime, duration, amount } = loan;
+    const pool = (pools as Pool[])?.find(
+      ({ poolId }) => loan.poolId === poolId
+    );
+    let durations = (Date.now() / 1000 - Number(startTime)) / 86400;
+    if (durations < Number(duration)) {
+      durations++;
+    }
+    const interest = calculateInterest(
+      Number(formatEther(amount)),
+      Number(pool?.APY),
+      durations,
+      20
+    );
 
-                </div>
-            </div>
-            <div style={{ marginTop: "40px", marginBottom: "40px" }}>
-                <Input
-                    icon={<IconSearch />}
-                    variant="filled"
-                    size='xl'
-                    placeholder='search collections...'
-                />
-            </div>
-            <DataTable
-                records={records}
-                columns={[
-                    { accessor: 'collection', width: '25%', sortable: true, titleStyle: { fontSize: "25px" } },
-                    { accessor: 'borrowed', width: '20%', sortable: true, titleStyle: { fontSize: "25px" } },
-                    { accessor: 'term', width: '15%', sortable: true, titleStyle: { fontSize: "25px" } },
-                    { accessor: 'repayment', width: '15%', sortable: true, titleStyle: { fontSize: "25px" } },
-                ]}
-                sortStatus={sortStatus}
-                onSortStatusChange={setSortStatus}
-            />
+    const value = parseEther(interest) + borrowPrice + amount;
+    console.log(value);
+    const { request } = await publicClient.simulateContract({
+      ...contractMortgage,
+      functionName: 'BorrowerPayLoan',
+      value,
+      args: [loan.poolId, loan.loanId],
+      account: address,
+    });
+
+    await walletClient?.writeContract(request);
+  };
+
+  return (
+    <div style={{ padding: '20px 70px' }}>
+      <div style={{ maxWidth: '1200px' }}>
+        <Title size="3.2rem">My loans</Title>
+        <Text fz="lg">
+          Here are the NFTs you borrowed against. You must pay these in full by
+          the expiration date in order to keep your NFT.
+        </Text>
+      </div>
+      <div style={{ marginTop: '40px', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', gap: '20px', paddingTop: '20px' }}>
+          <Card
+            shadow="sm"
+            padding="lg"
+            radius="md"
+            withBorder
+            style={{ width: '300px' }}
+          >
+            <Text size="14px" weight={500} color="grey">
+              BORROW PRICE
+            </Text>
+            <Text size="36px" weight={700}>
+              XCR {formatEther(borrowPrice)}
+            </Text>
+          </Card>
         </div>
-    )
+      </div>
+      <div style={{ marginTop: '40px', marginBottom: '40px' }}>
+        <Input
+          icon={<IconSearch />}
+          variant="filled"
+          size="xl"
+          placeholder="search collections..."
+        />
+      </div>
+      <DataTable
+        records={loans?.filter(({ borrower }) => borrower === address)}
+        columns={[
+          {
+            accessor: 'Collection',
+            width: '25%',
+            sortable: true,
+            titleStyle: { fontSize: '25px' },
+            render: (loan) => {
+              const pool = pools?.find(({ poolId }) => loan.poolId === poolId);
+              return (
+                <Collection name={truncateMiddle(pool?.tokenAddress || '')} />
+              );
+            },
+          },
+          ...columns,
+          {
+            accessor: 'currentInterest',
+            width: '20%',
+            titleStyle: { fontSize: '25px' },
+            render: (loan: Loan) => {
+              const { startTime, duration, amount } = loan;
+              const pool = (pools as Pool[])?.find(
+                ({ poolId }) => loan.poolId === poolId
+              );
+              let durations = (Date.now() / 1000 - Number(startTime)) / 86400;
+              if (durations < Number(duration)) {
+                durations++;
+              }
+
+              return (
+                <Text weight={700}>
+                  {calculateInterest(
+                    Number(formatEther(amount)),
+                    Number(pool?.APY),
+                    durations
+                  )}
+                </Text>
+              );
+            },
+          },
+          {
+            accessor: ' ',
+            width: '10%',
+            render: (loan) => (
+              <Button onClick={() => handlePay(loan)}>Pay</Button>
+            ),
+          },
+        ]}
+      />
+    </div>
+  );
 }

@@ -13,7 +13,7 @@ import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Pool } from 'src/types';
-import { formatEther, parseUnits } from 'viem';
+import { formatEther, parseEther } from 'viem';
 import {
   useAccount,
   useBalance,
@@ -68,7 +68,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
 
   const handleLend = async ({ offerAmount = 0 }) => {
     try {
-      const value = parseUnits(offerAmount.toString(), 18);
+      const value = parseEther(offerAmount.toString());
       const { request } = await publicClient.simulateContract({
         ...contractMortgage,
         functionName: 'LenderOffer',
