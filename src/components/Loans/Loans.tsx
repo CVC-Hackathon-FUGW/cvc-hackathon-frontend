@@ -51,6 +51,9 @@ const columns = [
 
 export default function Loans() {
   const { address } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  const publicClient = getPublicClient();
+
   const { data: loans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
     ...contractMortgage,
     functionName: 'getAllLoans',
@@ -59,9 +62,6 @@ export default function Loans() {
     ...contractMortgage,
     functionName: 'getAllPool',
   });
-  const { data: walletClient } = useWalletClient();
-  const publicClient = getPublicClient();
-  console.log(loans);
 
   const handlePay = async (loan: Loan) => {
     const { startTime, duration, amount } = loan;
