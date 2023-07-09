@@ -27,6 +27,10 @@ const HEADER_HEIGHT = rem(60);
 
 const links = [
   {
+    link: '/marketplace',
+    label: 'Marketplace',
+  },
+  {
     link: '/lend',
     label: 'Lend',
   },
@@ -42,10 +46,6 @@ const links = [
     link: '/loans',
     label: 'Loans',
   },
-  {
-    link: '/marketplace',
-    label: 'Marketplace',
-  }
 ];
 
 const MyHeader = () => {

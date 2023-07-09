@@ -1,4 +1,4 @@
-import { AppShell } from '@mantine/core';
+import { AppShell, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import {
   EthereumClient,
@@ -13,6 +13,7 @@ import { cvcTestnet } from './configs/networks';
 import router from './routes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ModalsProvider } from '@mantine/modals';
 
 const queryClient = new QueryClient();
 
@@ -31,9 +32,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiConfig config={wagmiConfig}>
-        <AppShell padding="md" header={<MyHeader />}>
-          <RouterProvider router={router} />
-        </AppShell>
+        <MantineProvider withGlobalStyles withNormalizeCSS>
+          <ModalsProvider>
+            <AppShell padding="md" header={<MyHeader />}>
+              <RouterProvider router={router} />
+            </AppShell>
+          </ModalsProvider>
+        </MantineProvider>
       </WagmiConfig>
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
       <Notifications />
