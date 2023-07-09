@@ -14,6 +14,7 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMemo, useState } from 'react';
 import {
+  abiERC721Enumerable,
   abiNft,
   addressMortgage,
   contractMortgage,
@@ -24,10 +25,15 @@ import { Loan, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
 import {
+  erc721ABI,
+  useAccount,
   useContractRead,
+  useContractReads,
   useContractWrite,
+  useNetwork,
   useWaitForTransaction,
 } from 'wagmi';
+import { getPublicClient } from 'wagmi/actions';
 
 interface ModalLendProps {
   opened: boolean;
@@ -38,12 +44,38 @@ interface ModalLendProps {
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { APY, duration, image, poolId, tokenAddress } = { ...data };
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
+  const publicClient = getPublicClient();
 
   const { onSubmit, getInputProps, values } = useForm({
     initialValues: {
       tokenId: '',
     },
   });
+  const { address } = useAccount();
+
+  const { data: numberOfNFTs } = useContractRead({
+    address: tokenAddress,
+    abi: erc721ABI,
+    functionName: 'balanceOf',
+    args: [address || zeroAddress],
+    enabled: opened,
+    select: (data) => Number(data),
+  });
+
+  const { data: allNFTs } = useContractReads({
+    contracts: Array.from({
+      length: numberOfNFTs || 0,
+    }).map((_, index) => ({
+      address: tokenAddress,
+      abi: erc721ABI,
+      functionName: 'tokenByIndex',
+      args: [BigInt(index)],
+    })),
+    enabled: opened,
+  });
+
+  console.log('numberOfNFTs', numberOfNFTs);
+  console.log('allNFTs', allNFTs);
 
   const { data: allLoans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
     ...contractMortgage,
@@ -105,8 +137,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     }
   }, [allLoans, poolId]);
 
-  console.log(loans);
-
   const floorPrice = useMemo(() => {
     if (floorPriceGwei) {
       return Number(formatEther(floorPriceGwei as bigint));
@@ -125,6 +155,19 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       size={'xl'}
       centered
     >
+      <Button
+        onClick={async () => {
+          const name = await publicClient.readContract({
+            address: tokenAddress || zeroAddress,
+            abi: abiERC721Enumerable,
+            functionName: 'tokenOfOwnerByIndex',
+            args: [address || zeroAddress, BigInt(0)],
+          });
+          console.log('name', name);
+        }}
+      >
+        Read
+      </Button>
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center justify-between">
           <Group className="flex flex-row gap-2 items-center">

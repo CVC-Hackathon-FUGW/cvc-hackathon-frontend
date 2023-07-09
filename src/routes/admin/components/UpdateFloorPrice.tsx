@@ -1,7 +1,6 @@
 import { Button, LoadingOverlay, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { modals } from '@mantine/modals';
-import React from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { formatEther, parseEther } from 'viem';
 import { useContractRead, useContractWrite } from 'wagmi';
