@@ -11,39 +11,6 @@ import AvailablePool from '../Lend/AvailablePool';
 import Collection from '../Lend/Collection';
 import DrawerBorrow from './DrawerBorrow';
 
-const dataResponse = [
-  {
-    pool_id: 1,
-    token_address: 'abc',
-    total_pool_amount: 5,
-    interest: 0.123,
-    duration: 7,
-    state: 'active',
-    image:
-      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
-  },
-  {
-    pool_id: 1,
-    token_address: 'abc',
-    total_pool_amount: 10,
-    interest: 0.231,
-    duration: 7,
-    state: 'active',
-    image:
-      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
-  },
-  {
-    pool_id: 1,
-    token_address: 'abc',
-    total_pool_amount: 7,
-    interest: 0.789,
-    duration: 14,
-    state: 'active',
-    image:
-      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
-  },
-];
-
 const columns = [
   {
     accessor: 'collection',

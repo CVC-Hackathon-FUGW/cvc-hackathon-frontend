@@ -5,18 +5,29 @@ import {
   Card,
   Divider,
   Group,
+  Input,
   Modal,
   Text,
   Title,
 } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { useMemo, useState } from 'react';
-import { contractMortgage } from 'src/configs/contract';
+import {
+  abiNft,
+  addressMortgage,
+  contractMortgage,
+} from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Loan, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
-import { formatEther, parseEther, zeroAddress } from 'viem';
-import { useContractRead } from 'wagmi';
+import { formatEther, zeroAddress } from 'viem';
+import {
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from 'wagmi';
 
 interface ModalLendProps {
   opened: boolean;
@@ -26,11 +37,63 @@ interface ModalLendProps {
 
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { APY, duration, image, poolId, tokenAddress } = { ...data };
-  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
+
+  const { onSubmit, getInputProps, values } = useForm({
+    initialValues: {
+      tokenId: '',
+    },
+  });
 
   const { data: allLoans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
     ...contractMortgage,
     functionName: 'getAllLoans',
+  });
+
+  const { data: floorPriceGwei } = useContractRead({
+    ...contractMortgage,
+    functionName: 'getFloorPrice',
+    args: [tokenAddress],
+    enabled: opened,
+  });
+
+  const { data: approved } = useContractRead({
+    address: tokenAddress,
+    abi: abiNft,
+    functionName: 'getApproved',
+    args: [BigInt(values.tokenId)],
+    enabled: !!values.tokenId,
+  });
+
+  const isApproved = useMemo(() => {
+    if (approved) {
+      return approved === addressMortgage;
+    }
+    return false;
+  }, [approved]);
+
+  const {
+    write: approve,
+    reset,
+    data: allowance,
+  } = useContractWrite({
+    address: tokenAddress,
+    abi: abiNft,
+    functionName: 'approve',
+  });
+
+  const { write: borrow } = useContractWrite({
+    ...contractMortgage,
+    functionName: 'BorrowerTakeLoan',
+  });
+
+  const { isSuccess } = useWaitForTransaction({
+    hash: allowance?.hash,
+    onSuccess: () =>
+      notifications.show({
+        title: 'Approve successfully',
+        message: 'You can now Borrow',
+      }),
   });
 
   const loans = useMemo(() => {
@@ -44,13 +107,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
 
   console.log(loans);
 
-  const { data: floorPriceGwei } = useContractRead({
-    ...contractMortgage,
-    functionName: 'getFloorPrice',
-    args: [tokenAddress],
-    enabled: opened,
-  });
-
   const floorPrice = useMemo(() => {
     if (floorPriceGwei) {
       return Number(formatEther(floorPriceGwei as bigint));
@@ -63,6 +119,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       opened={opened}
       onClose={() => {
         setSelectedLoan(null);
+        reset();
         close();
       }}
       size={'xl'}
@@ -150,6 +207,30 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
             </Card>
           ))}
         </div>
+        <Divider />
+
+        <form
+          className="flex flex-col gap-2"
+          onSubmit={onSubmit(({ tokenId }) => {
+            if (!tokenId) return;
+            const bigTokenId = BigInt(tokenId);
+            if (isSuccess || isApproved) {
+              return borrow({
+                args: [poolId, bigTokenId, selectedLoan?.loanId],
+              });
+            }
+            return approve({
+              args: [addressMortgage, bigTokenId],
+            });
+          })}
+        >
+          <Input {...getInputProps('tokenId')} placeholder="Enter Token ID" />
+          <Group position="center">
+            <Button disabled={!selectedLoan && !isApproved} type="submit">
+              {isSuccess || isApproved ? 'Borrow' : 'Approve'}
+            </Button>
+          </Group>
+        </form>
       </div>
     </Modal>
   );
