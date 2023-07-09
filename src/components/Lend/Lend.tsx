@@ -5,13 +5,12 @@ import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Pool } from 'src/types';
+import { tempImage } from 'src/utils/contains';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
 import ModalLend from './ModalLend';
-import { tempImage } from 'src/utils/contains';
-import { onError } from 'src/helpers/contract-call';
 
 const columns = [
   {
@@ -73,7 +72,6 @@ export default function Lend() {
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
-    onError,
   });
 
   return (

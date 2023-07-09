@@ -2,9 +2,10 @@
 export const calculateInterest = (
   amount: number,
   APY: number,
-  duration: number
+  duration: number,
+  round = 12
 ) => {
-  return (amount * APY * duration) / 100 / 365;
+  return ((amount * APY * duration) / 100 / 365).toFixed(round);
 };
 
 // now > startTime + duration*86400

@@ -1,53 +1,156 @@
-import { Drawer, Button, Group, Avatar, Card, Text, Title, Checkbox } from '@mantine/core';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Divider,
+  Group,
+  Modal,
+  Text,
+  Title,
+} from '@mantine/core';
+import { useMemo, useState } from 'react';
+import { contractMortgage } from 'src/configs/contract';
+import { calculateInterest } from 'src/helpers/cal-interest';
+import { truncateMiddle } from 'src/helpers/truncate-middle';
+import { Loan, Pool } from 'src/types';
+import { tempImage } from 'src/utils/contains';
+import { formatEther, parseEther, zeroAddress } from 'viem';
+import { useContractRead } from 'wagmi';
 
-export default function DrawerBorrow(props: any) {
+interface ModalLendProps {
+  opened: boolean;
+  close: () => void;
+  data?: Pool;
+}
 
+export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
+  const { APY, duration, image, poolId, tokenAddress } = { ...data };
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
 
-    return (
-        <Drawer opened={props.opened} onClose={props.close} position='right'>
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Avatar size="lg" src='https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg' radius="xl" alt="it's me" />
-                    <Title order={3}>Name Pool</Title>
-                    <Card shadow="sm" padding="lg" radius="md" withBorder style={{ width: '185px' }}>
-                        <Text weight={700} size='20px'>Floor</Text>
-                        <Text weight={700} size='20px'>◎0.05</Text>
-                    </Card>
+  const { data: allLoans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
+    ...contractMortgage,
+    functionName: 'getAllLoans',
+  });
+
+  const loans = useMemo(() => {
+    if (allLoans) {
+      return allLoans.filter(
+        (loan) =>
+          loan.poolId === poolId && !loan.state && loan.lender !== zeroAddress
+      );
+    }
+  }, [allLoans, poolId]);
+
+  console.log(loans);
+
+  const { data: floorPriceGwei } = useContractRead({
+    ...contractMortgage,
+    functionName: 'getFloorPrice',
+    args: [tokenAddress],
+    enabled: opened,
+  });
+
+  const floorPrice = useMemo(() => {
+    if (floorPriceGwei) {
+      return Number(formatEther(floorPriceGwei as bigint));
+    }
+    return 0;
+  }, [floorPriceGwei]);
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={() => {
+        setSelectedLoan(null);
+        close();
+      }}
+      size={'xl'}
+      centered
+    >
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-2 items-center justify-between">
+          <Group className="flex flex-row gap-2 items-center">
+            <Avatar
+              size="lg"
+              src={image || tempImage}
+              radius="xl"
+              alt="it's me"
+            />
+            <Title order={3}>{truncateMiddle(tokenAddress)}</Title>
+          </Group>
+          <Card
+            shadow="sm"
+            padding="xs"
+            radius="md"
+            withBorder
+            className="w-fit"
+          >
+            <Text weight={700} size="20px">
+              Floor
+            </Text>
+            <Text weight={700} size="20px">
+              XCR {floorPrice}
+            </Text>
+          </Card>
+          <Card
+            shadow="sm"
+            padding="sm"
+            radius="md"
+            withBorder
+            className="w-fit"
+          >
+            <Text weight={700} size="20px">
+              Duration
+            </Text>
+            <Text weight={700} size="20px">
+              {Number(duration)}d
+            </Text>
+          </Card>
+        </div>
+        <div className="flex flex-row overflow-x-auto gap-2">
+          {loans?.map((loan) => (
+            <Card
+              withBorder
+              shadow="sm"
+              radius="md"
+              className="w-full"
+              key={loan.loanId.toString()}
+              onClick={() => setSelectedLoan(loan)}
+              c={selectedLoan?.loanId === loan.loanId ? 'blue' : 'gray'}
+              sx={{
+                cursor: 'pointer',
+              }}
+            >
+              <Card.Section
+                p="sm"
+                className="flex flex-row justify-between items-center"
+              >
+                <div className="flex flex-col gap-2">
+                  <Text size="xl" fw="bold">
+                    {truncateMiddle(loan.tokenAddress)}
+                  </Text>
+                  <Text fz="xs" c="dimmed">
+                    Lender: {truncateMiddle(loan.lender)}
+                  </Text>
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                    <div>
-                        <Text color="grey" weight={600}>INTEREST</Text>
-                        <Text color="green" weight={700} size='26px'>100%</Text>
-                    </div>
-                    <div>
-                        <Text color="grey" weight={600}>DURATION</Text>
-                        <Text weight={700} size='26px'>7d</Text>
-                    </div>
-                    <div>
-                        <Text color="grey" weight={600}>AVAILABLE TO BORROW</Text>
-                        <Text weight={700} size='26px'> ◎ 0.001</Text>
-                    </div>
-                </div>
-                <Checkbox
-                    label={<Text weight={600}>Select all</Text>}
-                    mt={40}
-                    pl='35%'
-                />
-                <div style={{display: 'flex', justifyContent: 'center'}}>
-                    <Card shadow="sm" padding="lg" radius="md" mt={20} withBorder style={{ width: '185px', height: '180px'}}>
-
-                    </Card>
-                </div>
-
-                <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-                    <Title>1 NFT Selected</Title>
-                    <Text weight={700} size='26px'> ◎ 0.001</Text>
-                    <Button color='red' h={50} w={300}>
-                        <Text size='lg'>Borrow ◎ 0.001</Text>
-                    </Button>
-                </div>
-            </div>
-        </Drawer>
-    )
+                <Badge variant="outline">XCR {formatEther(loan.amount)}</Badge>
+              </Card.Section>
+              <Divider />
+              <Card.Section p="sm">
+                <Text>
+                  Interest:{' '}
+                  {calculateInterest(
+                    Number(formatEther(loan.amount)),
+                    Number(APY),
+                    Number(duration)
+                  )}
+                </Text>
+              </Card.Section>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </Modal>
+  );
 }

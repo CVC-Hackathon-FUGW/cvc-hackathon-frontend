@@ -1,102 +1,169 @@
-import sortBy from 'lodash/sortBy';
 import { Button, Input, Text, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
-import { useEffect, useState } from 'react';
-import Collection from '../Lend/Collection';
+import { DataTable } from 'mantine-datatable';
+import { useState } from 'react';
+import { contractMortgage } from 'src/configs/contract';
+import { truncateMiddle } from 'src/helpers/truncate-middle';
+import { Pool } from 'src/types';
+import { formatEther } from 'viem';
+import { useContractRead } from 'wagmi';
 import AvailablePool from '../Lend/AvailablePool';
-import { useDisclosure } from '@mantine/hooks';
+import Collection from '../Lend/Collection';
 import DrawerBorrow from './DrawerBorrow';
 
 const dataResponse = [
-    {
-        pool_id: 1,
-        token_address: "abc",
-        total_pool_amount: 5,
-        interest: 0.123,
-        duration: 7,
-        state: "active",
-        image: 'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg'
-    },
-    {
-        pool_id: 1,
-        token_address: "abc",
-        total_pool_amount: 10,
-        interest: 0.231,
-        duration: 7,
-        state: "active",
-        image: 'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg'
-    },
-    {
-        pool_id: 1,
-        token_address: "abc",
-        total_pool_amount: 7,
-        interest: 0.789,
-        duration: 14,
-        state: "active",
-        image: 'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg'
-    },
-]
+  {
+    pool_id: 1,
+    token_address: 'abc',
+    total_pool_amount: 5,
+    interest: 0.123,
+    duration: 7,
+    state: 'active',
+    image:
+      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
+  },
+  {
+    pool_id: 1,
+    token_address: 'abc',
+    total_pool_amount: 10,
+    interest: 0.231,
+    duration: 7,
+    state: 'active',
+    image:
+      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
+  },
+  {
+    pool_id: 1,
+    token_address: 'abc',
+    total_pool_amount: 7,
+    interest: 0.789,
+    duration: 14,
+    state: 'active',
+    image:
+      'https://thumbor.forbes.com/thumbor/fit-in/x/https://www.forbes.com/advisor/in/wp-content/uploads/2022/03/monkey-g412399084_1280.jpg',
+  },
+];
 
+const columns = [
+  {
+    accessor: 'collection',
+    width: '25%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ tokenAddress }: Pool) => (
+      <Collection name={truncateMiddle(tokenAddress)} />
+    ),
+  },
+  {
+    accessor: 'totalPoolAmount',
+    width: '20%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ totalPoolAmount }: Pool) => (
+      <AvailablePool
+        number={formatEther(totalPoolAmount)}
+        description="1344 of 1410 offers taken"
+      />
+    ),
+  },
+  {
+    accessor: 'bestOffer',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: () => 'Pending',
+  },
+  {
+    accessor: 'APY',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ APY }: Pool) => (
+      <Text size="30px" weight={700} color="green">
+        {Number(APY)}%
+      </Text>
+    ),
+  },
+  {
+    accessor: 'Interest',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ APY, duration }: Pool) => (
+      <Text>
+        {/* {Number(
+          calculateInterest(
+            Number(bestOffer),
+            Number(APY),
+            Number(duration)
+          )
+        )} */}
+        Pending
+      </Text>
+    ),
+  },
+  {
+    accessor: 'duration',
+    width: '15%',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ duration }: Pool) => (
+      <Text size="30px" weight={700}>
+        {Number(duration)}d
+      </Text>
+    ),
+  },
+];
 
 export default function Borrow() {
-    const [opened, { open, close }] = useDisclosure(false);
+  const [pool, setPool] = useState<Pool>();
+  const { data: pools } = useContractRead({
+    ...contractMortgage,
+    functionName: 'getAllPool',
+  });
+  return (
+    <>
+      <DrawerBorrow
+        opened={Boolean(pool)}
+        close={() => setPool(undefined)}
+        data={pool}
+      />
+      <div style={{ padding: '20px 70px' }}>
+        <div style={{ maxWidth: '990px' }}>
+          <Title size="3.2rem">Make loan offers on NFT collections.</Title>
+          <Text fz="lg">
+            Browse collections below, and name your price. The current best
+            offer will be shown to borrowers. To take your offer, they lock in
+            an NFT from that collection to use as collateral. You will be repaid
+            at the end of the loan, plus interest. If they fail to repay, you
+            get to keep the NFT.
+          </Text>
+        </div>
+        <div style={{ marginTop: '40px', marginBottom: '40px' }}>
+          <Input
+            icon={<IconSearch />}
+            variant="filled"
+            size="xl"
+            placeholder="search collections..."
+          />
+        </div>
 
-    const dataRecord = dataResponse.map((dataPool) => {
-        return {
-            collection: <Collection img={dataPool.image} name="SMB Barrel" />,
-            availablePool: <AvailablePool number={dataPool.total_pool_amount} description="1344 of 1410 offers taken" />,
-            bestOffer: <AvailablePool number={17.22} description="17.22 last loan token" />,
-            interest: <Text size="30px" weight={700} color='red'>{dataPool.interest}</Text>,
-            duration: <Text size="30px" weight={700}>{dataPool.duration}</Text>,
-            ' ': <Button onClick={open} color="red" size="md">Borrow</Button>
-        }
-    })
-
-    const [sortStatus, setSortStatus] = useState<DataTableSortStatus>({ columnAccessor: 'name', direction: 'asc' });
-    const [records, setRecords] = useState(sortBy(dataRecord, 'collection'));
-
-    useEffect(() => {
-        const result = sortBy(dataRecord, sortStatus.columnAccessor) as any;
-        setRecords(sortStatus.direction === 'desc' ? dataRecord.reverse() : result);
-    }, [sortStatus]);
-
-    return (
-        <>
-        <DrawerBorrow opened={opened} close={close}/>
-            <div style={{ padding: "20px 70px" }}>
-                <div style={{ maxWidth: "990px" }}>
-                    <Title size="3.2rem">Make loan offers on NFT collections.</Title>
-                    <Text fz="lg">
-                        Browse collections below, and name your price. The current best offer will be shown to borrowers.
-                        To take your offer, they lock in an NFT from that collection to use as collateral.
-                        You will be repaid at the end of the loan, plus interest. If they fail to repay, you get to keep the NFT.
-                    </Text>
-                </div>
-                <div style={{ marginTop: "40px", marginBottom: "40px" }}>
-                    <Input
-                        icon={<IconSearch />}
-                        variant="filled"
-                        size='xl'
-                        placeholder='search collections...'
-                    />
-                </div>
-
-                <DataTable
-                    records={records}
-                    columns={[
-                        { accessor: 'collection', width: '25%', sortable: true, titleStyle: { fontSize: "25px" } },
-                        { accessor: 'availablePool', width: '20%', sortable: true, titleStyle: { fontSize: "25px" } },
-                        { accessor: 'bestOffer', width: '15%', sortable: true, titleStyle: { fontSize: "25px" } },
-                        { accessor: 'interest', width: '15%', sortable: true, titleStyle: { fontSize: "25px" } },
-                        { accessor: 'duration', width: '15%', sortable: true, titleStyle: { fontSize: "25px" } },
-                        { accessor: ' ', width: '10%' },
-                    ]}
-                    sortStatus={sortStatus}
-                    onSortStatusChange={setSortStatus}
-                />
-            </div>
-        </>
-
-    )
+        <DataTable
+          records={(pools as Pool[])?.filter(({ state }) => state) || []}
+          columns={[
+            ...columns,
+            {
+              accessor: ' ',
+              width: '10%',
+              render: (dataPool) => (
+                <Button onClick={() => setPool(dataPool)} size="md">
+                  Borrow
+                </Button>
+              ),
+            },
+          ]}
+        />
+      </div>
+    </>
+  );
 }

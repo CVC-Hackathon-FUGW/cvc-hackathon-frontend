@@ -1,4 +1,5 @@
 import { Button, Input, Text, Title } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { IconSearch } from '@tabler/icons-react';
 import { DataTable } from 'mantine-datatable';
 import { contractMortgage } from 'src/configs/contract';
@@ -8,8 +9,6 @@ import { Loan, Pool } from 'src/types';
 import { formatEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
-import { modals } from '@mantine/modals';
-import { onError } from 'src/helpers/contract-call';
 
 const columns = [
   {
@@ -57,18 +56,15 @@ export default function Offers() {
   const { data: pools } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllPool',
-    onError,
   });
   const { data: loans } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllLoans',
-    onError,
   });
 
   const { write } = useContractWrite({
     ...contractMortgage,
     functionName: 'LenderRevokeOffer',
-    onError,
   });
 
   const openRevokeModal = ({ poolId, loanId }: Loan) => {
