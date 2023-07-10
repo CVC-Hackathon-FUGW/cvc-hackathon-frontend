@@ -1,5 +1,13 @@
 import { Image, Button, Avatar, Text, Tabs } from '@mantine/core';
-export default function Nft(){
+import { useNavigate, useParams } from 'react-router-dom';
+
+export default function Nft(props:any){
+    const navigate = useNavigate();
+    const {id} = useParams();
+    const handleClick = () => {
+        navigate(`/nft/${id}/details`)
+    }
+
     return <div className='p-14 flex gap-16 justify-center'>
     <div>
         <Image
@@ -8,7 +16,7 @@ export default function Nft(){
             alt="Norway"
             radius={5}
         />
-        <Button className='block mt-4' size='lg' fullWidth variant='default'>
+        <Button className='block mt-4' size='lg' fullWidth variant='default' onClick={()=>handleClick()}>
             Details
         </Button>
         <Button className='mt-4' size='lg' fullWidth>

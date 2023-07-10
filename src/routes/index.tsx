@@ -7,6 +7,7 @@ import LoansPage from './loans';
 import Admin from './admin/Index';
 import MarketplacePage from './marketplace';
 import NftPage from './nft';
+import NftDetails from 'src/components/Nft/NftDetails';
 
 const router = createBrowserRouter([
   {
@@ -34,8 +35,12 @@ const router = createBrowserRouter([
     element: <MarketplacePage/>
   },
   {
-    path: '/nft/id',
+    path: '/nft/:id',
     element: <NftPage/> 
+  },
+  {
+    path: '/nft/:id/details',
+    element: <NftDetails/>
   },
   {
     path: '/admin',
