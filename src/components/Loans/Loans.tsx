@@ -9,6 +9,7 @@ import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useWalletClient } from 'wagmi';
 import { getPublicClient } from 'wagmi/actions';
 import Collection from '../Lend/Collection';
+import dayjs from 'src/utils/dayjs';
 
 const columns = [
   {
@@ -30,6 +31,21 @@ const columns = [
           {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
         </Text>
       );
+    },
+  },
+  {
+    accessor: 'remainingTime',
+    width: '15%',
+    titleStyle: { fontSize: '25px' },
+    render: ({ startTime, duration }: Loan) => {
+      if (Number(startTime) === 0) {
+        return <Text weight={700}>-</Text>;
+      }
+      console.log(startTime);
+
+      const unixTime = Number(startTime) + Number(duration) * 86400;
+
+      return <Text weight={700}>{dayjs.unix(unixTime).fromNow()}</Text>;
     },
   },
   {

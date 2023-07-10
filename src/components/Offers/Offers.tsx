@@ -15,12 +15,12 @@ import {
 } from 'wagmi';
 import Collection from '../Lend/Collection';
 import { getPublicClient } from 'wagmi/actions';
+import dayjs from 'src/utils/dayjs';
 
 const columns = [
   {
     accessor: 'duration',
     width: '15%',
-    sortable: true,
     titleStyle: { fontSize: '25px' },
     render: ({ duration }: Loan) => (
       <Text weight={700}>{Number(duration)}d</Text>
@@ -29,7 +29,6 @@ const columns = [
   {
     accessor: 'startTime',
     width: '15%',
-    sortable: true,
     titleStyle: { fontSize: '25px' },
     render: ({ startTime }: Loan) => {
       const unixTime = Number(startTime);
@@ -38,6 +37,21 @@ const columns = [
           {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
         </Text>
       );
+    },
+  },
+  {
+    accessor: 'remainingTime',
+    width: '15%',
+    titleStyle: { fontSize: '25px' },
+    render: ({ startTime, duration }: Loan) => {
+      if (Number(startTime) === 0) {
+        return <Text weight={700}>-</Text>;
+      }
+      console.log(startTime);
+
+      const unixTime = Number(startTime) + Number(duration) * 86400;
+
+      return <Text weight={700}>{dayjs.unix(unixTime).fromNow()}</Text>;
     },
   },
   {
@@ -50,7 +64,6 @@ const columns = [
   {
     accessor: 'Amount',
     width: '20%',
-    sortable: true,
     titleStyle: { fontSize: '25px' },
     render: ({ amount }: Loan) => (
       <Text weight={700}>{formatEther(amount)}</Text>

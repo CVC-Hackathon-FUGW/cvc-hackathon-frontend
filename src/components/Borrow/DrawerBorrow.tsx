@@ -14,7 +14,6 @@ import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useMemo, useState } from 'react';
 import {
-  abiERC721Enumerable,
   abiNft,
   addressMortgage,
   contractMortgage,
@@ -155,19 +154,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       size={'xl'}
       centered
     >
-      <Button
-        onClick={async () => {
-          const name = await publicClient.readContract({
-            address: tokenAddress || zeroAddress,
-            abi: abiERC721Enumerable,
-            functionName: 'tokenOfOwnerByIndex',
-            args: [address || zeroAddress, BigInt(0)],
-          });
-          console.log('name', name);
-        }}
-      >
-        Read
-      </Button>
       <div className="flex flex-col gap-2">
         <div className="flex flex-row gap-2 items-center justify-between">
           <Group className="flex flex-row gap-2 items-center">
