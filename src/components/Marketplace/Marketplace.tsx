@@ -15,7 +15,7 @@ export default function Marketplace() {
                 placeholder="search collectibles by name..."
                 w={500}
             />
-            <div className='flex flex-wrap gap-12 mt-6'>
+            <div className='flex flex-wrap gap-16 mt-6'>
                 
                 <CardNft/>
                 <CardNft/>
