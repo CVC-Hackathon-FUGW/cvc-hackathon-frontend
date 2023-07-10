@@ -1,10 +1,11 @@
 import { Image, Button, Avatar, Text, Tabs } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function Nft(props:any){
     const navigate = useNavigate();
+    const {id} = useParams();
     const handleClick = () => {
-        navigate(`/nft/id/details`)
+        navigate(`/nft/${id}/details`)
     }
 
     return <div className='p-14 flex gap-16 justify-center'>
