@@ -6,16 +6,10 @@ import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { isLoanEnded } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Loan, Pool } from 'src/types';
-import { formatEther, zeroAddress } from 'viem';
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  useWalletClient,
-} from 'wagmi';
-import Collection from '../Lend/Collection';
-import { getPublicClient } from 'wagmi/actions';
 import dayjs from 'src/utils/dayjs';
+import { formatEther, zeroAddress } from 'viem';
+import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import Collection from '../Lend/Collection';
 
 const columns = [
   {
@@ -73,8 +67,6 @@ const columns = [
 
 export default function Offers() {
   const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = getPublicClient();
 
   const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
     ...contractMortgage,
@@ -106,17 +98,17 @@ export default function Offers() {
     });
   };
 
-  const handleClaim = async (loan: Loan) => {
-    const { request } = await publicClient.simulateContract({
-      ...contractMortgage,
-      functionName: 'LenderClaimNFT',
-      value: borrowPrice,
-      args: [loan.poolId, loan.loanId],
-      account: address,
-    });
+  const { write: claim } = useContractWrite({
+    ...contractMortgage,
+    functionName: 'LenderClaimNFT',
+    value: borrowPrice,
+    account: address,
+  });
 
-    await walletClient?.writeContract(request);
-  };
+  const handleClaim = async (loan: Loan) =>
+    claim({
+      args: [loan.poolId, loan.loanId],
+    });
 
   return (
     <div style={{ padding: '20px 70px' }}>

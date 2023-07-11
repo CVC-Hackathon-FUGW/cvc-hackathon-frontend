@@ -2,28 +2,24 @@ import { Badge, Card, Group, Image, Text } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { abiNft } from 'src/configs/contract';
-import { Nft } from 'src/types';
+import { getNftSrc } from 'src/helpers/get-nft-src';
+import { MarketNft, Nft } from 'src/types';
 import { xrcRate } from 'src/utils/contains';
-import { Address, formatEther } from 'viem';
+import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 
-const NFTCard = ({
-  tokenId,
-  nftAddress,
-  selectedNft,
-  setSelectedNft,
-  price,
-}: {
-  tokenId: bigint;
-  nftAddress?: Address;
+interface NFTCardProps extends Partial<MarketNft> {
   selectedNft?: Nft;
-  setSelectedNft?: (nft: Nft) => void;
-  price?: bigint;
-}) => {
-  const { data: uri } = useContractRead<unknown[], 'TokenURI', string>({
-    address: nftAddress,
+  onClick?: (nft: Partial<MarketNft>) => void;
+}
+
+const NFTCard = (props: NFTCardProps) => {
+  const { tokenId, nftContract, selectedNft, onClick, price, ...rest } = props;
+
+  const { data: uri } = useContractRead<unknown[], 'tokenURI', string>({
+    address: nftContract,
     abi: abiNft,
-    functionName: 'tokenURI' as any,
+    functionName: 'tokenURI',
     args: [tokenId],
     enabled: !!tokenId,
   });
@@ -42,19 +38,16 @@ const NFTCard = ({
       padding="lg"
       radius="md"
       withBorder
-      className="cursor-pointer"
-      onClick={() => setSelectedNft?.({ nftContract: nftAddress!, tokenId })}
+      className="cursor-pointer grid gap-1"
+      onClick={() => onClick?.({ nftContract: nftContract!, tokenId, ...rest })}
       bg={selectedNft?.tokenId === tokenId ? 'cyan' : undefined}
     >
       <Card.Section>
-        <Image
-          src={data?.image?.replace('ipfs://', 'https://ipfs.io/ipfs/')}
-          alt="Norway"
-        />
+        <Image src={getNftSrc(data?.image)} alt="Norway" />
       </Card.Section>
       <Group position="apart" mt="md" mb="xs">
         <Text weight={500}>{data?.name}</Text>
-        <Badge>#{tokenId.toString()}</Badge>
+        <Badge>#{tokenId?.toString()}</Badge>
       </Group>
       {price ? (
         <Group position="apart" mt="xs">

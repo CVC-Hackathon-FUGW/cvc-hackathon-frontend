@@ -5,11 +5,10 @@ import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { Loan, Pool } from 'src/types';
-import { formatEther, parseEther, zeroAddress } from 'viem';
-import { useAccount, useContractRead, useWalletClient } from 'wagmi';
-import { getPublicClient } from 'wagmi/actions';
-import Collection from '../Lend/Collection';
 import dayjs from 'src/utils/dayjs';
+import { formatEther, parseEther, zeroAddress } from 'viem';
+import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import Collection from '../Lend/Collection';
 
 const columns = [
   {
@@ -41,11 +40,15 @@ const columns = [
       if (Number(startTime) === 0) {
         return <Text weight={700}>-</Text>;
       }
-      console.log(startTime);
 
-      const unixTime = Number(startTime) + Number(duration) * 86400;
+      const unixTime =
+        Number(startTime) + Number(duration) * 86400 - Date.now() / 1000;
 
-      return <Text weight={700}>{dayjs.unix(unixTime).fromNow()}</Text>;
+      return (
+        <Text weight={700}>
+          {dayjs.duration(unixTime, 'seconds').format('D[d] H[h] m[m]')}
+        </Text>
+      );
     },
   },
   {
@@ -67,8 +70,6 @@ const columns = [
 
 export default function Loans() {
   const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = getPublicClient();
 
   const { data: loans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
     ...contractMortgage,
@@ -77,6 +78,12 @@ export default function Loans() {
   const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
     ...contractMortgage,
     functionName: 'getAllPool',
+  });
+
+  const { write: pay } = useContractWrite({
+    ...contractMortgage,
+    functionName: 'BorrowerPayLoan',
+    account: address,
   });
 
   const handlePay = async (loan: Loan) => {
@@ -96,16 +103,10 @@ export default function Loans() {
     );
 
     const value = parseEther(interest) + borrowPrice + amount;
-    console.log(value);
-    const { request } = await publicClient.simulateContract({
-      ...contractMortgage,
-      functionName: 'BorrowerPayLoan',
+    pay({
       value,
       args: [loan.poolId, loan.loanId],
-      account: address,
     });
-
-    await walletClient?.writeContract(request);
   };
 
   return (

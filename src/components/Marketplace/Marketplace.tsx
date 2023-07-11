@@ -6,10 +6,11 @@ import { MarketNft } from 'src/types';
 import { useContractRead } from 'wagmi';
 import CreateMarketItem from './CreateMarketItem';
 import NFTCard from './NFTCard';
+import { useNavigate } from 'react-router-dom';
 
 export default function Marketplace() {
   const [opened, { close, open }] = useDisclosure();
-
+  const navigate = useNavigate();
   const { data: marketItems } = useContractRead<
     unknown[],
     'fetchMarketItems',
@@ -18,6 +19,8 @@ export default function Marketplace() {
     ...contractMarket,
     functionName: 'fetchMarketItems',
   });
+
+  console.log(marketItems);
 
   return (
     <div className="container flex flex-col gap-4">
@@ -35,8 +38,12 @@ export default function Marketplace() {
         <Button onClick={open}>List NFT</Button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {marketItems?.map(({ nftContract, tokenId, price }) => (
-          <NFTCard nftAddress={nftContract} tokenId={tokenId} price={price} />
+        {marketItems?.map(({ nftContract, ...rest }) => (
+          <NFTCard
+            nftContract={nftContract}
+            {...rest}
+            onClick={({ itemId }) => navigate(`${itemId}/details`)}
+          />
         ))}
       </div>
       <CreateMarketItem opened={opened} onClose={close} />

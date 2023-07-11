@@ -27,9 +27,7 @@ import {
   useContractRead,
   useContractWrite,
   useWaitForTransaction,
-  useWalletClient,
 } from 'wagmi';
-import { getPublicClient } from 'wagmi/actions';
 import NFTCard from './NFTCard';
 
 interface CreateMarketItemProps {
@@ -37,7 +35,7 @@ interface CreateMarketItemProps {
   onClose: () => void;
 }
 
-const listNftAddress: Address[] = [
+const listNftContract: Address[] = [
   '0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B',
 ];
 
@@ -50,8 +48,6 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     setActive((current) => (current < 2 ? current + 1 : current));
 
   const { address } = useAccount();
-  const { data: walletClient } = useWalletClient();
-  const publicClient = getPublicClient();
 
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
@@ -91,34 +87,29 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     enabled: !!allowance?.hash,
   });
 
+  const { write: listNft } = useContractWrite({
+    ...contractMarket,
+    functionName: 'CreateMarketItem',
+    value: borrowPrice,
+    account: address,
+  });
+
   const handleListNft = async ({
     nftContract = '',
     tokenId = 0n,
     price = '0',
     isVisaAccepted = false,
     isOfferable = false,
-  }) => {
-    try {
-      const { request } = await publicClient.simulateContract({
-        ...contractMarket,
-        functionName: 'CreateMarketItem',
-        value: borrowPrice,
-        args: [
-          nftContract,
-          tokenId,
-          parseEther(price),
-          isVisaAccepted,
-          isOfferable,
-        ],
-        account: address,
-      });
-
-      await walletClient?.writeContract(request);
-      onClose();
-    } catch (error) {
-      console.warn(error);
-    }
-  };
+  }) =>
+    listNft({
+      args: [
+        nftContract,
+        tokenId,
+        parseEther(price),
+        isVisaAccepted,
+        isOfferable,
+      ],
+    });
 
   return (
     <Modal
@@ -132,12 +123,12 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     >
       <Stepper active={active} onStepClick={setActive} breakpoint="sm">
         <Stepper.Step label="Select NFT" description="Select NFT to list">
-          {listNftAddress.map((nftAddress) => (
+          {listNftContract.map((nftContract) => (
             <NFTCollection
-              key={nftAddress}
-              nftAddress={opened ? nftAddress : undefined}
+              key={nftContract}
+              nftContract={opened ? nftContract : undefined}
               selectedNft={selectedNft}
-              setSelectedNft={setSelectedNft}
+              onItemClick={setSelectedNft as any}
             />
           ))}
           <Group position="center" m={'md'}>
@@ -199,15 +190,15 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
 export default CreateMarketItem;
 
 const NFTCollection = ({
-  nftAddress,
-  setSelectedNft,
+  nftContract,
+  onItemClick,
   selectedNft,
 }: {
-  nftAddress?: Address;
-  setSelectedNft: (nft: Nft) => void;
+  nftContract?: Address;
+  onItemClick: (nft: Partial<Nft>) => void;
   selectedNft?: Nft;
 }) => {
-  const nftIds = useNftDetector(nftAddress);
+  const nftIds = useNftDetector(nftContract);
 
   return (
     <Carousel
@@ -220,9 +211,9 @@ const NFTCollection = ({
         <Carousel.Slide key={tokenId.toString()}>
           <NFTCard
             tokenId={tokenId}
-            nftAddress={nftAddress}
+            nftContract={nftContract}
             selectedNft={selectedNft}
-            setSelectedNft={setSelectedNft}
+            onClick={onItemClick}
           />
         </Carousel.Slide>
       ))}

@@ -18,9 +18,8 @@ import {
   useAccount,
   useBalance,
   useContractRead,
-  useWalletClient,
+  useContractWrite,
 } from 'wagmi';
-import { getPublicClient } from 'wagmi/actions';
 
 interface ModalLendProps {
   opened: boolean;
@@ -34,8 +33,6 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
   };
   const { address } = useAccount();
   const { data: balance } = useBalance({ address, enabled: opened });
-  const { data: walletClient } = useWalletClient();
-  const publicClient = getPublicClient();
 
   const { data: floorPriceGwei } = useContractRead({
     ...contractMortgage,
@@ -66,22 +63,19 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     );
   }, [APY, duration, values.offerAmount]);
 
-  const handleLend = async ({ offerAmount = 0 }) => {
-    try {
-      const value = parseEther(offerAmount.toString());
-      const { request } = await publicClient.simulateContract({
-        ...contractMortgage,
-        functionName: 'LenderOffer',
-        value,
-        args: [poolId],
-        account: address,
-      });
+  const { write: lend } = useContractWrite({
+    ...contractMortgage,
+    functionName: 'LenderOffer',
+    account: address,
+    onSuccess: close,
+  });
 
-      await walletClient?.writeContract(request);
-      close();
-    } catch (error) {
-      console.log(error);
-    }
+  const handleLend = async ({ offerAmount = 0 }) => {
+    const value = parseEther(offerAmount.toString());
+    lend({
+      value,
+      args: [poolId],
+    });
   };
 
   return (

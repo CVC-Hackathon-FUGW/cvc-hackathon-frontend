@@ -29,10 +29,8 @@ import {
   useContractRead,
   useContractReads,
   useContractWrite,
-  useNetwork,
   useWaitForTransaction,
 } from 'wagmi';
-import { getPublicClient } from 'wagmi/actions';
 
 interface ModalLendProps {
   opened: boolean;
@@ -43,7 +41,6 @@ interface ModalLendProps {
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { APY, duration, image, poolId, tokenAddress } = { ...data };
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
-  const publicClient = getPublicClient();
 
   const { onSubmit, getInputProps, values } = useForm({
     initialValues: {

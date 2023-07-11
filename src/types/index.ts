@@ -39,3 +39,19 @@ export interface MarketNft extends Nft {
   currentOfferer: Address;
   sold: boolean;
 }
+
+export interface NftMetadata {
+  dna: string;
+  name: string;
+  edition: number;
+  description: string;
+  image: string;
+  date: number;
+  compiler: string;
+  attributes: Attribute[];
+}
+
+export interface Attribute {
+  trait_type: string;
+  value: string;
+}
