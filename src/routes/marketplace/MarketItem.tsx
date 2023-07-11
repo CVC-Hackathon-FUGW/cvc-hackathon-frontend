@@ -112,16 +112,33 @@ const MarketItem = () => {
             <div className="flex flex-col gap-2">
               <Text>You are selling this item</Text>
               {isOfferable && (
-                <Button
-                  disabled={sold || numCurrentOfferValue === 0}
-                  onClick={() =>
-                    acceptOffer({
-                      args: [nftContract, marketItem?.itemId],
-                    })
-                  }
-                >
-                  Accept Offer ({numCurrentOfferValue} XCR)
-                </Button>
+                <>
+                  <Text>
+                    Current offer:{' '}
+                    {Number(currentOfferValue) > 0
+                      ? numCurrentOfferValue
+                      : 'No offer yet'}
+                  </Text>
+                  <ShowAddress
+                    address={
+                      currentOfferer === zeroAddress
+                        ? 'Be the first!'
+                        : currentOfferer
+                    }
+                  >
+                    Current offerer:
+                  </ShowAddress>
+                  <Button
+                    disabled={sold || numCurrentOfferValue === 0}
+                    onClick={() =>
+                      acceptOffer({
+                        args: [nftContract, marketItem?.itemId],
+                      })
+                    }
+                  >
+                    Accept Offer ({numCurrentOfferValue} XCR)
+                  </Button>
+                </>
               )}
               <Button
                 color="red"
