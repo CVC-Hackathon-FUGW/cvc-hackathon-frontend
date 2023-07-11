@@ -35,7 +35,7 @@ export interface MarketNft extends Nft {
   price: bigint;
   isOfferable: boolean;
   acceptVisaPayment: boolean;
-  currentOfferValue: string;
+  currentOfferValue: bigint;
   currentOfferer: Address;
   sold: boolean;
 }
