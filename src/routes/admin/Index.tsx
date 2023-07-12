@@ -1,4 +1,4 @@
-import { Button, Group } from '@mantine/core';
+import { Button, Group, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { DataTable } from 'mantine-datatable';
@@ -13,7 +13,11 @@ import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
 
 const Admin = () => {
-  const { data: pools, refetch } = useContractRead({
+  const { data: pools, refetch } = useContractRead<
+    unknown[],
+    'getAllPool',
+    Pool[]
+  >({
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
@@ -31,12 +35,12 @@ const Admin = () => {
 
   return (
     <div>
+      <Title>Mortgages</Title>
       <Group position="right">
         <Button onClick={open}>Create Pool</Button>
       </Group>
-
       <DataTable
-        records={pools as Pool[]}
+        records={pools || []}
         columns={[
           {
             accessor: 'tokenAddress',
@@ -86,6 +90,7 @@ const Admin = () => {
         refetch={refetch}
         key={`${editingPool?.poolId}`}
       />
+      <Title>Marketplace collection</Title>
     </div>
   );
 };
