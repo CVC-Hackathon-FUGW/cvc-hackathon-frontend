@@ -6,6 +6,9 @@ const baseURL = `${url}/${prefix}`;
 
 const api = axios.create({
   baseURL,
+  headers: {
+    'ngrok-skip-browser-warning': true,
+  },
 });
 
 api.interceptors.response.use((response) => response.data);

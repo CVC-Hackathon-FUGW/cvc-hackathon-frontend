@@ -1,9 +1,11 @@
 import {
+  Avatar,
   Burger,
   Button,
   Container,
   Group,
   Header,
+  Image,
   Menu,
   Text,
   ThemeIcon,
@@ -22,6 +24,7 @@ import { useCallback, useEffect } from 'react';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { useAccount, useDisconnect, useNetwork } from 'wagmi';
 import SwitchNetworkModal from './SwitchNetworkModal';
+import logo from 'src/assets/logo.png';
 
 const HEADER_HEIGHT = rem(60);
 
@@ -84,9 +87,7 @@ const MyHeader = () => {
             size="sm"
           />
           <a href="/">
-            <ThemeIcon variant="gradient" size={32}>
-              <IconCurrencyEthereum />
-            </ThemeIcon>
+            <Avatar src={logo} size="lg" />
           </a>
         </Group>
         <Group spacing={5} className={classes.links}>
