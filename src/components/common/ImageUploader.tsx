@@ -1,3 +1,4 @@
+import { Button } from '@mantine/core';
 import { useState } from 'react';
 
 const ImageUploader = () => {
@@ -11,7 +12,7 @@ const ImageUploader = () => {
         fetch('https://api.imgur.com/3/upload', {
             method: 'POST',
             headers: {
-                Authorization: 'Client ID: cd42c4da6b4837b' 
+                Authorization: 'Client ID: cd42c4da6b4837b'
             },
             body: formData
         })
@@ -33,16 +34,22 @@ const ImageUploader = () => {
 
     return (
         <div>
-            
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            <button onClick={handleImageUpload}>Tải lên</button>
-            {imageUrl && (
-                <div>
-                    <p>Đường link ảnh:</p>
-                    <a href={imageUrl} target="_blank" rel="noopener noreferrer">{imageUrl}</a>
-                    <img src='https://i.imgur.com/ckSPILI.jpg' alt='Image' />
-                </div>
-            )}
+            <div className="">
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                />
+            </div>
+            <div className='flex'>
+                <Button className='mt-2' onClick={handleImageUpload}>Tải lên</Button>
+                {imageUrl && (
+                    <div className='ml-2 mt-2'>
+                        <img src={imageUrl} width={200} alt='Image' />
+                    </div>
+                )}
+            </div>
+
         </div>
     );
 };

@@ -11,6 +11,7 @@ import { useContractRead } from 'wagmi';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
 import ModalLend from './ModalLend';
+import ImageUploader from '../common/ImageUploader';
 
 const columns = [
   {
@@ -76,6 +77,7 @@ export default function Lend() {
 
   return (
     <>
+    <ImageUploader/>
       <ModalLend
         opened={Boolean(pool)}
         close={() => setPool(undefined)}
