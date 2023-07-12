@@ -1,4 +1,4 @@
-import { Button, Divider, Group, Title } from '@mantine/core';
+import { Avatar, Button, Divider, Group, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import api from 'src/services/api';
-import { Pool } from 'src/types';
+import { Collection, Pool } from 'src/types';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
 import CreateCollection from './components/CreateCollection';
+import ShowAddress from 'src/components/common/ShowAddress';
 
 const Admin = () => {
   const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
@@ -21,12 +22,10 @@ const Admin = () => {
     watch: true,
   });
 
-  const { data: marketItems } = useQuery({
-    queryFn: () => api.get('/marketItems'),
+  const { data: marketCollections } = useQuery<Collection[]>({
+    queryFn: () => api.get('/marketCollections'),
     queryKey: ['get-marketItems'],
   });
-
-  console.log('marketItems', marketItems);
 
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
   // const [opened, { open, close }] = useDisclosure(false);
@@ -95,7 +94,31 @@ const Admin = () => {
           Create Collection
         </Button>
       </Group>
-
+      <DataTable
+        records={marketCollections || []}
+        columns={[
+          {
+            accessor: 'Image',
+            render: (value) => <Avatar src={value.image} />,
+          },
+          {
+            accessor: 'collection_name',
+          },
+          {
+            accessor: 'token_address',
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
+            render: (value) => <ShowAddress address={value.token_address} />,
+          },
+          {
+            accessor: ' ',
+            render: (value) => (
+              <div className="flex flex-row gap-2">
+                <Button color="red">Delete</Button>
+              </div>
+            ),
+          },
+        ]}
+      />
       <CreatePool
         opened={createAction === 'pool'}
         close={() => setCreateAction(undefined)}

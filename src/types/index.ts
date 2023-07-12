@@ -55,3 +55,11 @@ export interface Attribute {
   trait_type: string;
   value: string;
 }
+
+export interface Collection {
+  collection_id: number;
+  collection_name: string;
+  token_address: string;
+  image: string;
+  is_active: boolean;
+}
