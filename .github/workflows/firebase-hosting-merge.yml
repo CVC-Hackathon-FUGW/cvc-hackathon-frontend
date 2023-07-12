@@ -17,6 +17,8 @@ jobs:
           echo "VITE_CONTRACT_ADDRESS_MORTGAGE=${{ secrets.VITE_CONTRACT_ADDRESS_MORTGAGE }}" >> .env
           echo "VITE_CONTRACT_ADDRESS_MARKET=${{ secrets.VITE_CONTRACT_ADDRESS_MARKET }}" >> .env
           echo "VITE_ADMIN_ADDRESS=${{ secrets.VITE_ADMIN_ADDRESS }}" >> .env
+          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+          cat .env
 
       - name: Install and Build
         run: |

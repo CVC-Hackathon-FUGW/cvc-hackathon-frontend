@@ -11,6 +11,8 @@ import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
+import { useQuery } from '@tanstack/react-query';
+import api from 'src/services/api';
 
 const Admin = () => {
   const { data: pools, refetch } = useContractRead<
@@ -22,6 +24,14 @@ const Admin = () => {
     functionName: 'getAllPool',
     watch: true,
   });
+
+  const { data: marketItems } = useQuery({
+    queryFn: () => api.get('/marketItems'),
+    queryKey: ['get-marketItems'],
+  });
+
+  console.log(marketItems);
+
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
 
