@@ -15,10 +15,9 @@ interface EditPoolProps {
   opened: boolean;
   close: () => void;
   editingPool: Pool | null;
-  refetch: () => void;
 }
 
-const EditPool = ({ opened, close, editingPool, refetch }: EditPoolProps) => {
+const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
       _APY: Number(editingPool?.APY),
@@ -33,10 +32,7 @@ const EditPool = ({ opened, close, editingPool, refetch }: EditPoolProps) => {
   });
   useWaitForTransaction({
     hash: data?.hash,
-    onSuccess: () => {
-      refetch();
-      close();
-    },
+    onSuccess: close,
   });
 
   return (

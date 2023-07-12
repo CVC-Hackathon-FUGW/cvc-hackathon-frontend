@@ -51,6 +51,17 @@ const router = createBrowserRouter([
     path: '/admin',
     element: <Admin />,
   },
+  {
+    path: '/test-firebase',
+    element: (
+      <div>
+        <img
+          alt="test"
+          src="https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360161843_5575879599181195_2087333185588283944_n.png?alt=media&token=33c5bfb7-98fc-4f10-aaaf-bc6695a6b4eb"
+        />
+      </div>
+    ),
+  },
 ]);
 
 export default router;

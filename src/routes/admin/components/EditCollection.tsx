@@ -3,57 +3,64 @@ import {
   Drawer,
   Group,
   LoadingOverlay,
+  Switch,
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { contractMortgage } from 'src/configs/contract';
+import { Pool } from 'src/types';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
-interface CreatePoolProps {
+interface EditCollectionProps {
   opened: boolean;
   close: () => void;
+  editingPool: Pool | null;
+  refetch: () => void;
 }
 
-const CreatePool = ({ opened, close }: CreatePoolProps) => {
+const EditCollection = ({
+  opened,
+  close,
+  editingPool,
+  refetch,
+}: EditCollectionProps) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
-      _tokenAddress: '',
-      _APY: 0,
-      _duration: 0,
+      _APY: Number(editingPool?.APY),
+      _duration: Number(editingPool?.duration),
+      _state: editingPool?.state,
     },
   });
 
   const { write, isLoading, data } = useContractWrite({
     ...contractMortgage,
-    functionName: 'CreatePool',
+    functionName: 'UpdatePool',
   });
-
   useWaitForTransaction({
     hash: data?.hash,
-    onSuccess: close,
+    onSuccess: () => {
+      refetch();
+      close();
+    },
   });
 
   return (
     <Drawer
       opened={opened}
       onClose={close}
-      title="Create Pool"
+      title="Edit Collection"
       position="right"
     >
       <form
-        onSubmit={onSubmit(({ _tokenAddress, _APY, _duration }) => {
+        onSubmit={onSubmit(({ _APY, _duration, _state }) => {
+          const _poolId = editingPool?.poolId;
+          console.log(_poolId, _APY, _duration, _state);
           write?.({
-            args: [_tokenAddress, BigInt(_APY), BigInt(_duration)],
+            args: [_poolId, BigInt(_APY), BigInt(_duration), _state],
           });
         })}
         className="flex flex-col gap-4"
       >
-        <TextInput
-          label="Token address"
-          {...getInputProps('_tokenAddress', {
-            type: 'input',
-          })}
-        />
         <TextInput
           label="APY"
           type="number"
@@ -68,6 +75,13 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
             type: 'input',
           })}
         />
+        <Switch
+          label="State"
+          {...getInputProps('_state', {
+            type: 'checkbox',
+          })}
+        />
+        {/* TODO: add image upload */}
         <Group position="right">
           <Button type="submit">Create</Button>
         </Group>
@@ -77,4 +91,4 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
   );
 };
 
-export default CreatePool;
+export default EditCollection;

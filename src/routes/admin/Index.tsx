@@ -1,25 +1,21 @@
-import { Button, Group, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Button, Divider, Group, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
+import api from 'src/services/api';
 import { Pool } from 'src/types';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
-import { useQuery } from '@tanstack/react-query';
-import api from 'src/services/api';
+import CreateCollection from './components/CreateCollection';
 
 const Admin = () => {
-  const { data: pools, refetch } = useContractRead<
-    unknown[],
-    'getAllPool',
-    Pool[]
-  >({
+  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
@@ -30,10 +26,11 @@ const Admin = () => {
     queryKey: ['get-marketItems'],
   });
 
-  console.log(marketItems);
+  console.log('marketItems', marketItems);
 
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
-  const [opened, { open, close }] = useDisclosure(false);
+  // const [opened, { open, close }] = useDisclosure(false);
+  const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
 
   const openFloorPriceModal = ({ tokenAddress }: Pool) => {
     modals.open({
@@ -47,7 +44,7 @@ const Admin = () => {
     <div>
       <Title>Mortgages</Title>
       <Group position="right">
-        <Button onClick={open}>Create Pool</Button>
+        <Button onClick={() => setCreateAction('pool')}>Create Pool</Button>
       </Group>
       <DataTable
         records={pools || []}
@@ -91,16 +88,28 @@ const Admin = () => {
           },
         ]}
       />
+      <Divider variant="dashed" className="my-5" />
+      <Title>Marketplace collection</Title>
+      <Group position="right">
+        <Button onClick={() => setCreateAction('collection')}>
+          Create Collection
+        </Button>
+      </Group>
 
-      <CreatePool opened={opened} close={close} refetch={refetch} />
+      <CreatePool
+        opened={createAction === 'pool'}
+        close={() => setCreateAction(undefined)}
+      />
+      <CreateCollection
+        opened={createAction === 'collection'}
+        close={() => setCreateAction(undefined)}
+      />
       <EditPool
         opened={Boolean(editingPool)}
         close={() => setEditingPool(null)}
         editingPool={editingPool}
-        refetch={refetch}
         key={`${editingPool?.poolId}`}
       />
-      <Title>Marketplace collection</Title>
     </div>
   );
 };

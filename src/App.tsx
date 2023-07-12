@@ -15,7 +15,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ModalsProvider } from '@mantine/modals';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: 500,
+    },
+  },
+});
 
 const chains = [cvcTestnet];
 const projectId: string = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
