@@ -1,6 +1,6 @@
-import { Avatar, Button, Divider, Group, Title } from '@mantine/core';
+import { Avatar, Button, Divider, Group, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
@@ -14,23 +14,63 @@ import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
 import CreateCollection from './components/CreateCollection';
 import ShowAddress from 'src/components/common/ShowAddress';
+import { notifications } from '@mantine/notifications';
+import useAdmin from 'src/hooks/useAdmin';
+
+const poolColumns = [
+  {
+    accessor: 'tokenAddress',
+    width: '15%',
+    render: (value: Pool) => `${truncateMiddle(value.tokenAddress)}`,
+  },
+  {
+    accessor: 'APY',
+    width: '25%',
+    cellsStyle: { color: 'green', fontWeight: 'bold' },
+    render: (value: Pool) => `${Number(value.APY)}%`,
+  },
+  {
+    accessor: 'Duration',
+    width: '20%',
+    render: (value: Pool) => `${Number(value.duration)}d`,
+  },
+  {
+    accessor: 'poolId',
+    width: '15%',
+    render: (value: Pool) => `${Number(value.poolId)}`,
+  },
+  {
+    accessor: 'TotalPoolAmount',
+    width: '15%',
+    render: (value: Pool) => `${formatEther(value.totalPoolAmount)}`,
+  },
+];
 
 const Admin = () => {
+  const [editingPool, setEditingPool] = useState<Pool | null>(null);
+  const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
+  const { isAdmin } = useAdmin();
   const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
   });
 
-  const { data: marketCollections } = useQuery<Collection[]>({
+  const { data: marketCollections, refetch } = useQuery<Collection[]>({
     queryFn: () => api.get('/marketCollections'),
     queryKey: ['get-marketItems'],
   });
 
-  console.log(marketCollections);
-
-  const [editingPool, setEditingPool] = useState<Pool | null>(null);
-  const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
+  const { mutate } = useMutation({
+    mutationFn: (id: number) => api.delete(`/marketCollections/${id}`),
+    onSuccess: () => {
+      refetch();
+      notifications.show({
+        title: 'Success',
+        message: 'Collection deleted',
+      });
+    },
+  });
 
   const openFloorPriceModal = ({ tokenAddress }: Pool) => {
     modals.open({
@@ -40,8 +80,25 @@ const Admin = () => {
     });
   };
 
+  const openDeleteModal = ({ collection_id }: Collection) => {
+    modals.openConfirmModal({
+      title: 'Delete Collection',
+      centered: true,
+      onConfirm: () => mutate(collection_id),
+      confirmProps: { color: 'red' },
+      labels: {
+        cancel: 'Cancel',
+        confirm: 'Delete',
+      },
+    });
+  };
+
+  if (!isAdmin) {
+    return <Text>You can't access this page</Text>;
+  }
+
   return (
-    <div>
+    <div className="container">
       <Title>Mortgages</Title>
       <Group position="right">
         <Button onClick={() => setCreateAction('pool')}>Create Pool</Button>
@@ -49,32 +106,7 @@ const Admin = () => {
       <DataTable
         records={pools || []}
         columns={[
-          {
-            accessor: 'tokenAddress',
-            width: '15%',
-            render: (value: Pool) => `${truncateMiddle(value.tokenAddress)}`,
-          },
-          {
-            accessor: 'APY',
-            width: '25%',
-            cellsStyle: { color: 'green', fontWeight: 'bold' },
-            render: (value: Pool) => `${Number(value.APY)}%`,
-          },
-          {
-            accessor: 'Duration',
-            width: '20%',
-            render: (value: Pool) => `${Number(value.duration)}d`,
-          },
-          {
-            accessor: 'poolId',
-            width: '15%',
-            render: (value: Pool) => `${Number(value.poolId)}`,
-          },
-          {
-            accessor: 'TotalPoolAmount',
-            width: '15%',
-            render: (value: Pool) => `${formatEther(value.totalPoolAmount)}`,
-          },
+          ...poolColumns,
           {
             accessor: ' ',
             render: (value: Pool) => (
@@ -114,7 +146,9 @@ const Admin = () => {
             accessor: ' ',
             render: (value) => (
               <div className="flex flex-row gap-2">
-                <Button color="red">Delete</Button>
+                <Button color="red" onClick={() => openDeleteModal(value)}>
+                  Delete
+                </Button>
               </div>
             ),
           },
