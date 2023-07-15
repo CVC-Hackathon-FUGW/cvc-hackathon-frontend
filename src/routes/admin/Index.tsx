@@ -27,8 +27,9 @@ const Admin = () => {
     queryKey: ['get-marketItems'],
   });
 
+  console.log(marketCollections);
+
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
-  // const [opened, { open, close }] = useDisclosure(false);
   const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
 
   const openFloorPriceModal = ({ tokenAddress }: Pool) => {
