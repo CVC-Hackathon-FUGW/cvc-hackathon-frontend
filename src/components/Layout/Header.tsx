@@ -5,26 +5,20 @@ import {
   Container,
   Group,
   Header,
-  Image,
   Menu,
   Text,
-  ThemeIcon,
   createStyles,
   rem,
 } from '@mantine/core';
 import { useClipboard, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import {
-  IconCopy,
-  IconCurrencyEthereum,
-  IconPlugConnectedX,
-} from '@tabler/icons-react';
+import { IconCopy, IconPlugConnectedX } from '@tabler/icons-react';
 import { useWeb3Modal } from '@web3modal/react';
 import { useCallback, useEffect } from 'react';
+import logo from 'src/assets/logo.png';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { useAccount, useDisconnect, useNetwork } from 'wagmi';
 import SwitchNetworkModal from './SwitchNetworkModal';
-import logo from 'src/assets/logo.png';
 
 const HEADER_HEIGHT = rem(60);
 
@@ -80,12 +74,33 @@ const MyHeader = () => {
     <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT}>
       <Container className={classes.inner} fluid>
         <Group>
-          <Burger
-            opened={openedBurger}
-            onClick={toggleBurger}
-            className={classes.burger}
-            size="sm"
-          />
+          <Menu>
+            <Menu.Target>
+              <Burger
+                opened={openedBurger}
+                onClick={toggleBurger}
+                className={classes.burger}
+                size="sm"
+              />
+            </Menu.Target>
+            <Menu.Dropdown>
+              {links.map(({ link, label }) => (
+                <Menu.Item key={label} onClick={toggleBurger}>
+                  <Text
+                    variant={
+                      window?.location?.pathname === link ? 'gradient' : 'text'
+                    }
+                    key={label}
+                    href={link}
+                    className={classes.link}
+                    component="a"
+                  >
+                    {label}
+                  </Text>
+                </Menu.Item>
+              ))}
+            </Menu.Dropdown>
+          </Menu>
           <a href="/">
             <Avatar src={logo} size="lg" />
           </a>

@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 import ShowAddress from 'src/components/common/ShowAddress';
 import { abiNft, contractMarket } from 'src/configs/contract';
 import { getNftSrc } from 'src/helpers/get-nft-src';
-import { MarketNft, NftMetadata } from 'src/types';
+import { ContractNft, NftMetadata } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -19,7 +19,7 @@ const MarketItem = () => {
   const { data: marketItem } = useContractRead<
     unknown[],
     'GetMarketItem',
-    MarketNft
+    ContractNft
   >({
     ...contractMarket,
     functionName: 'GetMarketItem',
@@ -79,9 +79,6 @@ const MarketItem = () => {
     },
   });
 
-  console.log('isOwner', isOwner);
-  console.log(marketItem);
-  console.log(data);
   const { write: buyNft } = useContractWrite({
     ...contractMarket,
     functionName: 'Buy',

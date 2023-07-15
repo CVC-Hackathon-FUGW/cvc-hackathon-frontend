@@ -40,7 +40,6 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
       <form
         onSubmit={onSubmit(({ _APY, _duration, _state }) => {
           const _poolId = editingPool?.poolId;
-          console.log(_poolId, _APY, _duration, _state);
           write?.({
             args: [_poolId, BigInt(_APY), BigInt(_duration), _state],
           });

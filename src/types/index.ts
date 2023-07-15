@@ -24,19 +24,19 @@ export interface Loan {
 }
 
 export interface Nft {
-  nftContract: Address;
+  nftContract?: Address;
   tokenId: bigint;
 }
 
-export interface MarketNft extends Nft {
-  itemId: bigint;
-  seller: Address;
-  owner: Address;
+export interface ContractNft extends Nft {
+  itemId?: bigint;
+  seller?: Address;
+  owner?: Address;
   price: bigint;
   isOfferable: boolean;
   acceptVisaPayment: boolean;
   currentOfferValue: bigint;
-  currentOfferer: Address;
+  currentOfferer?: Address;
   sold: boolean;
 }
 
@@ -59,7 +59,7 @@ export interface Attribute {
 export interface Collection {
   collection_id: number;
   collection_name: string;
-  token_address: string;
+  token_address: Address;
   image: string;
   is_active: boolean;
 }

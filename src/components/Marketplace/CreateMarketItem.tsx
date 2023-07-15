@@ -19,7 +19,7 @@ import {
   contractMarket,
 } from 'src/configs/contract';
 import useNftDetector from 'src/hooks/useNftDetector';
-import { Nft } from 'src/types';
+import { Collection, Nft } from 'src/types';
 import { parseEther, zeroAddress } from 'viem';
 import {
   Address,
@@ -29,15 +29,14 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 import NFTCard from './NFTCard';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import api from 'src/services/api';
+import { ListNftContractParams, MarketNft } from './types';
 
 interface CreateMarketItemProps {
   opened: boolean;
   onClose: () => void;
 }
-
-const listNftContract: Address[] = [
-  '0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B',
-];
 
 const CreateMarketItem = (props: CreateMarketItemProps) => {
   const { opened, onClose } = props;
@@ -55,6 +54,13 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       isVisaAccepted: false,
       isOfferable: false,
     },
+  });
+
+  const { data: listNftContract } = useQuery({
+    queryKey: ['get-marketItems'],
+    queryFn: () => api.get<void, Collection[]>('/marketCollections'),
+    initialData: [],
+    select: (data) => data?.map(({ token_address }) => token_address) || [],
   });
 
   const {
@@ -86,21 +92,38 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     },
     enabled: !!allowance?.hash,
   });
-
+  // call the contract to list the nft
   const { write: listNft } = useContractWrite({
     ...contractMarket,
     functionName: 'CreateMarketItem',
     value: borrowPrice,
     account: address,
   });
+  // call the api to add the nft to the collection
+  const { mutate: addMarketItem } = useMutation({
+    mutationKey: ['add-marketItem'],
+    mutationFn: (params: MarketNft) => api.post('/marketItems', params),
+  });
 
   const handleListNft = async ({
-    nftContract = '',
+    nftContract,
     tokenId = 0n,
     price = '0',
     isVisaAccepted = false,
     isOfferable = false,
-  }) =>
+  }: ListNftContractParams) => {
+    addMarketItem({
+      accept_visa_payment: isVisaAccepted,
+      is_offerable: isOfferable,
+      price: BigInt(parseEther(price)),
+      address: nftContract,
+      current_offer_value: 0n,
+      current_offerer: zeroAddress,
+      owner: zeroAddress,
+      seller: address,
+      token_id: tokenId,
+      sold: false,
+    });
     listNft({
       args: [
         nftContract,
@@ -110,6 +133,8 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
         isOfferable,
       ],
     });
+    onClose();
+  };
 
   return (
     <Modal
@@ -121,9 +146,14 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       size={'xl'}
       centered
     >
-      <Stepper active={active} onStepClick={setActive} breakpoint="sm">
+      <Stepper
+        active={active}
+        onStepClick={setActive}
+        breakpoint="sm"
+        allowNextStepsSelect={false}
+      >
         <Stepper.Step label="Select NFT" description="Select NFT to list">
-          {listNftContract.map((nftContract) => (
+          {listNftContract?.map((nftContract) => (
             <NFTCollection
               key={nftContract}
               nftContract={opened ? nftContract : undefined}

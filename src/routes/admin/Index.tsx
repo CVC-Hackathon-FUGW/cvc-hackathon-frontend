@@ -160,7 +160,10 @@ const Admin = () => {
       />
       <CreateCollection
         opened={createAction === 'collection'}
-        close={() => setCreateAction(undefined)}
+        close={() => {
+          refetch();
+          setCreateAction(undefined);
+        }}
       />
       <EditPool
         opened={Boolean(editingPool)}

@@ -3,14 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { abiNft } from 'src/configs/contract';
 import { getNftSrc } from 'src/helpers/get-nft-src';
-import { MarketNft, Nft } from 'src/types';
+import { ContractNft, Nft } from 'src/types';
 import { xrcRate } from 'src/utils/contains';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 
-interface NFTCardProps extends Partial<MarketNft> {
+interface NFTCardProps extends Partial<ContractNft> {
   selectedNft?: Nft;
-  onClick?: (nft: Partial<MarketNft>) => void;
+  onClick?: (nft: Partial<ContractNft>) => void;
 }
 
 const NFTCard = (props: NFTCardProps) => {
@@ -28,6 +28,7 @@ const NFTCard = (props: NFTCardProps) => {
     queryKey: ['nft', uri],
     queryFn: async () => uri && axios.get(uri).then((res) => res.data),
     enabled: !!uri,
+    retry: false,
   });
 
   if (!data) return null;

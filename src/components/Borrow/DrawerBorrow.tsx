@@ -70,9 +70,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     enabled: opened,
   });
 
-  console.log('numberOfNFTs', numberOfNFTs);
-  console.log('allNFTs', allNFTs);
-
   const { data: allLoans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
     ...contractMortgage,
     functionName: 'getAllLoans',

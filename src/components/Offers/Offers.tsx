@@ -41,7 +41,6 @@ const columns = [
       if (Number(startTime) === 0) {
         return <Text weight={700}>-</Text>;
       }
-      console.log(startTime);
 
       const unixTime = Number(startTime) + Number(duration) * 86400;
 
