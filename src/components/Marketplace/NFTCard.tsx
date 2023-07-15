@@ -15,6 +15,7 @@ interface NFTCardProps extends Partial<ContractNft> {
 
 const NFTCard = (props: NFTCardProps) => {
   const { tokenId, nftContract, selectedNft, onClick, price, ...rest } = props;
+  console.log('NFTCard', props);
 
   const { data: uri } = useContractRead<unknown[], 'tokenURI', string>({
     address: nftContract,

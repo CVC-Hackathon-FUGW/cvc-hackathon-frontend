@@ -77,7 +77,6 @@ export default function Lend() {
 
   return (
     <>
-    <ImageUploader/>
       <ModalLend
         opened={Boolean(pool)}
         close={() => setPool(undefined)}

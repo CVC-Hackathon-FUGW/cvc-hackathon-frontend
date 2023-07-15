@@ -1,12 +1,13 @@
 import { Avatar, Button, Image, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import ShowAddress from 'src/components/common/ShowAddress';
 import { abiNft, contractMarket } from 'src/configs/contract';
 import { getNftSrc } from 'src/helpers/get-nft-src';
+import api from 'src/services/api';
 import { ContractNft, NftMetadata } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
@@ -100,6 +101,11 @@ const MarketItem = () => {
     functionName: 'CancelListing',
   });
 
+  const { mutate: deleteMarketItem } = useMutation({
+    mutationKey: ['deleteItems'],
+    mutationFn: (id: number) => api.delete(`/marketIItems/${id}`),
+  });
+
   return (
     <div className="container grid place-items-center">
       <div className="flex flex-row gap-6">
@@ -127,11 +133,12 @@ const MarketItem = () => {
                   </ShowAddress>
                   <Button
                     disabled={sold || numCurrentOfferValue === 0}
-                    onClick={() =>
+                    onClick={() => {
+                      deleteMarketItem(Number(marketItem?.itemId));
                       acceptOffer({
                         args: [nftContract, marketItem?.itemId],
-                      })
-                    }
+                      });
+                    }}
                   >
                     Accept Offer ({numCurrentOfferValue} XCR)
                   </Button>
@@ -140,11 +147,12 @@ const MarketItem = () => {
               <Button
                 color="red"
                 disabled={sold}
-                onClick={() =>
+                onClick={() => {
+                  deleteMarketItem(Number(marketItem?.itemId));
                   cancelListing({
                     args: [nftContract, marketItem?.itemId],
-                  })
-                }
+                  });
+                }}
               >
                 Cancel Listing
               </Button>
@@ -153,12 +161,13 @@ const MarketItem = () => {
             <div className="flex flex-col gap-4">
               <Button
                 disabled={sold}
-                onClick={() =>
+                onClick={() => {
+                  deleteMarketItem(Number(marketItem?.itemId));
                   buyNft({
                     value: price,
                     args: [nftContract, marketItem?.itemId],
-                  })
-                }
+                  });
+                }}
               >
                 Buy
               </Button>

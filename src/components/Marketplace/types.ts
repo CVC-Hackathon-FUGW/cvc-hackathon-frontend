@@ -19,4 +19,6 @@ export interface MarketNft {
   current_offer_value: bigint;
   current_offerer?: Address;
   sold: boolean;
+  item_id?: bigint;
+  is_active?: boolean;
 }

@@ -42,6 +42,8 @@ export const marketToContract = (marketItem: MarketNft): ContractNft => {
     seller,
     token_id,
     sold,
+    item_id,
+    is_active,
   } = marketItem;
 
   return {
@@ -55,5 +57,7 @@ export const marketToContract = (marketItem: MarketNft): ContractNft => {
     owner,
     seller,
     nftContract: address,
+    itemId: item_id,
+    isActive: is_active,
   };
 };
