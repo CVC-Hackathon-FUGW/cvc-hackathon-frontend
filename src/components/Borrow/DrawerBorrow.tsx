@@ -6,7 +6,9 @@ import {
   Divider,
   Group,
   Input,
+  LoadingOverlay,
   Modal,
+  Stepper,
   Text,
   Title,
 } from '@mantine/core';
@@ -20,7 +22,8 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractLoan, ContractPool } from 'src/types';
+import useNftDetector from 'src/hooks/useNftDetector';
+import { ContractLoan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
 import {
@@ -28,24 +31,22 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
+import NFTCollection from '../Marketplace/NFTCollection';
 
 interface ModalLendProps {
   opened: boolean;
   close: () => void;
-  data?: ContractPool;
+  data?: Pool;
 }
 
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
-  const { APY, duration, image, poolId, tokenAddress } = { ...data };
+  const { apy, duration, image, pool_id, token_address } = { ...data };
   const [selectedLoan, setSelectedLoan] = useState<ContractLoan | null>();
+  const [step, setStep] = useState(0);
+  const [selectedNft, setSelectedNft] = useState<Nft>();
 
-  const { onSubmit, getInputProps, values } = useForm({
-    initialValues: {
-      tokenId: '',
-    },
-  });
-
-  // const nftIds = useNftDetector(tokenAddress);
+  const nftIds = useNftDetector(token_address);
+  console.log(nftIds);
 
   const { data: allLoans } = useContractRead<
     unknown[],
@@ -59,31 +60,25 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { data: floorPriceGwei } = useContractRead({
     ...contractMortgage,
     functionName: 'getFloorPrice',
-    args: [tokenAddress],
+    args: [token_address],
     enabled: opened,
   });
 
   const { data: approved } = useContractRead({
-    address: tokenAddress,
+    address: token_address,
     abi: abiNft,
     functionName: 'getApproved',
-    args: [BigInt(values.tokenId)],
-    enabled: !!values.tokenId,
+    args: [selectedNft?.tokenId],
+    enabled: !!selectedNft?.tokenId,
+    select: (value) => value === addressMortgage,
   });
-
-  const isApproved = useMemo(() => {
-    if (approved) {
-      return approved === addressMortgage;
-    }
-    return false;
-  }, [approved]);
 
   const {
     write: approve,
     reset,
     data: allowance,
   } = useContractWrite({
-    address: tokenAddress,
+    address: token_address,
     abi: abiNft,
     functionName: 'approve',
   });
@@ -93,7 +88,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     functionName: 'BorrowerTakeLoan',
   });
 
-  const { isSuccess } = useWaitForTransaction({
+  const { isLoading } = useWaitForTransaction({
     hash: allowance?.hash,
     onSuccess: () =>
       notifications.show({
@@ -106,10 +101,12 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     if (allLoans) {
       return allLoans.filter(
         (loan) =>
-          loan.poolId === poolId && !loan.state && loan.lender !== zeroAddress
+          Number(loan.poolId) === pool_id &&
+          !loan.state &&
+          loan.lender !== zeroAddress
       );
     }
-  }, [allLoans, poolId]);
+  }, [allLoans, pool_id]);
 
   const floorPrice = useMemo(() => {
     if (floorPriceGwei) {
@@ -117,6 +114,9 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     }
     return 0;
   }, [floorPriceGwei]);
+
+  const nextStep = () =>
+    setStep((current) => (current < 2 ? current + 1 : current));
 
   return (
     <Modal
@@ -129,17 +129,17 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       size={'xl'}
       centered
     >
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row gap-2 items-center justify-between">
-          <Group className="flex flex-row gap-2 items-center">
-            <Avatar
-              size="lg"
-              src={image || tempImage}
-              radius="xl"
-              alt="it's me"
-            />
-            <Title order={3}>{truncateMiddle(tokenAddress)}</Title>
-          </Group>
+      <div className="flex flex-row gap-2 items-center justify-between mb-10">
+        <Group className="flex flex-row gap-2 items-center">
+          <Avatar
+            size="lg"
+            src={image || tempImage}
+            radius="xl"
+            alt="it's me"
+          />
+          <Title order={3}>{truncateMiddle(token_address)}</Title>
+        </Group>
+        <Group className="flex flex-row gap-2 items-center">
           <Card
             shadow="sm"
             padding="xs"
@@ -168,59 +168,95 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
               {Number(duration)}d
             </Text>
           </Card>
-        </div>
-        <div className="flex flex-row overflow-x-auto gap-2">
-          {loans?.map((loan) => (
-            <Card
-              withBorder
-              shadow="sm"
-              radius="md"
-              className="w-full"
-              key={loan.loanId.toString()}
-              onClick={() => setSelectedLoan(loan)}
-              c={selectedLoan?.loanId === loan.loanId ? 'blue' : 'gray'}
-              sx={{
-                cursor: 'pointer',
+        </Group>
+      </div>
+      <Stepper
+        active={step}
+        onStepClick={setStep}
+        breakpoint="sm"
+        allowNextStepsSelect={false}
+      >
+        <Stepper.Step label="Select NFT" description="Select NFT">
+          <NFTCollection
+            nftContract={opened ? token_address : undefined}
+            selectedNft={selectedNft}
+            onItemClick={setSelectedNft as any}
+          />
+          <Group position="center" m={'md'}>
+            <Button
+              disabled={!selectedNft}
+              onClick={() => {
+                if (approved) {
+                  return nextStep();
+                }
+                return approve({
+                  args: [addressMortgage, selectedNft?.tokenId],
+                });
               }}
             >
-              <Card.Section
-                p="sm"
-                className="flex flex-row justify-between items-center"
+              {approved ? 'Next' : 'Approve'}
+            </Button>
+          </Group>
+          <LoadingOverlay visible={isLoading} />
+        </Stepper.Step>
+        <Stepper.Step label="Select a loan" description="Select a loan">
+          <div className="flex flex-row overflow-x-auto gap-2">
+            {loans?.map((loan) => (
+              <Card
+                withBorder
+                shadow="sm"
+                radius="md"
+                className="w-full"
+                key={loan.loanId.toString()}
+                onClick={() => setSelectedLoan(loan)}
+                c={selectedLoan?.loanId === loan.loanId ? 'blue' : 'gray'}
+                sx={{
+                  cursor: 'pointer',
+                }}
               >
-                <div className="flex flex-col gap-2">
-                  <Text size="xl" fw="bold">
-                    {truncateMiddle(loan.tokenAddress)}
+                <Card.Section
+                  p="sm"
+                  className="flex flex-row justify-between items-center"
+                >
+                  <div className="flex flex-col gap-2">
+                    <Text size="xl" fw="bold">
+                      {truncateMiddle(loan.tokenAddress)}
+                    </Text>
+                    <Text fz="xs" c="dimmed">
+                      Lender: {truncateMiddle(loan.lender)}
+                    </Text>
+                  </div>
+                  <Badge variant="outline">
+                    XCR {formatEther(loan.amount)}
+                  </Badge>
+                </Card.Section>
+                <Divider />
+                <Card.Section p="sm">
+                  <Text>
+                    Interest:{' '}
+                    {calculateInterest(
+                      Number(formatEther(loan.amount)),
+                      Number(apy),
+                      Number(duration)
+                    )}
                   </Text>
-                  <Text fz="xs" c="dimmed">
-                    Lender: {truncateMiddle(loan.lender)}
-                  </Text>
-                </div>
-                <Badge variant="outline">XCR {formatEther(loan.amount)}</Badge>
-              </Card.Section>
-              <Divider />
-              <Card.Section p="sm">
-                <Text>
-                  Interest:{' '}
-                  {calculateInterest(
-                    Number(formatEther(loan.amount)),
-                    Number(APY),
-                    Number(duration)
-                  )}
-                </Text>
-              </Card.Section>
-            </Card>
-          ))}
-        </div>
-        <Divider />
+                </Card.Section>
+              </Card>
+            ))}
+          </div>
+        </Stepper.Step>
+      </Stepper>
+      <div className="flex flex-col gap-2">
+        {/* <Divider /> */}
 
-        <form
+        {/* <form
           className="flex flex-col gap-2"
           onSubmit={onSubmit(({ tokenId }) => {
             if (!tokenId) return;
             const bigTokenId = BigInt(tokenId);
             if (isSuccess || isApproved) {
               return borrow({
-                args: [poolId, bigTokenId, selectedLoan?.loanId],
+                args: [pool_id, bigTokenId, selectedLoan?.loanId],
               });
             }
             return approve({
@@ -234,7 +270,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
               {isSuccess || isApproved ? 'Borrow' : 'Approve'}
             </Button>
           </Group>
-        </form>
+        </form> */}
       </div>
     </Modal>
   );

@@ -3,7 +3,7 @@ import { tempImage } from 'src/utils/contains';
 
 interface Props {
   img?: string;
-  name: string;
+  name?: string;
 }
 
 export default function Collection({ name, img }: Props) {

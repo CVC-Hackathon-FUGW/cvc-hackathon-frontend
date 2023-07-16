@@ -32,6 +32,7 @@ import NFTCard from './NFTCard';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from 'src/services/api';
 import { ListNftContractParams, MarketNft } from './types';
+import NFTCollection from './NFTCollection';
 
 interface CreateMarketItemProps {
   opened: boolean;
@@ -40,11 +41,11 @@ interface CreateMarketItemProps {
 
 const CreateMarketItem = (props: CreateMarketItemProps) => {
   const { opened, onClose } = props;
-  const [active, setActive] = useState(0);
   const [selectedNft, setSelectedNft] = useState<Nft>();
+  const [step, setStep] = useState(0);
 
   const nextStep = () =>
-    setActive((current) => (current < 2 ? current + 1 : current));
+    setStep((current) => (current < 2 ? current + 1 : current));
 
   const { address } = useAccount();
 
@@ -84,7 +85,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
   const { isLoading } = useWaitForTransaction({
     hash: allowance?.hash,
     onSuccess: () => {
-      setActive(1);
+      setStep(1);
       notifications.show({
         title: 'Approve successfully',
         message: 'You can now Borrow',
@@ -147,8 +148,8 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       centered
     >
       <Stepper
-        active={active}
-        onStepClick={setActive}
+        active={step}
+        onStepClick={setStep}
         breakpoint="sm"
         allowNextStepsSelect={false}
       >
@@ -218,35 +219,3 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
 };
 
 export default CreateMarketItem;
-
-const NFTCollection = ({
-  nftContract,
-  onItemClick,
-  selectedNft,
-}: {
-  nftContract?: Address;
-  onItemClick: (nft: Partial<Nft>) => void;
-  selectedNft?: Nft;
-}) => {
-  const nftIds = useNftDetector(nftContract);
-
-  return (
-    <Carousel
-      slideSize="33%"
-      breakpoints={[{ maxWidth: 'sm', slideSize: '100%', slideGap: rem(2) }]}
-      slideGap="xl"
-      align="start"
-    >
-      {nftIds?.map((tokenId) => (
-        <Carousel.Slide key={tokenId.toString()}>
-          <NFTCard
-            tokenId={tokenId}
-            nftContract={nftContract}
-            selectedNft={selectedNft}
-            onClick={onItemClick}
-          />
-        </Carousel.Slide>
-      ))}
-    </Carousel>
-  );
-};

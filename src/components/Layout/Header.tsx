@@ -14,15 +14,16 @@ import { useClipboard, useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconCopy, IconPlugConnectedX } from '@tabler/icons-react';
 import { useWeb3Modal } from '@web3modal/react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import logo from 'src/assets/logo.png';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { useAccount, useDisconnect, useNetwork } from 'wagmi';
 import SwitchNetworkModal from './SwitchNetworkModal';
+import useAdmin from 'src/hooks/useAdmin';
 
 const HEADER_HEIGHT = rem(60);
 
-const links = [
+const routes = [
   {
     link: '/marketplace',
     label: 'Marketplace',
@@ -45,17 +46,25 @@ const links = [
   },
 ];
 
+const adminRoutes = [
+  {
+    link: '/admin',
+    label: 'Admin',
+  },
+];
+
 const MyHeader = () => {
   const { classes } = useStyles();
   const [openedBurger, { toggle: toggleBurger }] = useDisclosure(false);
   const [openedModal, { open: openModal, close: closeModal }] =
     useDisclosure(false);
-  const { copy } = useClipboard();
 
+  const { copy } = useClipboard();
   const { open } = useWeb3Modal();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { chain } = useNetwork();
+  const { isAdmin } = useAdmin();
 
   const handleCopyAddress = useCallback(() => {
     copy(address);
@@ -63,6 +72,11 @@ const MyHeader = () => {
       message: 'Address copied to clipboard',
     });
   }, [copy, address]);
+
+  const roleRoutes = useMemo(
+    () => (isAdmin ? [...adminRoutes, ...routes] : routes),
+    [isAdmin]
+  );
 
   useEffect(() => {
     if (chain?.unsupported) {
@@ -84,7 +98,7 @@ const MyHeader = () => {
               />
             </Menu.Target>
             <Menu.Dropdown>
-              {links.map(({ link, label }) => (
+              {roleRoutes.map(({ link, label }) => (
                 <Menu.Item key={label} onClick={toggleBurger}>
                   <Text
                     variant={
@@ -106,7 +120,7 @@ const MyHeader = () => {
           </a>
         </Group>
         <Group spacing={5} className={classes.links}>
-          {links.map(({ link, label }) => (
+          {roleRoutes.map(({ link, label }) => (
             <Text
               variant={
                 window?.location?.pathname === link ? 'gradient' : 'text'

@@ -1,12 +1,11 @@
 import { Button, Input, Text, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
-import { contractMortgage } from 'src/configs/contract';
-import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractPool } from 'src/types';
+import api from 'src/services/api';
+import { Pool } from 'src/types';
 import { formatEther } from 'viem';
-import { useContractRead } from 'wagmi';
 import AvailablePool from '../Lend/AvailablePool';
 import Collection from '../Lend/Collection';
 import DrawerBorrow from './DrawerBorrow';
@@ -17,8 +16,8 @@ const columns = [
     width: '25%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ tokenAddress }: ContractPool) => (
-      <Collection name={truncateMiddle(tokenAddress)} />
+    render: ({ collection_name, image }: Pool) => (
+      <Collection name={collection_name} img={image} />
     ),
   },
   {
@@ -26,9 +25,9 @@ const columns = [
     width: '20%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ totalPoolAmount }: ContractPool) => (
+    render: ({ total_pool_amount }: Pool) => (
       <AvailablePool
-        number={formatEther(totalPoolAmount)}
+        number={formatEther(total_pool_amount || 0n)}
         description="1344 of 1410 offers taken"
       />
     ),
@@ -45,9 +44,9 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ APY }: ContractPool) => (
+    render: ({ apy }: Pool) => (
       <Text size="30px" weight={700} color="green">
-        {Number(APY)}%
+        {Number(apy)}%
       </Text>
     ),
   },
@@ -56,7 +55,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ APY, duration }: ContractPool) => (
+    render: () => (
       <Text>
         {/* {Number(
           calculateInterest(
@@ -74,7 +73,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: ContractPool) => (
+    render: ({ duration }: Pool) => (
       <Text size="30px" weight={700}>
         {Number(duration)}d
       </Text>
@@ -83,11 +82,16 @@ const columns = [
 ];
 
 export default function Borrow() {
-  const [pool, setPool] = useState<ContractPool>();
-  const { data: pools } = useContractRead({
-    ...contractMortgage,
-    functionName: 'getAllPool',
+  const [pool, setPool] = useState<Pool>();
+  // const { data: pools } = useContractRead({
+  //   ...contractMortgage,
+  //   functionName: 'getAllPool',
+  // });
+  const { data: pools } = useQuery<Pool[]>({
+    queryKey: ['pools'],
+    queryFn: () => api.get('/pools'),
   });
+
   return (
     <>
       <DrawerBorrow
@@ -116,9 +120,7 @@ export default function Borrow() {
         </div>
 
         <DataTable
-          records={
-            (pools as ContractPool[])?.filter(({ state }) => state) || []
-          }
+          records={pools?.filter(({ state }) => state) || []}
           columns={[
             ...columns,
             {

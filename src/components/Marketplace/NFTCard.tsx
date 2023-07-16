@@ -30,6 +30,7 @@ const NFTCard = (props: NFTCardProps) => {
     queryFn: async () => uri && axios.get(uri).then((res) => res.data),
     enabled: !!uri,
     retry: false,
+    onError: undefined,
   });
 
   if (!data) return null;
