@@ -5,7 +5,7 @@ import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { isLoanEnded } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { Loan, Pool } from 'src/types';
+import { ContractLoan, ContractPool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -16,7 +16,7 @@ const columns = [
     accessor: 'duration',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: Loan) => (
+    render: ({ duration }: ContractLoan) => (
       <Text weight={700}>{Number(duration)}d</Text>
     ),
   },
@@ -24,7 +24,7 @@ const columns = [
     accessor: 'startTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime }: Loan) => {
+    render: ({ startTime }: ContractLoan) => {
       const unixTime = Number(startTime);
       return (
         <Text weight={700}>
@@ -37,7 +37,7 @@ const columns = [
     accessor: 'remainingTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime, duration }: Loan) => {
+    render: ({ startTime, duration }: ContractLoan) => {
       if (Number(startTime) === 0) {
         return <Text weight={700}>-</Text>;
       }
@@ -50,7 +50,7 @@ const columns = [
   {
     accessor: 'borrower',
     titleStyle: { fontSize: '25px' },
-    render: ({ borrower }: Loan) => (
+    render: ({ borrower }: ContractLoan) => (
       <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
     ),
   },
@@ -58,7 +58,7 @@ const columns = [
     accessor: 'Amount',
     width: '20%',
     titleStyle: { fontSize: '25px' },
-    render: ({ amount }: Loan) => (
+    render: ({ amount }: ContractLoan) => (
       <Text weight={700}>{formatEther(amount)}</Text>
     ),
   },
@@ -67,7 +67,11 @@ const columns = [
 export default function Offers() {
   const { address } = useAccount();
 
-  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
+  const { data: pools } = useContractRead<
+    unknown[],
+    'getAllPool',
+    ContractPool[]
+  >({
     ...contractMortgage,
     functionName: 'getAllPool',
   });
@@ -81,7 +85,7 @@ export default function Offers() {
     functionName: 'LenderRevokeOffer',
   });
 
-  const openRevokeModal = ({ poolId, loanId }: Loan) => {
+  const openRevokeModal = ({ poolId, loanId }: ContractLoan) => {
     modals.openConfirmModal({
       title: 'Revoke offer',
       centered: true,
@@ -104,7 +108,7 @@ export default function Offers() {
     account: address,
   });
 
-  const handleClaim = async (loan: Loan) =>
+  const handleClaim = async (loan: ContractLoan) =>
     claim({
       args: [loan.poolId, loan.loanId],
     });
@@ -130,7 +134,9 @@ export default function Offers() {
         />
       </div>
       <DataTable
-        records={(loans as Loan[])?.filter(({ lender }) => lender === address)}
+        records={(loans as ContractLoan[])?.filter(
+          ({ lender }) => lender === address
+        )}
         columns={[
           {
             accessor: 'Collection',
@@ -138,7 +144,7 @@ export default function Offers() {
             sortable: true,
             titleStyle: { fontSize: '25px' },
             render: (loan) => {
-              const pool = (pools as Pool[])?.find(
+              const pool = (pools as ContractPool[])?.find(
                 ({ poolId }) => loan.poolId === poolId
               );
               return (

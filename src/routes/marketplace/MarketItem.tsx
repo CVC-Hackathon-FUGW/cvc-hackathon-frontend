@@ -101,7 +101,7 @@ const MarketItem = () => {
     functionName: 'CancelListing',
   });
 
-  const { mutate: deleteMarketItem } = useMutation({
+  const { mutateAsync: deleteMarketItem } = useMutation({
     mutationKey: ['deleteItems'],
     mutationFn: (id: number) => api.delete(`/marketIItems/${id}`),
   });
@@ -133,8 +133,8 @@ const MarketItem = () => {
                   </ShowAddress>
                   <Button
                     disabled={sold || numCurrentOfferValue === 0}
-                    onClick={() => {
-                      deleteMarketItem(Number(marketItem?.itemId));
+                    onClick={async () => {
+                      await deleteMarketItem(Number(marketItem?.itemId));
                       acceptOffer({
                         args: [nftContract, marketItem?.itemId],
                       });
@@ -147,8 +147,8 @@ const MarketItem = () => {
               <Button
                 color="red"
                 disabled={sold}
-                onClick={() => {
-                  deleteMarketItem(Number(marketItem?.itemId));
+                onClick={async () => {
+                  await deleteMarketItem(Number(marketItem?.itemId));
                   cancelListing({
                     args: [nftContract, marketItem?.itemId],
                   });
@@ -161,8 +161,8 @@ const MarketItem = () => {
             <div className="flex flex-col gap-4">
               <Button
                 disabled={sold}
-                onClick={() => {
-                  deleteMarketItem(Number(marketItem?.itemId));
+                onClick={async () => {
+                  await deleteMarketItem(Number(marketItem?.itemId));
                   buyNft({
                     value: price,
                     args: [nftContract, marketItem?.itemId],

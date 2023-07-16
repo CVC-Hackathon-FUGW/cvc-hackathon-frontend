@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 
-export interface Pool {
+export interface ContractPool {
   APY: bigint;
   duration: bigint;
   poolId: bigint;
@@ -10,7 +10,7 @@ export interface Pool {
   image?: string;
 }
 
-export interface Loan {
+export interface ContractLoan {
   loanId: bigint;
   lender: string;
   borrower: string;
@@ -63,4 +63,27 @@ export interface Collection {
   token_address: Address;
   image: string;
   is_active: boolean;
+}
+
+export interface Pool {
+  pool_id?: number;
+  token_address: Address;
+  collection_name: string;
+  total_pool_amount?: bigint;
+  apy: bigint;
+  duration: bigint;
+  state: boolean;
+  image: string;
+  is_active: boolean;
+}
+
+export interface Loan extends Omit<Pool, 'total_pool_amount'> {
+  loan_id: number;
+  lender: Address;
+  borrower: Address;
+  amount: bigint;
+  start_time: bigint;
+  token_id: bigint;
+  created_at: number;
+  updated_at: number;
 }

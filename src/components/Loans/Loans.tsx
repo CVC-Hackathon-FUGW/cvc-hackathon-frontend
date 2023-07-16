@@ -4,7 +4,7 @@ import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { Loan, Pool } from 'src/types';
+import { ContractLoan, ContractPool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -15,7 +15,7 @@ const columns = [
     accessor: 'duration',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: Loan) => (
+    render: ({ duration }: ContractLoan) => (
       <Text weight={700}>{Number(duration)}d</Text>
     ),
   },
@@ -23,7 +23,7 @@ const columns = [
     accessor: 'startTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime }: Loan) => {
+    render: ({ startTime }: ContractLoan) => {
       const unixTime = Number(startTime);
       return (
         <Text weight={700}>
@@ -36,7 +36,7 @@ const columns = [
     accessor: 'remainingTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime, duration }: Loan) => {
+    render: ({ startTime, duration }: ContractLoan) => {
       if (Number(startTime) === 0) {
         return <Text weight={700}>-</Text>;
       }
@@ -54,7 +54,7 @@ const columns = [
   {
     accessor: 'borrower',
     titleStyle: { fontSize: '25px' },
-    render: ({ borrower }: Loan) => (
+    render: ({ borrower }: ContractLoan) => (
       <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
     ),
   },
@@ -62,7 +62,7 @@ const columns = [
     accessor: 'Amount',
     width: '20%',
     titleStyle: { fontSize: '25px' },
-    render: ({ amount }: Loan) => (
+    render: ({ amount }: ContractLoan) => (
       <Text weight={700}>{formatEther(amount)}</Text>
     ),
   },
@@ -71,11 +71,19 @@ const columns = [
 export default function Loans() {
   const { address } = useAccount();
 
-  const { data: loans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
+  const { data: loans } = useContractRead<
+    unknown[],
+    'getAllLoans',
+    ContractLoan[]
+  >({
     ...contractMortgage,
     functionName: 'getAllLoans',
   });
-  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
+  const { data: pools } = useContractRead<
+    unknown[],
+    'getAllPool',
+    ContractPool[]
+  >({
     ...contractMortgage,
     functionName: 'getAllPool',
   });
@@ -86,9 +94,9 @@ export default function Loans() {
     account: address,
   });
 
-  const handlePay = async (loan: Loan) => {
+  const handlePay = async (loan: ContractLoan) => {
     const { startTime, duration, amount } = loan;
-    const pool = (pools as Pool[])?.find(
+    const pool = (pools as ContractPool[])?.find(
       ({ poolId }) => loan.poolId === poolId
     );
     let durations = (Date.now() / 1000 - Number(startTime)) / 86400;
@@ -164,9 +172,9 @@ export default function Loans() {
             accessor: 'currentInterest',
             width: '20%',
             titleStyle: { fontSize: '25px' },
-            render: (loan: Loan) => {
+            render: (loan: ContractLoan) => {
               const { startTime, duration, amount } = loan;
-              const pool = (pools as Pool[])?.find(
+              const pool = (pools as ContractPool[])?.find(
                 ({ poolId }) => loan.poolId === poolId
               );
               let durations = (Date.now() / 1000 - Number(startTime)) / 86400;

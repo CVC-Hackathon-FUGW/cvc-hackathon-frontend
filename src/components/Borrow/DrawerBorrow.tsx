@@ -20,14 +20,11 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { Loan, Pool } from 'src/types';
+import { ContractLoan, ContractPool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
 import {
-  erc721ABI,
-  useAccount,
   useContractRead,
-  useContractReads,
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
@@ -35,42 +32,26 @@ import {
 interface ModalLendProps {
   opened: boolean;
   close: () => void;
-  data?: Pool;
+  data?: ContractPool;
 }
 
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { APY, duration, image, poolId, tokenAddress } = { ...data };
-  const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
+  const [selectedLoan, setSelectedLoan] = useState<ContractLoan | null>();
 
   const { onSubmit, getInputProps, values } = useForm({
     initialValues: {
       tokenId: '',
     },
   });
-  const { address } = useAccount();
 
-  const { data: numberOfNFTs } = useContractRead({
-    address: tokenAddress,
-    abi: erc721ABI,
-    functionName: 'balanceOf',
-    args: [address || zeroAddress],
-    enabled: opened,
-    select: (data) => Number(data),
-  });
+  // const nftIds = useNftDetector(tokenAddress);
 
-  const { data: allNFTs } = useContractReads({
-    contracts: Array.from({
-      length: numberOfNFTs || 0,
-    }).map((_, index) => ({
-      address: tokenAddress,
-      abi: erc721ABI,
-      functionName: 'tokenByIndex',
-      args: [BigInt(index)],
-    })),
-    enabled: opened,
-  });
-
-  const { data: allLoans } = useContractRead<unknown[], 'getAllLoans', Loan[]>({
+  const { data: allLoans } = useContractRead<
+    unknown[],
+    'getAllLoans',
+    ContractLoan[]
+  >({
     ...contractMortgage,
     functionName: 'getAllLoans',
   });

@@ -4,7 +4,7 @@ import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { Pool } from 'src/types';
+import { ContractPool } from 'src/types';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 import AvailablePool from '../Lend/AvailablePool';
@@ -17,7 +17,7 @@ const columns = [
     width: '25%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ tokenAddress }: Pool) => (
+    render: ({ tokenAddress }: ContractPool) => (
       <Collection name={truncateMiddle(tokenAddress)} />
     ),
   },
@@ -26,7 +26,7 @@ const columns = [
     width: '20%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ totalPoolAmount }: Pool) => (
+    render: ({ totalPoolAmount }: ContractPool) => (
       <AvailablePool
         number={formatEther(totalPoolAmount)}
         description="1344 of 1410 offers taken"
@@ -45,7 +45,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ APY }: Pool) => (
+    render: ({ APY }: ContractPool) => (
       <Text size="30px" weight={700} color="green">
         {Number(APY)}%
       </Text>
@@ -56,7 +56,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ APY, duration }: Pool) => (
+    render: ({ APY, duration }: ContractPool) => (
       <Text>
         {/* {Number(
           calculateInterest(
@@ -74,7 +74,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: Pool) => (
+    render: ({ duration }: ContractPool) => (
       <Text size="30px" weight={700}>
         {Number(duration)}d
       </Text>
@@ -83,7 +83,7 @@ const columns = [
 ];
 
 export default function Borrow() {
-  const [pool, setPool] = useState<Pool>();
+  const [pool, setPool] = useState<ContractPool>();
   const { data: pools } = useContractRead({
     ...contractMortgage,
     functionName: 'getAllPool',
@@ -116,7 +116,9 @@ export default function Borrow() {
         </div>
 
         <DataTable
-          records={(pools as Pool[])?.filter(({ state }) => state) || []}
+          records={
+            (pools as ContractPool[])?.filter(({ state }) => state) || []
+          }
           columns={[
             ...columns,
             {

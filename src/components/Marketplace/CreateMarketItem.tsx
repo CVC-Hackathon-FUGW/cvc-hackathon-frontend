@@ -100,7 +100,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     account: address,
   });
   // call the api to add the nft to the collection
-  const { mutate: addMarketItem } = useMutation({
+  const { mutateAsync: addMarketItem } = useMutation({
     mutationKey: ['add-marketItem'],
     mutationFn: (params: MarketNft) => api.post('/marketItems', params),
   });
@@ -112,7 +112,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     isVisaAccepted = false,
     isOfferable = false,
   }: ListNftContractParams) => {
-    addMarketItem({
+    await addMarketItem({
       accept_visa_payment: isVisaAccepted,
       is_offerable: isOfferable,
       price: BigInt(parseEther(price)),

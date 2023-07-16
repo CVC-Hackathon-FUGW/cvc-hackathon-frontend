@@ -6,8 +6,12 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation } from '@tanstack/react-query';
 import { contractMortgage } from 'src/configs/contract';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import useImageUploader from 'src/hooks/useImageUploader';
+import api from 'src/services/api';
+import { Pool } from 'src/types';
+import { Address, useContractWrite, useWaitForTransaction } from 'wagmi';
 
 interface CreatePoolProps {
   opened: boolean;
@@ -17,15 +21,22 @@ interface CreatePoolProps {
 const CreatePool = ({ opened, close }: CreatePoolProps) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
-      _tokenAddress: '',
-      _APY: 0,
-      _duration: 0,
+      collection_name: '',
+      tokenAddress: '',
+      duration: 0,
+      APY: 0,
     },
   });
 
   const { write, isLoading, data } = useContractWrite({
     ...contractMortgage,
     functionName: 'CreatePool',
+  });
+  const { ImageInput, uploadImage, isLoading: uploading } = useImageUploader();
+
+  const { mutateAsync: createPool } = useMutation({
+    mutationKey: ['create-pool'],
+    mutationFn: (params: Pool) => api.post('/pools', params),
   });
 
   useWaitForTransaction({
@@ -41,37 +52,59 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
       position="right"
     >
       <form
-        onSubmit={onSubmit(({ _tokenAddress, _APY, _duration }) => {
-          write?.({
-            args: [_tokenAddress, BigInt(_APY), BigInt(_duration)],
-          });
-        })}
+        onSubmit={onSubmit(
+          async ({ tokenAddress, APY, duration, collection_name }) => {
+            const image = await uploadImage();
+
+            if (image) {
+              await createPool({
+                apy: BigInt(APY),
+                duration: BigInt(duration),
+                collection_name,
+                image,
+                is_active: true,
+                state: true,
+                token_address: tokenAddress as Address,
+              });
+              write?.({
+                args: [tokenAddress, BigInt(APY), BigInt(duration)],
+              });
+            }
+          }
+        )}
         className="flex flex-col gap-4"
       >
+        <ImageInput />
+        <TextInput
+          label="Collection name"
+          {...getInputProps('collection_name', {
+            type: 'input',
+          })}
+        />
         <TextInput
           label="Token address"
-          {...getInputProps('_tokenAddress', {
+          {...getInputProps('tokenAddress', {
             type: 'input',
           })}
         />
         <TextInput
           label="APY"
           type="number"
-          {...getInputProps('_APY', {
+          {...getInputProps('APY', {
             type: 'input',
           })}
         />
         <TextInput
           label="Duration"
           type="number"
-          {...getInputProps('_duration', {
+          {...getInputProps('duration', {
             type: 'input',
           })}
         />
         <Group position="right">
           <Button type="submit">Create</Button>
         </Group>
-        <LoadingOverlay visible={isLoading} overlayBlur={2} />
+        <LoadingOverlay visible={isLoading || uploading} overlayBlur={2} />
       </form>
     </Drawer>
   );

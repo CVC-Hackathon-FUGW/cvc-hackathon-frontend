@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import api from 'src/services/api';
-import { Collection, Pool } from 'src/types';
+import { Collection, ContractPool } from 'src/types';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
@@ -21,36 +21,40 @@ const poolColumns = [
   {
     accessor: 'tokenAddress',
     width: '15%',
-    render: (value: Pool) => `${truncateMiddle(value.tokenAddress)}`,
+    render: (value: ContractPool) => `${truncateMiddle(value.tokenAddress)}`,
   },
   {
     accessor: 'APY',
     width: '25%',
     cellsStyle: { color: 'green', fontWeight: 'bold' },
-    render: (value: Pool) => `${Number(value.APY)}%`,
+    render: (value: ContractPool) => `${Number(value.APY)}%`,
   },
   {
     accessor: 'Duration',
     width: '20%',
-    render: (value: Pool) => `${Number(value.duration)}d`,
+    render: (value: ContractPool) => `${Number(value.duration)}d`,
   },
   {
     accessor: 'poolId',
     width: '15%',
-    render: (value: Pool) => `${Number(value.poolId)}`,
+    render: (value: ContractPool) => `${Number(value.poolId)}`,
   },
   {
     accessor: 'TotalPoolAmount',
     width: '15%',
-    render: (value: Pool) => `${formatEther(value.totalPoolAmount)}`,
+    render: (value: ContractPool) => `${formatEther(value.totalPoolAmount)}`,
   },
 ];
 
 const Admin = () => {
-  const [editingPool, setEditingPool] = useState<Pool | null>(null);
+  const [editingPool, setEditingPool] = useState<ContractPool | null>(null);
   const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
   const { isAdmin } = useAdmin();
-  const { data: pools } = useContractRead<unknown[], 'getAllPool', Pool[]>({
+  const { data: pools } = useContractRead<
+    unknown[],
+    'getAllPool',
+    ContractPool[]
+  >({
     ...contractMortgage,
     functionName: 'getAllPool',
     watch: true,
@@ -72,7 +76,7 @@ const Admin = () => {
     },
   });
 
-  const openFloorPriceModal = ({ tokenAddress }: Pool) => {
+  const openFloorPriceModal = ({ tokenAddress }: ContractPool) => {
     modals.open({
       title: 'Update Floor Price',
       centered: true,
@@ -109,7 +113,7 @@ const Admin = () => {
           ...poolColumns,
           {
             accessor: ' ',
-            render: (value: Pool) => (
+            render: (value: ContractPool) => (
               <div className="flex flex-row gap-2">
                 <Button onClick={() => setEditingPool(value)}>Update</Button>
                 <Button onClick={() => openFloorPriceModal(value)} color="teal">

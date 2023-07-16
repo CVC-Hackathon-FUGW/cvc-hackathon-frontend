@@ -12,7 +12,7 @@ import { useMemo } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { Pool } from 'src/types';
+import { ContractPool } from 'src/types';
 import { formatEther, parseEther } from 'viem';
 import {
   useAccount,
@@ -24,7 +24,7 @@ import {
 interface ModalLendProps {
   opened: boolean;
   close: () => void;
-  data?: Pool;
+  data?: ContractPool;
 }
 
 export default function ModalLend({ opened, close, data }: ModalLendProps) {

@@ -8,13 +8,13 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { contractMortgage } from 'src/configs/contract';
-import { Pool } from 'src/types';
+import { ContractPool } from 'src/types';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
 interface EditPoolProps {
   opened: boolean;
   close: () => void;
-  editingPool: Pool | null;
+  editingPool: ContractPool | null;
 }
 
 const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
