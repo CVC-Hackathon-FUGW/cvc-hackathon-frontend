@@ -20,6 +20,8 @@ jobs:
           echo "VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}" >> .env
           echo "VITE_ADMIN_ADDRESS=${{ secrets.VITE_ADMIN_ADDRESS }}" >> .env
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+          echo "VITE_PAYPAL_CLIENT_ID=${{ secrets.VITE_PAYPAL_CLIENT_ID }}" >> .env
+          echo "VITE_PAYPAL_SECRET_KEY=${{ secrets.VITE_PAYPAL_SECRET_KEY }}" >> .env
           cat .env
 
       - name: Install and Build
