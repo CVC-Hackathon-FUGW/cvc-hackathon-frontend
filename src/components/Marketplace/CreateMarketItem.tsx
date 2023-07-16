@@ -1,5 +1,6 @@
 import {
   Button,
+  Collapse,
   Group,
   LoadingOverlay,
   Modal,
@@ -27,6 +28,9 @@ import {
 } from 'wagmi';
 import NFTCollection from './NFTCollection';
 import { ListNftContractParams, MarketNft } from './types';
+import NFTCard from './NFTCard';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { nftSellerPlanId } from 'src/configs/payment';
 
 interface CreateMarketItemProps {
   opened: boolean;
@@ -38,12 +42,11 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
   const [selectedNft, setSelectedNft] = useState<Nft>();
   const [step, setStep] = useState(0);
 
-  const nextStep = () =>
-    setStep((current) => (current < 2 ? current + 1 : current));
-
   const { address } = useAccount();
+  const [{ options, isPending, isResolved }, dispatch] =
+    usePayPalScriptReducer();
 
-  const { onSubmit, getInputProps } = useForm({
+  const { onSubmit, getInputProps, values } = useForm({
     initialValues: {
       price: 0,
       isVisaAccepted: false,
@@ -157,7 +160,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
               disabled={!selectedNft}
               onClick={() => {
                 if (approved) {
-                  return nextStep();
+                  return setStep(1);
                 }
                 approve({
                   args: [addressMarket, selectedNft?.tokenId],
@@ -173,35 +176,62 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
           label="Set Price & Approve"
           description="Set price for your NFT"
         >
-          <form
-            className="flex flex-col gap-4"
-            onSubmit={onSubmit((values) =>
-              handleListNft({
-                ...values,
-                price: values.price.toString(),
-                nftContract: selectedNft?.nftContract,
-                tokenId: selectedNft?.tokenId,
-              })
-            )}
-          >
-            <TextInput
-              label="Price"
-              placeholder="Enter price"
-              type="number"
-              {...getInputProps('price')}
+          <div className="grid grid-cols-2 gap-4">
+            <NFTCard
+              tokenId={selectedNft?.tokenId}
+              nftContract={selectedNft?.nftContract}
             />
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={onSubmit((values) =>
+                handleListNft({
+                  ...values,
+                  price: values.price.toString(),
+                  nftContract: selectedNft?.nftContract,
+                  tokenId: selectedNft?.tokenId,
+                })
+              )}
+            >
+              <TextInput
+                label="Price"
+                placeholder="Enter price"
+                type="number"
+                {...getInputProps('price')}
+              />
+              <Switch
+                label="Offerable"
+                {...getInputProps('isOfferable', { type: 'checkbox' })}
+              />
+              <Switch
+                label="Accept PayPal"
+                {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
+              />
+              <Collapse in={values.isVisaAccepted}>
+                <PayPalButtons
+                  style={{
+                    label: 'subscribe',
+                  }}
+                  createSubscription={async (_, actions) => {
+                    const orderId = await actions.subscription.create({
+                      plan_id: nftSellerPlanId,
+                    });
 
-            <Switch
-              label="Accept PayPal"
-              {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
-            />
-            <Switch
-              label="Offerable"
-              {...getInputProps('isOfferable', { type: 'checkbox' })}
-            />
+                    return orderId;
+                  }}
+                  onApprove={async (data, actions) => {
+                    console.log(data);
 
-            <Button type="submit">List NFT</Button>
-          </form>
+                    const order = await actions.order?.capture();
+                    console.log(order);
+                  }}
+                />
+              </Collapse>
+              <Button type="submit" className="mt-auto">
+                List NFT
+              </Button>
+              <LoadingOverlay visible={isPending} />
+            </form>
+          </div>
         </Stepper.Step>
       </Stepper>
     </Modal>

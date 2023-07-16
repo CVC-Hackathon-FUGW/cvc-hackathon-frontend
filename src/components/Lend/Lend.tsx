@@ -3,10 +3,8 @@ import { IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
-import { truncateMiddle } from 'src/helpers/truncate-middle';
 import api from 'src/services/api';
-import { ContractPool, Pool } from 'src/types';
-import { tempImage } from 'src/utils/contains';
+import { Pool } from 'src/types';
 import { formatEther } from 'viem';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
@@ -18,8 +16,8 @@ const columns = [
     width: '25%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ tokenAddress }: ContractPool) => (
-      <Collection img={tempImage} name={truncateMiddle(tokenAddress)} />
+    render: ({ collection_name, image }: Pool) => (
+      <Collection img={image} name={collection_name} />
     ),
   },
   {
@@ -27,9 +25,9 @@ const columns = [
     width: '20%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ totalPoolAmount }: ContractPool) => (
+    render: ({ total_pool_amount }: Pool) => (
       <AvailablePool
-        number={formatEther(totalPoolAmount)}
+        number={formatEther(total_pool_amount || 0n)}
         description="1344 of 1410 offers taken"
       />
     ),
@@ -46,9 +44,9 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ APY }: ContractPool) => (
+    render: ({ apy }: Pool) => (
       <Text size="30px" weight={700} color="green">
-        {Number(APY)}%
+        {Number(apy)}%
       </Text>
     ),
   },
@@ -57,7 +55,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: ContractPool) => (
+    render: ({ duration }: Pool) => (
       <Text size="30px" weight={700}>
         {Number(duration)}d
       </Text>
@@ -101,9 +99,7 @@ export default function Lend() {
         </div>
 
         <DataTable
-          records={
-            (pools as ContractPool[])?.filter(({ state }) => state) || []
-          }
+          records={(pools as Pool[])?.filter(({ state }) => state) || []}
           columns={[
             ...columns,
             {

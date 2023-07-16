@@ -45,6 +45,7 @@ export default function Marketplace() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {marketItems?.map(({ nftContract, ...rest }) => (
           <NFTCard
+            key={Number(rest.itemId)}
             nftContract={nftContract}
             {...rest}
             onClick={({ itemId }) => navigate(`${itemId}/details`)}

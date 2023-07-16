@@ -15,6 +15,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ModalsProvider } from '@mantine/modals';
 import { onError } from './helpers/contract-call';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { paypalOptions } from './configs/payment';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,11 +44,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <WagmiConfig config={wagmiConfig}>
         <MantineProvider withGlobalStyles withNormalizeCSS>
-          <ModalsProvider>
-            <AppShell padding="md" header={<MyHeader />}>
-              <RouterProvider router={router} />
-            </AppShell>
-          </ModalsProvider>
+          <PayPalScriptProvider options={paypalOptions}>
+            <ModalsProvider>
+              <AppShell padding="md" header={<MyHeader />}>
+                <RouterProvider router={router} />
+              </AppShell>
+            </ModalsProvider>
+          </PayPalScriptProvider>
         </MantineProvider>
       </WagmiConfig>
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
