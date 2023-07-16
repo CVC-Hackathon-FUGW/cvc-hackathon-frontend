@@ -5,15 +5,12 @@ import {
   Card,
   Divider,
   Group,
-  Input,
   LoadingOverlay,
   Modal,
   Stepper,
   Text,
   Title,
 } from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
 import { useMemo, useState } from 'react';
 import {
   abiNft,
@@ -22,7 +19,6 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import useNftDetector from 'src/hooks/useNftDetector';
 import { ContractLoan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
@@ -44,9 +40,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const [selectedLoan, setSelectedLoan] = useState<ContractLoan | null>();
   const [step, setStep] = useState(0);
   const [selectedNft, setSelectedNft] = useState<Nft>();
-
-  const nftIds = useNftDetector(token_address);
-  console.log(nftIds);
 
   const { data: allLoans } = useContractRead<
     unknown[],
@@ -88,13 +81,9 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     functionName: 'BorrowerTakeLoan',
   });
 
-  const { isLoading } = useWaitForTransaction({
+  const { isLoading, isSuccess } = useWaitForTransaction({
     hash: allowance?.hash,
-    onSuccess: () =>
-      notifications.show({
-        title: 'Approve successfully',
-        message: 'You can now Borrow',
-      }),
+    onSuccess: () => setStep(1),
   });
 
   const loans = useMemo(() => {
@@ -244,34 +233,22 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
               </Card>
             ))}
           </div>
-        </Stepper.Step>
-      </Stepper>
-      <div className="flex flex-col gap-2">
-        {/* <Divider /> */}
-
-        {/* <form
-          className="flex flex-col gap-2"
-          onSubmit={onSubmit(({ tokenId }) => {
-            if (!tokenId) return;
-            const bigTokenId = BigInt(tokenId);
-            if (isSuccess || isApproved) {
-              return borrow({
-                args: [pool_id, bigTokenId, selectedLoan?.loanId],
-              });
-            }
-            return approve({
-              args: [addressMortgage, bigTokenId],
-            });
-          })}
-        >
-          <Input {...getInputProps('tokenId')} placeholder="Enter Token ID" />
-          <Group position="center">
-            <Button disabled={!selectedLoan && !isApproved} type="submit">
-              {isSuccess || isApproved ? 'Borrow' : 'Approve'}
+          <Group position="center" m={'md'}>
+            <Button
+              disabled={!selectedLoan}
+              onClick={() => {
+                if (isSuccess || approved) {
+                  return borrow({
+                    args: [pool_id, selectedNft?.tokenId, selectedLoan?.loanId],
+                  });
+                }
+              }}
+            >
+              Borrow
             </Button>
           </Group>
-        </form> */}
-      </div>
+        </Stepper.Step>
+      </Stepper>
     </Modal>
   );
 }

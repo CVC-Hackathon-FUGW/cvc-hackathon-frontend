@@ -6,6 +6,7 @@ import {
   LoadingOverlay,
   Modal,
   Stepper,
+  Switch,
   TextInput,
   rem,
 } from '@mantine/core';
@@ -86,10 +87,6 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     hash: allowance?.hash,
     onSuccess: () => {
       setStep(1);
-      notifications.show({
-        title: 'Approve successfully',
-        message: 'You can now Borrow',
-      });
     },
     enabled: !!allowance?.hash,
   });
@@ -200,16 +197,16 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
               type="number"
               {...getInputProps('price')}
             />
-            <div className="flex flex-row items-center justify-evenly">
-              <Checkbox
-                label="Accept PayPal"
-                {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
-              />
-              <Checkbox
-                label="Offerable"
-                {...getInputProps('isOfferable', { type: 'checkbox' })}
-              />
-            </div>
+
+            <Switch
+              label="Accept PayPal"
+              {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
+            />
+            <Switch
+              label="Offerable"
+              {...getInputProps('isOfferable', { type: 'checkbox' })}
+            />
+
             <Button type="submit">List NFT</Button>
           </form>
         </Stepper.Step>
