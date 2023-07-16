@@ -67,14 +67,14 @@ export interface Collection {
 
 export interface Pool {
   pool_id?: number;
-  token_address: Address;
-  collection_name: string;
+  token_address?: Address;
+  collection_name?: string;
   total_pool_amount?: bigint;
-  apy: bigint;
-  duration: bigint;
-  state: boolean;
-  image: string;
-  is_active: boolean;
+  apy?: bigint;
+  duration?: bigint;
+  state?: boolean;
+  image?: string;
+  is_active?: boolean;
 }
 
 export interface Loan extends Omit<Pool, 'total_pool_amount'> {

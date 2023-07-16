@@ -7,23 +7,31 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation } from '@tanstack/react-query';
 import { contractMortgage } from 'src/configs/contract';
-import { ContractPool } from 'src/types';
+import api from 'src/services/api';
+import { Pool } from 'src/types';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
 
 interface EditPoolProps {
   opened: boolean;
   close: () => void;
-  editingPool: ContractPool | null;
+  editingPool: Pool | null;
 }
 
 const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
-      _APY: Number(editingPool?.APY),
-      _duration: Number(editingPool?.duration),
-      _state: editingPool?.state,
+      APY: Number(editingPool?.apy),
+      duration: Number(editingPool?.duration),
+      state: editingPool?.state,
+      collection_name: editingPool?.collection_name,
     },
+  });
+
+  const { mutateAsync: updatePool } = useMutation({
+    mutationKey: ['update-pool'],
+    mutationFn: (params: Pool) => api.patch('/pools', params),
   });
 
   const { write, isLoading, data } = useContractWrite({
@@ -38,31 +46,44 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
   return (
     <Drawer opened={opened} onClose={close} title="Edit Pool" position="right">
       <form
-        onSubmit={onSubmit(({ _APY, _duration, _state }) => {
-          const _poolId = editingPool?.poolId;
+        onSubmit={onSubmit(({ APY, duration, state, collection_name }) => {
+          const _poolId = editingPool?.pool_id;
+          updatePool({
+            ...editingPool,
+            apy: BigInt(APY),
+            duration: BigInt(duration),
+            collection_name,
+            state,
+          });
           write?.({
-            args: [_poolId, BigInt(_APY), BigInt(_duration), _state],
+            args: [_poolId, BigInt(APY), BigInt(duration), state],
           });
         })}
         className="flex flex-col gap-4"
       >
         <TextInput
+          label="Collection name"
+          {...getInputProps('collection_name', {
+            type: 'input',
+          })}
+        />
+        <TextInput
           label="APY"
           type="number"
-          {...getInputProps('_APY', {
+          {...getInputProps('APY', {
             type: 'input',
           })}
         />
         <TextInput
           label="Duration"
           type="number"
-          {...getInputProps('_duration', {
+          {...getInputProps('duration', {
             type: 'input',
           })}
         />
         <Switch
           label="State"
-          {...getInputProps('_state', {
+          {...getInputProps('state', {
             type: 'checkbox',
           })}
         />
