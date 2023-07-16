@@ -1,63 +1,56 @@
 import { Avatar, Button, Divider, Group, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
-import { contractMortgage } from 'src/configs/contract';
+import ShowAddress from 'src/components/common/ShowAddress';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
+import useAdmin from 'src/hooks/useAdmin';
 import api from 'src/services/api';
-import { Collection, ContractPool } from 'src/types';
+import { Collection, Pool } from 'src/types';
 import { formatEther } from 'viem';
-import { useContractRead } from 'wagmi';
 import CreatePool from './components/CreatPool';
+import CreateCollection from './components/CreateCollection';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
-import CreateCollection from './components/CreateCollection';
-import ShowAddress from 'src/components/common/ShowAddress';
-import { notifications } from '@mantine/notifications';
-import useAdmin from 'src/hooks/useAdmin';
 
 const poolColumns = [
   {
     accessor: 'tokenAddress',
     width: '15%',
-    render: (value: ContractPool) => `${truncateMiddle(value.tokenAddress)}`,
+    render: (value: Pool) => `${truncateMiddle(value.token_address)}`,
   },
   {
     accessor: 'APY',
     width: '25%',
     cellsStyle: { color: 'green', fontWeight: 'bold' },
-    render: (value: ContractPool) => `${Number(value.APY)}%`,
+    render: (value: Pool) => `${Number(value.apy)}%`,
   },
   {
     accessor: 'Duration',
     width: '20%',
-    render: (value: ContractPool) => `${Number(value.duration)}d`,
+    render: (value: Pool) => `${Number(value.duration)}d`,
   },
   {
     accessor: 'poolId',
     width: '15%',
-    render: (value: ContractPool) => `${Number(value.poolId)}`,
+    render: (value: Pool) => `${Number(value.pool_id)}`,
   },
   {
     accessor: 'TotalPoolAmount',
     width: '15%',
-    render: (value: ContractPool) => `${formatEther(value.totalPoolAmount)}`,
+    render: (value: Pool) => `${formatEther(value.total_pool_amount || 0n)}`,
   },
 ];
 
 const Admin = () => {
-  const [editingPool, setEditingPool] = useState<ContractPool | null>(null);
+  const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
   const { isAdmin } = useAdmin();
-  const { data: pools } = useContractRead<
-    unknown[],
-    'getAllPool',
-    ContractPool[]
-  >({
-    ...contractMortgage,
-    functionName: 'getAllPool',
-    watch: true,
+  const { data: pools } = useQuery<Pool[]>({
+    queryKey: ['pools'],
+    queryFn: () => api.get('/pools'),
   });
 
   const { data: marketCollections, refetch } = useQuery<Collection[]>({
@@ -76,11 +69,11 @@ const Admin = () => {
     },
   });
 
-  const openFloorPriceModal = ({ tokenAddress }: ContractPool) => {
+  const openFloorPriceModal = ({ token_address }: Pool) => {
     modals.open({
       title: 'Update Floor Price',
       centered: true,
-      children: <UpdateFloorPrice tokenAddress={tokenAddress} />,
+      children: <UpdateFloorPrice tokenAddress={token_address} />,
     });
   };
 
@@ -113,7 +106,7 @@ const Admin = () => {
           ...poolColumns,
           {
             accessor: ' ',
-            render: (value: ContractPool) => (
+            render: (value: Pool) => (
               <div className="flex flex-row gap-2">
                 <Button onClick={() => setEditingPool(value)}>Update</Button>
                 <Button onClick={() => openFloorPriceModal(value)} color="teal">
@@ -173,7 +166,7 @@ const Admin = () => {
         opened={Boolean(editingPool)}
         close={() => setEditingPool(null)}
         editingPool={editingPool}
-        key={`${editingPool?.poolId}`}
+        key={`${editingPool?.pool_id}`}
       />
     </div>
   );

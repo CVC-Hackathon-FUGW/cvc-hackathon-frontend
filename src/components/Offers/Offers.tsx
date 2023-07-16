@@ -1,14 +1,16 @@
 import { Button, Input, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { IconSearch } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { isLoanEnded } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractLoan, ContractPool } from 'src/types';
+import api from 'src/services/api';
+import { Loan, Pool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, zeroAddress } from 'viem';
-import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
 
 const columns = [
@@ -16,7 +18,7 @@ const columns = [
     accessor: 'duration',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: ContractLoan) => (
+    render: ({ duration }: Loan) => (
       <Text weight={700}>{Number(duration)}d</Text>
     ),
   },
@@ -24,8 +26,8 @@ const columns = [
     accessor: 'startTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime }: ContractLoan) => {
-      const unixTime = Number(startTime);
+    render: ({ start_time }: Loan) => {
+      const unixTime = Number(start_time);
       return (
         <Text weight={700}>
           {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
@@ -37,12 +39,12 @@ const columns = [
     accessor: 'remainingTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime, duration }: ContractLoan) => {
-      if (Number(startTime) === 0) {
+    render: ({ start_time, duration }: Loan) => {
+      if (Number(start_time) === 0) {
         return <Text weight={700}>-</Text>;
       }
 
-      const unixTime = Number(startTime) + Number(duration) * 86400;
+      const unixTime = Number(start_time) + Number(duration) * 86400;
 
       return <Text weight={700}>{dayjs.unix(unixTime).fromNow()}</Text>;
     },
@@ -50,7 +52,7 @@ const columns = [
   {
     accessor: 'borrower',
     titleStyle: { fontSize: '25px' },
-    render: ({ borrower }: ContractLoan) => (
+    render: ({ borrower }: Loan) => (
       <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
     ),
   },
@@ -58,7 +60,7 @@ const columns = [
     accessor: 'Amount',
     width: '20%',
     titleStyle: { fontSize: '25px' },
-    render: ({ amount }: ContractLoan) => (
+    render: ({ amount }: Loan) => (
       <Text weight={700}>{formatEther(amount)}</Text>
     ),
   },
@@ -67,32 +69,35 @@ const columns = [
 export default function Offers() {
   const { address } = useAccount();
 
-  const { data: pools } = useContractRead<
-    unknown[],
-    'getAllPool',
-    ContractPool[]
-  >({
-    ...contractMortgage,
-    functionName: 'getAllPool',
-  });
-  const { data: loans } = useContractRead({
-    ...contractMortgage,
-    functionName: 'getAllLoans',
+  const { data: pools } = useQuery<Pool[]>({
+    queryKey: ['pools'],
+    queryFn: () => api.get('/pools'),
   });
 
-  const { write } = useContractWrite({
+  const { data: loans } = useQuery<Loan[]>({
+    queryKey: ['loans'],
+    queryFn: () => api.get('/loans'),
+  });
+
+  const { writeAsync: revoke } = useContractWrite({
     ...contractMortgage,
     functionName: 'LenderRevokeOffer',
   });
+  const { mutateAsync: deleteLend } = useMutation({
+    mutationKey: ['delete-lend'],
+    mutationFn: (id?: number) => api.delete(`/loans/${id}`),
+  });
 
-  const openRevokeModal = ({ poolId, loanId }: ContractLoan) => {
+  const openRevokeModal = ({ pool_id, loan_id }: Loan) => {
     modals.openConfirmModal({
       title: 'Revoke offer',
       centered: true,
-      onConfirm: () =>
-        write({
-          args: [poolId, loanId],
-        }),
+      onConfirm: async () => {
+        await revoke({
+          args: [pool_id, loan_id],
+        });
+        deleteLend(loan_id);
+      },
       confirmProps: { color: 'red' },
       labels: {
         cancel: 'Cancel',
@@ -101,17 +106,19 @@ export default function Offers() {
     });
   };
 
-  const { write: claim } = useContractWrite({
+  const { writeAsync: claim } = useContractWrite({
     ...contractMortgage,
     functionName: 'LenderClaimNFT',
     value: borrowPrice,
     account: address,
   });
 
-  const handleClaim = async (loan: ContractLoan) =>
-    claim({
-      args: [loan.poolId, loan.loanId],
+  const handleClaim = async (loan: Loan) => {
+    await claim({
+      args: [loan.pool_id, loan.loan_id],
     });
+    deleteLend(loan.loan_id);
+  };
 
   return (
     <div style={{ padding: '20px 70px' }}>
@@ -134,9 +141,7 @@ export default function Offers() {
         />
       </div>
       <DataTable
-        records={(loans as ContractLoan[])?.filter(
-          ({ lender }) => lender === address
-        )}
+        records={loans?.filter(({ lender }) => lender === address)}
         columns={[
           {
             accessor: 'Collection',
@@ -144,11 +149,11 @@ export default function Offers() {
             sortable: true,
             titleStyle: { fontSize: '25px' },
             render: (loan) => {
-              const pool = (pools as ContractPool[])?.find(
-                ({ poolId }) => loan.poolId === poolId
+              const pool = pools?.find(
+                ({ pool_id }) => loan.pool_id === pool_id
               );
               return (
-                <Collection name={truncateMiddle(pool?.tokenAddress || '')} />
+                <Collection name={pool?.collection_name} img={pool?.image} />
               );
             },
           },
@@ -157,7 +162,7 @@ export default function Offers() {
             accessor: ' ',
             width: '10%',
             render: (loan) => {
-              const { state, startTime, duration } = loan;
+              const { state, start_time, duration } = loan;
 
               if (!state) {
                 return (
@@ -171,7 +176,7 @@ export default function Offers() {
                 );
               }
 
-              const isEnded = isLoanEnded(Number(startTime), Number(duration));
+              const isEnded = isLoanEnded(Number(start_time), Number(duration));
               if (isEnded) {
                 return (
                   <Button

@@ -11,6 +11,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import {
   abiNft,
@@ -19,7 +20,8 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractLoan, Nft, Pool } from 'src/types';
+import api from 'src/services/api';
+import { Loan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
 import {
@@ -37,17 +39,13 @@ interface ModalLendProps {
 
 export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { apy, duration, image, pool_id, token_address } = { ...data };
-  const [selectedLoan, setSelectedLoan] = useState<ContractLoan | null>();
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
   const [step, setStep] = useState(0);
   const [selectedNft, setSelectedNft] = useState<Nft>();
 
-  const { data: allLoans } = useContractRead<
-    unknown[],
-    'getAllLoans',
-    ContractLoan[]
-  >({
-    ...contractMortgage,
-    functionName: 'getAllLoans',
+  const { data: allLoans } = useQuery<Loan[]>({
+    queryKey: ['loans'],
+    queryFn: () => api.get('/loans'),
   });
 
   const { data: floorPriceGwei } = useContractRead({
@@ -90,9 +88,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     if (allLoans) {
       return allLoans.filter(
         (loan) =>
-          Number(loan.poolId) === pool_id &&
-          !loan.state &&
-          loan.lender !== zeroAddress
+          loan.pool_id === pool_id && !loan.state && loan.lender !== zeroAddress
       );
     }
   }, [allLoans, pool_id]);
@@ -196,9 +192,9 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                 shadow="sm"
                 radius="md"
                 className="w-full"
-                key={loan.loanId.toString()}
+                key={loan.loan_id?.toString()}
                 onClick={() => setSelectedLoan(loan)}
-                c={selectedLoan?.loanId === loan.loanId ? 'blue' : 'gray'}
+                c={selectedLoan?.loan_id === loan.loan_id ? 'blue' : 'gray'}
                 sx={{
                   cursor: 'pointer',
                 }}
@@ -209,7 +205,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                 >
                   <div className="flex flex-col gap-2">
                     <Text size="xl" fw="bold">
-                      {truncateMiddle(loan.tokenAddress)}
+                      {truncateMiddle(loan.token_address)}
                     </Text>
                     <Text fz="xs" c="dimmed">
                       Lender: {truncateMiddle(loan.lender)}
@@ -239,7 +235,11 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
               onClick={() => {
                 if (isSuccess || approved) {
                   return borrow({
-                    args: [pool_id, selectedNft?.tokenId, selectedLoan?.loanId],
+                    args: [
+                      pool_id,
+                      selectedNft?.tokenId,
+                      selectedLoan?.loan_id,
+                    ],
                   });
                 }
               }}

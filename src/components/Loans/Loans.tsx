@@ -1,13 +1,15 @@
 import { Button, Card, Input, Text, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractLoan, ContractPool } from 'src/types';
+import api from 'src/services/api';
+import { Loan, Pool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
-import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
 
 const columns = [
@@ -15,7 +17,7 @@ const columns = [
     accessor: 'duration',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: ContractLoan) => (
+    render: ({ duration }: Loan) => (
       <Text weight={700}>{Number(duration)}d</Text>
     ),
   },
@@ -23,8 +25,8 @@ const columns = [
     accessor: 'startTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime }: ContractLoan) => {
-      const unixTime = Number(startTime);
+    render: ({ start_time }: Loan) => {
+      const unixTime = Number(start_time);
       return (
         <Text weight={700}>
           {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
@@ -36,13 +38,13 @@ const columns = [
     accessor: 'remainingTime',
     width: '15%',
     titleStyle: { fontSize: '25px' },
-    render: ({ startTime, duration }: ContractLoan) => {
-      if (Number(startTime) === 0) {
+    render: ({ start_time, duration }: Loan) => {
+      if (Number(start_time) === 0) {
         return <Text weight={700}>-</Text>;
       }
 
       const unixTime =
-        Number(startTime) + Number(duration) * 86400 - Date.now() / 1000;
+        Number(start_time) + Number(duration) * 86400 - Date.now() / 1000;
 
       return (
         <Text weight={700}>
@@ -54,7 +56,7 @@ const columns = [
   {
     accessor: 'borrower',
     titleStyle: { fontSize: '25px' },
-    render: ({ borrower }: ContractLoan) => (
+    render: ({ borrower }: Loan) => (
       <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
     ),
   },
@@ -62,7 +64,7 @@ const columns = [
     accessor: 'Amount',
     width: '20%',
     titleStyle: { fontSize: '25px' },
-    render: ({ amount }: ContractLoan) => (
+    render: ({ amount }: Loan) => (
       <Text weight={700}>{formatEther(amount)}</Text>
     ),
   },
@@ -71,50 +73,47 @@ const columns = [
 export default function Loans() {
   const { address } = useAccount();
 
-  const { data: loans } = useContractRead<
-    unknown[],
-    'getAllLoans',
-    ContractLoan[]
-  >({
-    ...contractMortgage,
-    functionName: 'getAllLoans',
+  const { data: loans } = useQuery<Loan[]>({
+    queryKey: ['loans'],
+    queryFn: () => api.get('/loans'),
   });
-  const { data: pools } = useContractRead<
-    unknown[],
-    'getAllPool',
-    ContractPool[]
-  >({
-    ...contractMortgage,
-    functionName: 'getAllPool',
+  const { data: pools } = useQuery<Pool[]>({
+    queryKey: ['pools'],
+    queryFn: () => api.get('/pools'),
   });
 
-  const { write: pay } = useContractWrite({
+  const { mutateAsync: deleteLend } = useMutation({
+    mutationKey: ['delete-lend'],
+    mutationFn: (id?: number) => api.delete(`/loans/${id}`),
+  });
+
+  const { writeAsync: pay } = useContractWrite({
     ...contractMortgage,
     functionName: 'BorrowerPayLoan',
     account: address,
   });
 
-  const handlePay = async (loan: ContractLoan) => {
-    const { startTime, duration, amount } = loan;
-    const pool = (pools as ContractPool[])?.find(
-      ({ poolId }) => loan.poolId === poolId
-    );
-    let durations = (Date.now() / 1000 - Number(startTime)) / 86400;
+  const handlePay = async (loan: Loan) => {
+    const { start_time, duration, amount } = loan;
+    const pool = pools?.find(({ pool_id }) => loan.pool_id === pool_id);
+    let durations = (Date.now() / 1000 - Number(start_time)) / 86400;
     if (durations < Number(duration)) {
       durations++;
     }
     const interest = calculateInterest(
       Number(formatEther(amount)),
-      Number(pool?.APY),
+      Number(pool?.apy),
       durations,
       20
     );
 
     const value = parseEther(interest) + borrowPrice + amount;
-    pay({
+    await pay({
       value,
-      args: [loan.poolId, loan.loanId],
+      args: [loan.pool_id, loan.loan_id],
     });
+
+    deleteLend(loan.loan_id);
   };
 
   return (
@@ -161,9 +160,11 @@ export default function Loans() {
             sortable: true,
             titleStyle: { fontSize: '25px' },
             render: (loan) => {
-              const pool = pools?.find(({ poolId }) => loan.poolId === poolId);
+              const pool = pools?.find(
+                ({ pool_id }) => loan.pool_id === pool_id
+              );
               return (
-                <Collection name={truncateMiddle(pool?.tokenAddress || '')} />
+                <Collection name={truncateMiddle(pool?.token_address || '')} />
               );
             },
           },
@@ -172,12 +173,12 @@ export default function Loans() {
             accessor: 'currentInterest',
             width: '20%',
             titleStyle: { fontSize: '25px' },
-            render: (loan: ContractLoan) => {
-              const { startTime, duration, amount } = loan;
-              const pool = (pools as ContractPool[])?.find(
-                ({ poolId }) => loan.poolId === poolId
+            render: (loan: Loan) => {
+              const { start_time, duration, amount } = loan;
+              const pool = pools?.find(
+                ({ pool_id }) => loan.pool_id === pool_id
               );
-              let durations = (Date.now() / 1000 - Number(startTime)) / 86400;
+              let durations = (Date.now() / 1000 - Number(start_time)) / 86400;
               if (durations < Number(duration)) {
                 durations++;
               }
@@ -186,7 +187,7 @@ export default function Loans() {
                 <Text weight={700}>
                   {calculateInterest(
                     Number(formatEther(amount)),
-                    Number(pool?.APY),
+                    Number(pool?.apy),
                     durations
                   )}
                 </Text>

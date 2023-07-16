@@ -77,13 +77,17 @@ export interface Pool {
   is_active?: boolean;
 }
 
-export interface Loan extends Omit<Pool, 'total_pool_amount'> {
-  loan_id: number;
-  lender: Address;
-  borrower: Address;
+export interface Loan
+  extends Omit<
+    Pool,
+    'total_pool_amount' | 'apy' | 'collection_name' | 'image'
+  > {
+  loan_id?: number;
+  lender?: Address;
+  borrower?: Address;
   amount: bigint;
-  start_time: bigint;
-  token_id: bigint;
-  created_at: number;
-  updated_at: number;
+  start_time?: number;
+  token_id?: bigint;
+  created_at?: number;
+  updated_at?: number;
 }

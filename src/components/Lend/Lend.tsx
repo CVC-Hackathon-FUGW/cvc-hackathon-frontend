@@ -1,17 +1,16 @@
 import { Button, Input, Text, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
-import { contractMortgage } from 'src/configs/contract';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractPool } from 'src/types';
+import api from 'src/services/api';
+import { ContractPool, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther } from 'viem';
-import { useContractRead } from 'wagmi';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
 import ModalLend from './ModalLend';
-import ImageUploader from '../common/ImageUploader';
 
 const columns = [
   {
@@ -67,12 +66,11 @@ const columns = [
 ];
 
 export default function Lend() {
-  const [pool, setPool] = useState<ContractPool>();
+  const [pool, setPool] = useState<Pool>();
 
-  const { data: pools } = useContractRead({
-    ...contractMortgage,
-    functionName: 'getAllPool',
-    watch: true,
+  const { data: pools } = useQuery<Pool[]>({
+    queryKey: ['pools'],
+    queryFn: () => api.get('/pools'),
   });
 
   return (

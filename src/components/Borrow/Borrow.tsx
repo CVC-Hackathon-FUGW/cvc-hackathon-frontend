@@ -83,10 +83,7 @@ const columns = [
 
 export default function Borrow() {
   const [pool, setPool] = useState<Pool>();
-  // const { data: pools } = useContractRead({
-  //   ...contractMortgage,
-  //   functionName: 'getAllPool',
-  // });
+
   const { data: pools } = useQuery<Pool[]>({
     queryKey: ['pools'],
     queryFn: () => api.get('/pools'),

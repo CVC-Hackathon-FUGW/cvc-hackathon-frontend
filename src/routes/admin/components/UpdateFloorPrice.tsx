@@ -2,10 +2,10 @@ import { Button, LoadingOverlay, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { modals } from '@mantine/modals';
 import { contractMortgage } from 'src/configs/contract';
-import { formatEther, parseEther } from 'viem';
+import { Address, formatEther, parseEther } from 'viem';
 import { useContractRead, useContractWrite } from 'wagmi';
 
-const UpdateFloorPrice = ({ tokenAddress }: { tokenAddress: string }) => {
+const UpdateFloorPrice = ({ tokenAddress }: { tokenAddress?: Address }) => {
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
       floorPrice: '',

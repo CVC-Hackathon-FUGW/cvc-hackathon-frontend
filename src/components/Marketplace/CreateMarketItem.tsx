@@ -1,17 +1,14 @@
-import { Carousel } from '@mantine/carousel';
 import {
   Button,
-  Checkbox,
   Group,
   LoadingOverlay,
   Modal,
   Stepper,
   Switch,
   TextInput,
-  rem,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   abiNft,
@@ -19,21 +16,17 @@ import {
   borrowPrice,
   contractMarket,
 } from 'src/configs/contract';
-import useNftDetector from 'src/hooks/useNftDetector';
+import api from 'src/services/api';
 import { Collection, Nft } from 'src/types';
 import { parseEther, zeroAddress } from 'viem';
 import {
-  Address,
   useAccount,
   useContractRead,
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
-import NFTCard from './NFTCard';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import api from 'src/services/api';
-import { ListNftContractParams, MarketNft } from './types';
 import NFTCollection from './NFTCollection';
+import { ListNftContractParams, MarketNft } from './types';
 
 interface CreateMarketItemProps {
   opened: boolean;

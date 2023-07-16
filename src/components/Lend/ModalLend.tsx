@@ -8,12 +8,13 @@ import {
   Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
-import { truncateMiddle } from 'src/helpers/truncate-middle';
-import { ContractPool } from 'src/types';
-import { formatEther, parseEther } from 'viem';
+import api from 'src/services/api';
+import { Loan, Pool } from 'src/types';
+import { formatEther, parseEther, zeroAddress } from 'viem';
 import {
   useAccount,
   useBalance,
@@ -24,11 +25,11 @@ import {
 interface ModalLendProps {
   opened: boolean;
   close: () => void;
-  data?: ContractPool;
+  data?: Pool;
 }
 
 export default function ModalLend({ opened, close, data }: ModalLendProps) {
-  const { APY, duration, image, poolId, tokenAddress } = {
+  const { apy, duration, image, pool_id, token_address, collection_name } = {
     ...data,
   };
   const { address } = useAccount();
@@ -37,7 +38,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
   const { data: floorPriceGwei } = useContractRead({
     ...contractMortgage,
     functionName: 'getFloorPrice',
-    args: [tokenAddress],
+    args: [token_address],
     enabled: opened,
   });
   const floorPrice = useMemo(() => {
@@ -57,11 +58,16 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     return Number(
       calculateInterest(
         Number(values.offerAmount),
-        Number(APY),
+        Number(apy),
         Number(duration)
       )
     );
-  }, [APY, duration, values.offerAmount]);
+  }, [apy, duration, values.offerAmount]);
+
+  const { mutateAsync: createLend } = useMutation({
+    mutationKey: ['create-lend'],
+    mutationFn: (params: Loan) => api.post('/loans', params),
+  });
 
   const { write: lend } = useContractWrite({
     ...contractMortgage,
@@ -72,9 +78,18 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
 
   const handleLend = async ({ offerAmount = 0 }) => {
     const value = parseEther(offerAmount.toString());
+    await createLend({
+      amount: value,
+      borrower: zeroAddress,
+      lender: address,
+      pool_id,
+      duration,
+      token_address,
+      start_time: 0,
+    });
     lend({
       value,
-      args: [poolId],
+      args: [pool_id],
     });
   };
 
@@ -84,7 +99,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
         <Avatar size="lg" src={image} radius="xl" alt="it's me" />
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Title order={3}>{truncateMiddle(tokenAddress)}</Title>
+        <Title order={3}>{collection_name}</Title>
       </div>
       <div style={{ padding: '15px 10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -93,7 +108,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
               APY
             </Text>
             <Text color="green" weight={700} size="26px">
-              {Number(APY)}%
+              {Number(apy)}%
             </Text>
           </div>
           <div>
