@@ -3,7 +3,8 @@ import { useForm } from '@mantine/form';
 import { useInterval } from '@mantine/hooks';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
-import { contractCheckIn } from 'src/configs/contract';
+import ShowAddress from 'src/components/common/ShowAddress';
+import { addressCheckIn, contractCheckIn } from 'src/configs/contract';
 import dayjs from 'src/utils/dayjs';
 import {
   useAccount,
@@ -29,7 +30,6 @@ const CheckIn = () => {
     args: [address],
     enabled: !!address,
     onSuccess: (data) => {
-      console.log('lastCheckin', data);
       const lastCheckin = Number(data || 0n);
       if (lastCheckin > 0) {
         setCount(60 * 60 * 24 - (Date.now() / 1000 - lastCheckin));
@@ -69,7 +69,16 @@ const CheckIn = () => {
         radius="md"
         className="flex flex-col gap-4"
       >
-        <Title order={1}>Check in</Title>
+        <div className="flex flex-row items-center justify-between">
+          <Title order={1}>Check in</Title>
+          <ShowAddress
+            variant="gradient"
+            weight="bold"
+            address={addressCheckIn}
+          >
+            RENT:
+          </ShowAddress>
+        </div>
         <Text fz="lg">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis,
           libero eius quod quos eligendi dolores optio eaque voluptatem corporis
