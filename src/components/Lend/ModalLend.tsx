@@ -12,6 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
+import usePoolUpdate from 'src/hooks/usePoolUpdate';
 import api from 'src/services/api';
 import { Loan, Pool } from 'src/types';
 import { formatEther, parseEther, zeroAddress } from 'viem';
@@ -69,10 +70,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     mutationFn: (params: Loan) => api.post('/loans', params),
   });
 
-  const { mutateAsync: updatePool } = useMutation({
-    mutationKey: ['update-pool'],
-    mutationFn: (params: Pool) => api.patch('/pools', params),
-  });
+  const { pool, mutateAsync: updatePool } = usePoolUpdate({ id: pool_id });
 
   const { write: lend } = useContractWrite({
     ...contractMortgage,
@@ -80,6 +78,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     account: address,
     onSuccess: close,
   });
+  console.log(pool);
 
   const handleLend = async ({ offerAmount = 0 }) => {
     const value = parseEther(offerAmount.toString());
@@ -91,6 +90,11 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
       duration,
       token_address,
       start_time: 0,
+    });
+    await updatePool({
+      pool_id,
+      total_pool_amount:
+        BigInt(pool?.total_pool_amount?.toString() || '0') + value,
     });
     lend({
       value,

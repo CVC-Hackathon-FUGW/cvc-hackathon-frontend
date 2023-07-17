@@ -11,7 +11,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import {
   abiNft,
@@ -25,11 +25,13 @@ import { Loan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
 import { formatEther, zeroAddress } from 'viem';
 import {
+  useAccount,
   useContractRead,
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
 import NFTCollection from '../Marketplace/NFTCollection';
+import usePoolUpdate from 'src/hooks/usePoolUpdate';
 
 interface ModalLendProps {
   opened: boolean;
@@ -42,6 +44,8 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>();
   const [step, setStep] = useState(0);
   const [selectedNft, setSelectedNft] = useState<Nft>();
+
+  const { address } = useAccount();
 
   const { data: allLoans } = useQuery<Loan[]>({
     queryKey: ['loans'],
@@ -74,7 +78,16 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     functionName: 'approve',
   });
 
-  const { write: borrow } = useContractWrite({
+  const { pool, mutateAsync: updatePool } = usePoolUpdate({
+    id: pool_id,
+  });
+
+  const { mutateAsync: updateLoan } = useMutation({
+    mutationKey: ['update-loan'],
+    mutationFn: (params: Loan) => api.patch(`/loans`, params),
+  });
+
+  const { writeAsync: borrow } = useContractWrite({
     ...contractMortgage,
     functionName: 'BorrowerTakeLoan',
   });
@@ -232,14 +245,28 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
           <Group position="center" m={'md'}>
             <Button
               disabled={!selectedLoan}
-              onClick={() => {
+              onClick={async () => {
                 if (isSuccess || approved) {
-                  return borrow({
+                  await borrow({
                     args: [
                       pool_id,
                       selectedNft?.tokenId,
                       selectedLoan?.loan_id,
                     ],
+                  });
+
+                  await updatePool({
+                    pool_id,
+                    total_pool_amount:
+                      BigInt(pool?.total_pool_amount?.toString() || '0') -
+                      BigInt(selectedLoan?.amount?.toString() || '0'),
+                  });
+
+                  updateLoan({
+                    loan_id: selectedLoan?.loan_id,
+                    borrower: address,
+                    amount: selectedLoan?.amount || 0n,
+                    start_time: Date.now() / 1000,
                   });
                 }
               }}

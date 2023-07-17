@@ -12,6 +12,7 @@ import dayjs from 'src/utils/dayjs';
 import { formatEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
+import usePoolUpdate from 'src/hooks/usePoolUpdate';
 
 const columns = [
   {
@@ -88,13 +89,22 @@ export default function Offers() {
     mutationFn: (id?: number) => api.delete(`/loans/${id}`),
   });
 
-  const openRevokeModal = ({ pool_id, loan_id }: Loan) => {
+  const { mutateAsync: updatePool } = usePoolUpdate({});
+
+  const openRevokeModal = ({ pool_id, loan_id, amount }: Loan) => {
     modals.openConfirmModal({
       title: 'Revoke offer',
       centered: true,
       onConfirm: async () => {
         await revoke({
           args: [pool_id, loan_id],
+        });
+        const pool = await api.get<void, Pool>(`/pools/${pool_id}`);
+        await updatePool({
+          pool_id: pool_id,
+          total_pool_amount:
+            BigInt(pool?.total_pool_amount?.toString() || '0') -
+            BigInt(amount.toString() || '0'),
         });
         deleteLend(loan_id);
       },
@@ -116,6 +126,13 @@ export default function Offers() {
   const handleClaim = async (loan: Loan) => {
     await claim({
       args: [loan.pool_id, loan.loan_id],
+    });
+    const pool = await api.get<void, Pool>(`/pools/${loan.pool_id}`);
+    await updatePool({
+      pool_id: loan.pool_id,
+      total_pool_amount:
+        BigInt(pool?.total_pool_amount?.toString() || '0') -
+        BigInt(loan.amount.toString() || '0'),
     });
     deleteLend(loan.loan_id);
   };

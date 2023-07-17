@@ -37,7 +37,9 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: () => 'Pending',
+    render: () => {
+      return 'Pending';
+    },
   },
   {
     accessor: 'APY',
@@ -47,24 +49,6 @@ const columns = [
     render: ({ apy }: Pool) => (
       <Text size="30px" weight={700} color="green">
         {Number(apy)}%
-      </Text>
-    ),
-  },
-  {
-    accessor: 'Interest',
-    width: '15%',
-    sortable: true,
-    titleStyle: { fontSize: '25px' },
-    render: () => (
-      <Text>
-        {/* {Number(
-          calculateInterest(
-            Number(bestOffer),
-            Number(APY),
-            Number(duration)
-          )
-        )} */}
-        Pending
       </Text>
     ),
   },
