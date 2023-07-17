@@ -141,7 +141,9 @@ export default function Offers() {
         />
       </div>
       <DataTable
-        records={loans?.filter(({ lender }) => lender === address)}
+        records={loans?.filter(
+          ({ lender, is_active }) => lender === address && is_active
+        )}
         columns={[
           {
             accessor: 'Collection',

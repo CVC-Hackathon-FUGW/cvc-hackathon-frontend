@@ -44,6 +44,10 @@ const routes = [
     link: '/loans',
     label: 'Loans',
   },
+  {
+    link: '/check-in',
+    label: 'Check in',
+  },
 ];
 
 const adminRoutes = [

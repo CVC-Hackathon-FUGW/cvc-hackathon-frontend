@@ -69,6 +69,11 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     mutationFn: (params: Loan) => api.post('/loans', params),
   });
 
+  const { mutateAsync: updatePool } = useMutation({
+    mutationKey: ['update-pool'],
+    mutationFn: (params: Pool) => api.patch('/pools', params),
+  });
+
   const { write: lend } = useContractWrite({
     ...contractMortgage,
     functionName: 'LenderOffer',

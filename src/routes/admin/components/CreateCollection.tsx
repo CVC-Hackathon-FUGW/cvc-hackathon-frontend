@@ -40,6 +40,7 @@ const CreateCollection = ({ opened, close }: CreateCollectionProps) => {
         collection_name,
         token_address,
         image,
+        volume: 0n,
       }),
     onSuccess: close,
   });

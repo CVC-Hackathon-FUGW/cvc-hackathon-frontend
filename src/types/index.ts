@@ -63,6 +63,7 @@ export interface Collection {
   token_address: Address;
   image: string;
   is_active: boolean;
+  volume: bigint;
 }
 
 export interface Pool {

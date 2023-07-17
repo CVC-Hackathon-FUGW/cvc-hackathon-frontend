@@ -1,14 +1,15 @@
 import { createBrowserRouter } from 'react-router-dom';
-import HomePage from './Home';
-import LendPage from './lend';
-import OffersPage from './offers';
-import BorrowPage from './borrow';
-import LoansPage from './loans';
-import Admin from './admin/Index';
-import MarketplacePage from './marketplace';
-import NftPage from './nft';
 import NftDetails from 'src/components/Nft/NftDetails';
+import HomePage from './Home';
+import Admin from './admin/Index';
+import BorrowPage from './borrow';
+import CheckIn from './checkIn';
+import LendPage from './lend';
+import LoansPage from './loans';
+import MarketplacePage from './marketplace';
 import MarketItem from './marketplace/MarketItem';
+import NftPage from './nft';
+import OffersPage from './offers';
 
 const router = createBrowserRouter([
   {
@@ -52,15 +53,8 @@ const router = createBrowserRouter([
     element: <Admin />,
   },
   {
-    path: '/test-firebase',
-    element: (
-      <div>
-        <img
-          alt="test"
-          src="https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360161843_5575879599181195_2087333185588283944_n.png?alt=media&token=33c5bfb7-98fc-4f10-aaaf-bc6695a6b4eb"
-        />
-      </div>
-    ),
+    path: '/check-in',
+    element: <CheckIn />,
   },
 ]);
 
