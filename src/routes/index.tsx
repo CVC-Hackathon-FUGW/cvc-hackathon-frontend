@@ -10,6 +10,7 @@ import MarketplacePage from './marketplace';
 import MarketItem from './marketplace/MarketItem';
 import NftPage from './nft';
 import OffersPage from './offers';
+import MarketplaceCollectionPage from './marketplaceCollection';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
     element: <MarketplacePage />,
   },
   {
+    path: '/collection',
+    element: <MarketplaceCollectionPage/>
+  },
+  {
     path: '/marketplace/:itemId/details',
     element: <MarketItem />,
   },
@@ -48,6 +53,7 @@ const router = createBrowserRouter([
     path: '/nft/:id/details',
     element: <NftDetails />,
   },
+
   {
     path: '/admin',
     element: <Admin />,
