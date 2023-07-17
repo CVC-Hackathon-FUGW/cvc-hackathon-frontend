@@ -38,6 +38,10 @@ const router = createBrowserRouter([
     element: <MarketplacePage />,
   },
   {
+    path: '/marketplace/:collectionId',
+    element: <MarketplacePage />
+  },
+  {
     path: '/collection',
     element: <MarketplaceCollectionPage/>
   },

@@ -1,89 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import CollectionCard from "./CollectionCard";
 import { Button, Input, Select, Text } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import _ from "lodash";
+import _, { debounce } from "lodash";
+import { useQuery, QueryClient } from "@tanstack/react-query";
+import api from "src/services/api";
+import { Collection } from "src/types";
+import { xdc } from "viem/chains";
 
-const result = [
-    {
-        "collection_id": 1,
-        "collection_name": "INS1D3RS", "token_address": "0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B",
-        "image": "https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360039525_580853007589182_1246281386788593312_n.jpg?alt=media\u0026token=7dbef1eb-b992-466e-b3f9-f22e7b27da45",
-        "is_active": true,
-        "volume": 100,
-    },
-    {
-        "collection_id": 2,
-        "collection_name": "ABCD", "token_address": "0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B",
-        "image": "https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360039525_580853007589182_1246281386788593312_n.jpg?alt=media\u0026token=7dbef1eb-b992-466e-b3f9-f22e7b27da45",
-        "is_active": true,
-        "volume": 80,
-    },
-    {
-        "collection_id": 2,
-        "collection_name": "EFGH", "token_address": "0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B",
-        "image": "https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360039525_580853007589182_1246281386788593312_n.jpg?alt=media\u0026token=7dbef1eb-b992-466e-b3f9-f22e7b27da45",
-        "is_active": true,
-        "volume": 10,
-
-    },
-    {
-        "collection_id": 4,
-        "collection_name": "AAAA", "token_address": "0xFB4b0A946AFbFb4267bB05B4e73e26481cEa983B",
-        "image": "https://firebasestorage.googleapis.com/v0/b/cvc-hackathon-frontend.appspot.com/o/public%2F360039525_580853007589182_1246281386788593312_n.jpg?alt=media\u0026token=7dbef1eb-b992-466e-b3f9-f22e7b27da45",
-        "is_active": true,
-        "volume": 50,
-
-    }
-]
+const queryClient = new QueryClient();
 
 export default function MarketPlaceCollection() {
-    const [collections, setCollections] = useState([] as any)
-    const [sort, setSort] = useState('collection_name')
-    const [name, setName] = useState('')
-    useEffect(() => {
-        fetch('https://cvc-hackathon-backend.up.railway.app/v1/marketCollections')
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Lỗi khi gọi API: " + response.status);
-                }
-            })
-            .then(data => {
-                const sortedCollections = _.sortBy(data, sort);
-                setCollections(sortedCollections);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-        // const sortedCollections = _.sortBy(result, sort);
-        // setCollections(sortedCollections)
-    }, [sort])
 
-    const handleSearchCollection = () => {
-        fetch(`https://cvc-hackathon-backend.up.railway.app/v1/marketCollections?name=${name}`)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Lỗi khi gọi API: " + response.status);
-                }
-            })
-            .then(data => {
-                const sortedCollections = _.sortBy(data, sort);
-                setCollections(sortedCollections);
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    }
+    //const [sort, setSort] = useState('collection_name')
+    const [nameSearch, setNameSearch] = useState('')
+    console.log(nameSearch)
+    const { data: collections } = useQuery({
+        queryKey: ['fetchMarketItems', nameSearch],
+        queryFn: () => api.get<void, Collection[]>(`/marketCollections?name=${nameSearch}`),
+    });
 
-    const handleChangeSortField = (value: string) => {
-        setSort(value)
-    }
+    // const handleChangeSortField = (value: string) => {
+    //     setSort(value)
+    // }
 
-    const renderItems = collections.map((item: any) => {
+    const handleSearch = debounce((value) => {
+        setNameSearch(value.target.value)
+      },400);
+    
+    // const sortedCollections = useMemo(() => {
+    //     if (sort) {
+    //         return _.sortBy(collections, sort)
+    //     }
+    //     return collections;
+    // }, [collections, sort]);
+
+
+    const renderItems = collections?.map((item: any) => {
         if (item.is_active === true) {
             return (
                 <CollectionCard key={item.collection_id} collection={item} />
@@ -91,7 +44,6 @@ export default function MarketPlaceCollection() {
         }
         return;
     })
-
     return (
         <div className="pl-20 pr-20">
             <div>
@@ -106,31 +58,26 @@ export default function MarketPlaceCollection() {
                                 size="sm"
                                 placeholder="search collectibles by name..."
                                 w={500}
-                                onChange={(event) => setName(event.target.value)}
+                                onChange={handleSearch}
                             />
                         </div>
-                        <Button onClick={handleSearchCollection}>Search</Button>
                     </div>
 
                     <Select
                         label="Sort by"
                         placeholder="Pick one"
-                        onChange={handleChangeSortField}
                         data={[
                             { value: 'collection_name', label: 'Name' },
                             { value: 'volume', label: 'Volume' },
                         ]}
                     />
                 </div>
-
-
             </div>
             <div className="mt-10 flex gap-8 justify-between">
                 {
                     renderItems
                 }
             </div>
-
         </div>
     )
 }

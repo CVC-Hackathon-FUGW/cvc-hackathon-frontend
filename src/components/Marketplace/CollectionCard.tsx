@@ -1,10 +1,13 @@
 import { Avatar, Card, Text } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
+import { Collection } from "src/types";
 
-export default function CollectionCard({ collection }: any) {
-
+export default function CollectionCard({ collection }: { collection: Collection }) {
+    const navigate =  useNavigate();
     const handleClickCollection = () => {
-        console.log("HIHI")
+        navigate(`/marketplace/${collection.collection_id}`)
     }
+
     return (
         <Card
             shadow="sm" padding="lg" radius="md" withBorder
@@ -34,7 +37,7 @@ export default function CollectionCard({ collection }: any) {
                 </div>
                 <div className="mt-4">
                     <Text className="font-semibold text-gray-500">Volume:</Text>
-                    <Text className="font-semibold">{collection.volume}</Text>
+                    <Text className="font-semibold">{collection.volume.toString()}</Text>
                 </div>
             </div>
         </Card>
