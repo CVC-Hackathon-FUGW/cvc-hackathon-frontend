@@ -1,0 +1,42 @@
+import { Avatar, Card, Text } from "@mantine/core";
+
+export default function CollectionCard({ collection }: any) {
+
+    const handleClickCollection = () => {
+        console.log("HIHI")
+    }
+    return (
+        <Card
+            shadow="sm" padding="lg" radius="md" withBorder
+            className="w-[280px] p-0 m-0 cursor-pointer transition-transform duration-300 transform-gpu hover:scale-105"
+            onClick={handleClickCollection}
+        >
+            <div className="flex flex-col items-center justify-center relative">
+                <div className="w-full h-[100px] bg-blue-300">
+
+                </div>
+                <Avatar
+                    src='https://static-images.vnncdn.net/files/publish/2022/9/3/bien-vo-cuc-thai-binh-346.jpeg' radius='100%' size='90px'
+                    className="absolute top-1/2"
+                />
+            </div>
+
+            <div style={{ wordWrap: 'break-word' }} className="mt-6 p-5">
+                <div className="flex justify-center text-xl font-bold mt-2">
+                    <Text className="content-center text-[#79699B]">{collection.collection_name}</Text>
+                </div>
+
+                <div className="mt-4">
+                    <Text className="font-semibold text-gray-500">
+                        Address:
+                    </Text>
+                    <Text className="font-semibold">{collection.token_address}</Text>
+                </div>
+                <div className="mt-4">
+                    <Text className="font-semibold text-gray-500">Volume:</Text>
+                    <Text className="font-semibold">{collection.volume}</Text>
+                </div>
+            </div>
+        </Card>
+    )
+}

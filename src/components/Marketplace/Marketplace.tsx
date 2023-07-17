@@ -28,7 +28,7 @@ export default function Marketplace() {
   });
 
   return (
-    <div className="container flex flex-col gap-4">
+    <div className="container flex flex-col gap-4 pl-20 pr-20">
       <div className="flex justify-center mb-4">
         <Title>MARKETPLACE</Title>
       </div>
