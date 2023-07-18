@@ -8,34 +8,23 @@ import api from "src/services/api";
 import { Collection } from "src/types";
 import { xdc } from "viem/chains";
 
-const queryClient = new QueryClient();
 
 export default function MarketPlaceCollection() {
 
-    //const [sort, setSort] = useState('collection_name')
+    const [sortField, setSortField] = useState('')
     const [nameSearch, setNameSearch] = useState('')
-    console.log(nameSearch)
+
     const { data: collections } = useQuery({
-        queryKey: ['fetchMarketItems', nameSearch],
+        queryKey: ['fetchMarketItems', nameSearch, sortField],
         queryFn: () => api.get<void, Collection[]>(`/marketCollections?name=${nameSearch}`),
+        select: (data) => _.sortBy(data,sortField)
     });
-
-    // const handleChangeSortField = (value: string) => {
-    //     setSort(value)
-    // }
-
+    
     const handleSearch = debounce((value) => {
         setNameSearch(value.target.value)
       },400);
     
-    // const sortedCollections = useMemo(() => {
-    //     if (sort) {
-    //         return _.sortBy(collections, sort)
-    //     }
-    //     return collections;
-    // }, [collections, sort]);
-
-
+    
     const renderItems = collections?.map((item: any) => {
         if (item.is_active === true) {
             return (
@@ -67,9 +56,9 @@ export default function MarketPlaceCollection() {
                         label="Sort by"
                         placeholder="Pick one"
                         data={[
-                            { value: 'collection_name', label: 'Name' },
                             { value: 'volume', label: 'Volume' },
                         ]}
+                        onChange={(value:any) => setSortField(value)}
                     />
                 </div>
             </div>

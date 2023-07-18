@@ -19,7 +19,7 @@ export default function CollectionCard({ collection }: { collection: Collection 
 
                 </div>
                 <Avatar
-                    src='https://static-images.vnncdn.net/files/publish/2022/9/3/bien-vo-cuc-thai-binh-346.jpeg' radius='100%' size='90px'
+                    src={collection.image} radius='100%' size='90px'
                     className="absolute top-1/2"
                 />
             </div>
