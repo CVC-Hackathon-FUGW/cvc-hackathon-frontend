@@ -39,11 +39,7 @@ const router = createBrowserRouter([
     element: <MarketplacePage />,
   },
   {
-    path: '/marketplace/:collectionId',
-    element: <MarketplacePage />,
-  },
-  {
-    path: '/collection',
+    path: '/marketplace/collection',
     element: <MarketplaceCollectionPage />,
   },
   {

@@ -2,18 +2,20 @@ import { Button, Input, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { marketToContract } from 'src/helpers/transform.market-item';
 import api from 'src/services/api';
+import { Collection } from 'src/types';
 import CreateMarketItem from './CreateMarketItem';
 import NFTCard from './NFTCard';
 import { MarketNft } from './types';
-import { Collection } from 'src/types';
 
 export default function Marketplace() {
   const [opened, { close, open }] = useDisclosure();
   const navigate = useNavigate();
-  const { collectionId } = useParams();
+  const [searchParams] = useSearchParams();
+  const collectionId = searchParams.get('collectionId');
+
   const { data: marketItems } = useQuery({
     queryKey: ['fetchMarketItems'],
     queryFn: () => api.get<void, MarketNft[]>('/marketItems'),
@@ -37,6 +39,8 @@ export default function Marketplace() {
     enabled: !!collection?.token_address,
   });
 
+  console.log(marketItemsAddress);
+
   return (
     <div className="container flex flex-col gap-4 pl-20 pr-20">
       <div className="flex justify-center mb-4">
@@ -53,7 +57,7 @@ export default function Marketplace() {
         <Button onClick={open}>List NFT</Button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {(marketItemsAddress || marketItems)?.map(
+        {(collectionId ? marketItemsAddress : marketItems)?.map(
           ({ nftContract, ...rest }) => (
             <NFTCard
               key={Number(rest.itemId)}
