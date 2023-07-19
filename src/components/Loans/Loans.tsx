@@ -44,7 +44,9 @@ const columns = [
       }
 
       const unixTime =
-        Number(start_time) + Number(duration) * 86400 - Date.now() / 1000;
+        Number(start_time) +
+        Number(duration) * 86400 -
+        Math.floor(Date.now() / 1000);
 
       return (
         <Text weight={700}>
@@ -73,7 +75,7 @@ const columns = [
 export default function Loans() {
   const { address } = useAccount();
 
-  const { data: loans } = useQuery<Loan[]>({
+  const { data: loans, refetch } = useQuery<Loan[]>({
     queryKey: ['loans'],
     queryFn: () => api.get('/loans'),
   });
@@ -85,6 +87,7 @@ export default function Loans() {
   const { mutateAsync: deleteLend } = useMutation({
     mutationKey: ['delete-lend'],
     mutationFn: (id?: number) => api.delete(`/loans/${id}`),
+    onSuccess: () => refetch(),
   });
 
   const { writeAsync: pay } = useContractWrite({
@@ -96,7 +99,8 @@ export default function Loans() {
   const handlePay = async (loan: Loan) => {
     const { start_time, duration, amount } = loan;
     const pool = pools?.find(({ pool_id }) => loan.pool_id === pool_id);
-    let durations = (Date.now() / 1000 - Number(start_time)) / 86400;
+    let durations =
+      (Math.floor(Date.now() / 1000) - Number(start_time)) / 86400;
     if (durations < Number(duration)) {
       durations++;
     }
@@ -107,7 +111,7 @@ export default function Loans() {
       20
     );
 
-    const value = parseEther(interest) + borrowPrice + amount;
+    const value = parseEther(interest) + BigInt(borrowPrice) + BigInt(amount);
     await pay({
       value,
       args: [loan.pool_id, loan.loan_id],
@@ -164,7 +168,7 @@ export default function Loans() {
                 ({ pool_id }) => loan.pool_id === pool_id
               );
               return (
-                <Collection name={truncateMiddle(pool?.token_address || '')} />
+                <Collection name={pool?.collection_name} img={pool?.image} />
               );
             },
           },
@@ -178,7 +182,8 @@ export default function Loans() {
               const pool = pools?.find(
                 ({ pool_id }) => loan.pool_id === pool_id
               );
-              let durations = (Date.now() / 1000 - Number(start_time)) / 86400;
+              let durations =
+                (Math.floor(Date.now() / 1000) - Number(start_time)) / 86400;
               if (durations < Number(duration)) {
                 durations++;
               }

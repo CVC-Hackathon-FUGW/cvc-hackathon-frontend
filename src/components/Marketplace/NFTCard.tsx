@@ -32,8 +32,6 @@ const NFTCard = (props: NFTCardProps) => {
     onError: undefined,
   });
 
-  if (!data) return null;
-
   return (
     <Card
       shadow="sm"

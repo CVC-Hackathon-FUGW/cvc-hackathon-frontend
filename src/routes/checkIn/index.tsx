@@ -32,7 +32,7 @@ const CheckIn = () => {
     onSuccess: (data) => {
       const lastCheckin = Number(data || 0n);
       if (lastCheckin > 0) {
-        setCount(60 * 60 * 24 - (Date.now() / 1000 - lastCheckin));
+        setCount(60 * 60 * 24 - (Math.floor(Date.now() / 1000) - lastCheckin));
         start();
       }
     },

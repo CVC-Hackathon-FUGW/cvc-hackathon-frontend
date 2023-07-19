@@ -104,6 +104,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     price = '0',
     isVisaAccepted = false,
     isOfferable = false,
+    merchantId = '',
   }: ListNftContractParams) => {
     await listNft({
       args: [
@@ -112,6 +113,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
         parseEther(price),
         isVisaAccepted,
         isOfferable,
+        merchantId,
       ],
     });
     await addMarketItem({
@@ -125,6 +127,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       seller: address,
       token_id: tokenId,
       sold: false,
+      merchant_id: merchantId,
     });
     onClose();
   };
@@ -146,14 +149,16 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
         allowNextStepsSelect={false}
       >
         <Stepper.Step label="Select NFT" description="Select NFT to list">
-          {listNftContract?.map((nftContract) => (
-            <NFTCollection
-              key={nftContract}
-              nftContract={opened ? nftContract : undefined}
-              selectedNft={selectedNft}
-              onItemClick={setSelectedNft as any}
-            />
-          ))}
+          <div className="flex flex-col gap-4">
+            {listNftContract?.map((nftContract) => (
+              <NFTCollection
+                key={nftContract}
+                nftContract={opened ? nftContract : undefined}
+                selectedNft={selectedNft}
+                onItemClick={setSelectedNft as any}
+              />
+            ))}
+          </div>
           <Group position="center" m={'md'}>
             <Button
               disabled={!selectedNft}

@@ -10,6 +10,6 @@ export const calculateInterest = (
 
 // now > startTime + duration*86400
 export const isLoanEnded = (startTime: number, duration: number) => {
-  const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(Math.floor(Date.now() / 1000));
   return now > startTime + duration * 86400;
 };

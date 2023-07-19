@@ -6,6 +6,7 @@ export interface ListNftContractParams {
   price: string;
   isVisaAccepted: boolean;
   isOfferable: boolean;
+  merchantId?: string;
 }
 
 export interface MarketNft {
@@ -21,4 +22,5 @@ export interface MarketNft {
   sold: boolean;
   item_id?: bigint;
   is_active?: boolean;
+  merchant_id?: string;
 }

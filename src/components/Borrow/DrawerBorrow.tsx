@@ -20,6 +20,7 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
+import usePoolUpdate from 'src/hooks/usePoolUpdate';
 import api from 'src/services/api';
 import { Loan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
@@ -31,7 +32,6 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 import NFTCollection from '../Marketplace/NFTCollection';
-import usePoolUpdate from 'src/hooks/usePoolUpdate';
 
 interface ModalLendProps {
   opened: boolean;
@@ -50,6 +50,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { data: allLoans } = useQuery<Loan[]>({
     queryKey: ['loans'],
     queryFn: () => api.get('/loans'),
+    enabled: opened,
   });
 
   const { data: floorPriceGwei } = useContractRead({
@@ -67,6 +68,12 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     enabled: !!selectedNft?.tokenId,
     select: (value) => value === addressMortgage,
   });
+  // const { data: pool1 } = useContractRead({
+  //   ...contractMortgage,
+  //   functionName: 'idToPool',
+  //   args: [1n],
+  // });
+  // console.log(pool1);
 
   const {
     write: approve,
@@ -90,6 +97,12 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { writeAsync: borrow } = useContractWrite({
     ...contractMortgage,
     functionName: 'BorrowerTakeLoan',
+    onSuccess: () => {
+      setSelectedLoan(null);
+      reset();
+      close();
+      setStep(0);
+    },
   });
 
   const { isLoading, isSuccess } = useWaitForTransaction({
@@ -123,8 +136,9 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
         setSelectedLoan(null);
         reset();
         close();
+        setStep(0);
       }}
-      size={'xl'}
+      size="85%"
       centered
     >
       <div className="flex flex-row gap-2 items-center justify-between mb-10">
@@ -217,7 +231,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                   className="flex flex-row justify-between items-center"
                 >
                   <div className="flex flex-col gap-2">
-                    <Text size="xl" fw="bold">
+                    <Text size="md" fw="bold">
                       {truncateMiddle(loan.token_address)}
                     </Text>
                     <Text fz="xs" c="dimmed">
@@ -266,7 +280,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                     loan_id: selectedLoan?.loan_id,
                     borrower: address,
                     amount: selectedLoan?.amount || 0n,
-                    start_time: Date.now() / 1000,
+                    start_time: Math.floor(Math.floor(Date.now() / 1000)),
                   });
                 }
               }}

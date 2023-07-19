@@ -39,6 +39,7 @@ export interface ContractNft extends Nft {
   currentOfferer?: Address;
   sold: boolean;
   isActive?: boolean;
+  merchantId?: string;
 }
 
 export interface NftMetadata {
