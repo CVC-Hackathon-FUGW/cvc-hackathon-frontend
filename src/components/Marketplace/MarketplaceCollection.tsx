@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import CollectionCard from "./CollectionCard";
-import { Button, Input, Select, Text } from "@mantine/core";
+import { Avatar, Button, Card, Input, Select, Text } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import _, { debounce } from "lodash";
 import { useQuery, QueryClient } from "@tanstack/react-query";
@@ -17,14 +17,14 @@ export default function MarketPlaceCollection() {
     const { data: collections } = useQuery({
         queryKey: ['fetchMarketItems', nameSearch, sortField],
         queryFn: () => api.get<void, Collection[]>(`/marketCollections?name=${nameSearch}`),
-        select: (data) => _.sortBy(data,sortField)
+        select: (data) => _.sortBy(data, sortField)
     });
-    
+
     const handleSearch = debounce((value) => {
         setNameSearch(value.target.value)
-      },400);
-    
-    
+    }, 400);
+
+
     const renderItems = collections?.map((item: any) => {
         if (item.is_active === true) {
             return (
@@ -58,14 +58,15 @@ export default function MarketPlaceCollection() {
                         data={[
                             { value: 'volume', label: 'Volume' },
                         ]}
-                        onChange={(value:any) => setSortField(value)}
+                        onChange={(value: any) => setSortField(value)}
                     />
                 </div>
             </div>
-            <div className="mt-10 flex gap-8 justify-between">
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {
                     renderItems
                 }
+                
             </div>
         </div>
     )

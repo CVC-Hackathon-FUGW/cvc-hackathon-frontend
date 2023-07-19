@@ -40,7 +40,7 @@ const NFTCard = (props: NFTCardProps) => {
       padding="lg"
       radius="md"
       withBorder
-      className="cursor-pointer grid gap-1"
+      className="cursor-pointer grid gap-1 transition-transform duration-300 transform-gpu hover:scale-105"
       onClick={() => onClick?.({ nftContract: nftContract!, tokenId, ...rest })}
       bg={selectedNft?.tokenId === tokenId ? 'cyan' : undefined}
     >
