@@ -262,7 +262,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                       BigInt(selectedLoan?.amount?.toString() || '0'),
                   });
 
-                  updateLoan({
+                  await updateLoan({
                     loan_id: selectedLoan?.loan_id,
                     borrower: address,
                     amount: selectedLoan?.amount || 0n,

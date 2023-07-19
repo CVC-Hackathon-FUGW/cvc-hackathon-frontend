@@ -86,7 +86,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     enabled: !!allowance?.hash,
   });
   // call the contract to list the nft
-  const { write: listNft } = useContractWrite({
+  const { writeAsync: listNft } = useContractWrite({
     ...contractMarket,
     functionName: 'CreateMarketItem',
     value: borrowPrice,
@@ -105,6 +105,15 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     isVisaAccepted = false,
     isOfferable = false,
   }: ListNftContractParams) => {
+    await listNft({
+      args: [
+        nftContract,
+        tokenId,
+        parseEther(price),
+        isVisaAccepted,
+        isOfferable,
+      ],
+    });
     await addMarketItem({
       accept_visa_payment: isVisaAccepted,
       is_offerable: isOfferable,
@@ -116,15 +125,6 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       seller: address,
       token_id: tokenId,
       sold: false,
-    });
-    listNft({
-      args: [
-        nftContract,
-        tokenId,
-        parseEther(price),
-        isVisaAccepted,
-        isOfferable,
-      ],
     });
     onClose();
   };

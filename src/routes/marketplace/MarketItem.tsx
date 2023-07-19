@@ -80,30 +80,30 @@ const MarketItem = () => {
     },
   });
 
-  const { write: buyNft } = useContractWrite({
+  const { writeAsync: buyNft } = useContractWrite({
     ...contractMarket,
     functionName: 'Buy',
     account: address,
   });
 
-  const { write: offerNft } = useContractWrite({
+  const { writeAsync: offerNft } = useContractWrite({
     ...contractMarket,
     functionName: 'OfferMarketItem',
     account: address,
   });
 
-  const { write: acceptOffer } = useContractWrite({
+  const { writeAsync: acceptOffer } = useContractWrite({
     ...contractMarket,
     functionName: 'AcceptOffer',
   });
-  const { write: cancelListing } = useContractWrite({
+  const { writeAsync: cancelListing } = useContractWrite({
     ...contractMarket,
     functionName: 'CancelListing',
   });
 
   const { mutateAsync: deleteMarketItem } = useMutation({
     mutationKey: ['deleteItems'],
-    mutationFn: (id: number) => api.delete(`/marketIItems/${id}`),
+    mutationFn: (id: number) => api.delete(`/marketItems/${id}`),
   });
 
   return (
@@ -134,10 +134,10 @@ const MarketItem = () => {
                   <Button
                     disabled={sold || numCurrentOfferValue === 0}
                     onClick={async () => {
-                      await deleteMarketItem(Number(marketItem?.itemId));
-                      acceptOffer({
+                      await acceptOffer({
                         args: [nftContract, marketItem?.itemId],
                       });
+                      await deleteMarketItem(Number(marketItem?.itemId));
                     }}
                   >
                     Accept Offer ({numCurrentOfferValue} XCR)
@@ -148,10 +148,10 @@ const MarketItem = () => {
                 color="red"
                 disabled={sold}
                 onClick={async () => {
-                  await deleteMarketItem(Number(marketItem?.itemId));
-                  cancelListing({
+                  await cancelListing({
                     args: [nftContract, marketItem?.itemId],
                   });
+                  await deleteMarketItem(Number(marketItem?.itemId));
                 }}
               >
                 Cancel Listing
@@ -162,11 +162,11 @@ const MarketItem = () => {
               <Button
                 disabled={sold}
                 onClick={async () => {
-                  await deleteMarketItem(Number(marketItem?.itemId));
                   buyNft({
                     value: price,
                     args: [nftContract, marketItem?.itemId],
                   });
+                  await deleteMarketItem(Number(marketItem?.itemId));
                 }}
               >
                 Buy

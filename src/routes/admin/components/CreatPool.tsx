@@ -28,7 +28,11 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
     },
   });
 
-  const { write, isLoading, data } = useContractWrite({
+  const {
+    writeAsync: create,
+    isLoading,
+    data,
+  } = useContractWrite({
     ...contractMortgage,
     functionName: 'CreatePool',
   });
@@ -57,6 +61,10 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
             const image = await uploadImage();
 
             if (image) {
+              await create?.({
+                args: [tokenAddress, BigInt(APY), BigInt(duration)],
+              });
+
               await createPool({
                 apy: BigInt(APY),
                 duration: BigInt(duration),
@@ -65,9 +73,6 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
                 is_active: true,
                 state: true,
                 token_address: tokenAddress as Address,
-              });
-              write?.({
-                args: [tokenAddress, BigInt(APY), BigInt(duration)],
               });
             }
           }

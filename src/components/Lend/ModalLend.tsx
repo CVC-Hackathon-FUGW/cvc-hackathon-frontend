@@ -72,7 +72,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
 
   const { pool, mutateAsync: updatePool } = usePoolUpdate({ id: pool_id });
 
-  const { write: lend } = useContractWrite({
+  const { writeAsync: lend } = useContractWrite({
     ...contractMortgage,
     functionName: 'LenderOffer',
     account: address,
@@ -82,6 +82,10 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
 
   const handleLend = async ({ offerAmount = 0 }) => {
     const value = parseEther(offerAmount.toString());
+    await lend({
+      value,
+      args: [pool_id],
+    });
     await createLend({
       amount: value,
       borrower: zeroAddress,
@@ -95,10 +99,6 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
       pool_id,
       total_pool_amount:
         BigInt(pool?.total_pool_amount?.toString() || '0') + value,
-    });
-    lend({
-      value,
-      args: [pool_id],
     });
   };
 

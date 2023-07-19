@@ -34,7 +34,11 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
     mutationFn: (params: Pool) => api.patch('/pools', params),
   });
 
-  const { write, isLoading, data } = useContractWrite({
+  const {
+    writeAsync: update,
+    isLoading,
+    data,
+  } = useContractWrite({
     ...contractMortgage,
     functionName: 'UpdatePool',
   });
@@ -46,19 +50,22 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
   return (
     <Drawer opened={opened} onClose={close} title="Edit Pool" position="right">
       <form
-        onSubmit={onSubmit(({ APY, duration, state, collection_name }) => {
-          const _poolId = editingPool?.pool_id;
-          updatePool({
-            ...editingPool,
-            apy: BigInt(APY),
-            duration: BigInt(duration),
-            collection_name,
-            state,
-          });
-          write?.({
-            args: [_poolId, BigInt(APY), BigInt(duration), state],
-          });
-        })}
+        onSubmit={onSubmit(
+          async ({ APY, duration, state, collection_name }) => {
+            const _poolId = editingPool?.pool_id;
+
+            await update?.({
+              args: [_poolId, BigInt(APY), BigInt(duration), state],
+            });
+            updatePool({
+              ...editingPool,
+              apy: BigInt(APY),
+              duration: BigInt(duration),
+              collection_name,
+              state,
+            });
+          }
+        )}
         className="flex flex-col gap-4"
       >
         <TextInput
