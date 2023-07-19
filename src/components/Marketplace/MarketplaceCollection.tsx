@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import CollectionCard from "./CollectionCard";
-import { Button, Input, Select, Text } from "@mantine/core";
+import { Avatar, Button, Card, Input, Select, Text } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 import _, { debounce } from "lodash";
 import { useQuery, QueryClient } from "@tanstack/react-query";
@@ -8,32 +8,21 @@ import api from "src/services/api";
 import { Collection } from "src/types";
 import { xdc } from "viem/chains";
 
-const queryClient = new QueryClient();
 
 export default function MarketPlaceCollection() {
 
-    //const [sort, setSort] = useState('collection_name')
+    const [sortField, setSortField] = useState('')
     const [nameSearch, setNameSearch] = useState('')
-    console.log(nameSearch)
-    const { data: collections } = useQuery({
-        queryKey: ['fetchMarketItems', nameSearch],
-        queryFn: () => api.get<void, Collection[]>(`/marketCollections?name=${nameSearch}`),
-    });
 
-    // const handleChangeSortField = (value: string) => {
-    //     setSort(value)
-    // }
+    const { data: collections } = useQuery({
+        queryKey: ['fetchMarketItems', nameSearch, sortField],
+        queryFn: () => api.get<void, Collection[]>(`/marketCollections?name=${nameSearch}`),
+        select: (data) => _.sortBy(data, sortField)
+    });
 
     const handleSearch = debounce((value) => {
         setNameSearch(value.target.value)
-      },400);
-    
-    // const sortedCollections = useMemo(() => {
-    //     if (sort) {
-    //         return _.sortBy(collections, sort)
-    //     }
-    //     return collections;
-    // }, [collections, sort]);
+    }, 400);
 
 
     const renderItems = collections?.map((item: any) => {
@@ -67,16 +56,17 @@ export default function MarketPlaceCollection() {
                         label="Sort by"
                         placeholder="Pick one"
                         data={[
-                            { value: 'collection_name', label: 'Name' },
                             { value: 'volume', label: 'Volume' },
                         ]}
+                        onChange={(value: any) => setSortField(value)}
                     />
                 </div>
             </div>
-            <div className="mt-10 flex gap-8 justify-between">
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {
                     renderItems
                 }
+                
             </div>
         </div>
     )

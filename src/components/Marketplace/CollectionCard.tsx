@@ -11,7 +11,7 @@ export default function CollectionCard({ collection }: { collection: Collection 
     return (
         <Card
             shadow="sm" padding="lg" radius="md" withBorder
-            className="w-[280px] p-0 m-0 cursor-pointer transition-transform duration-300 transform-gpu hover:scale-105"
+            className="w-[280px] p-0 m-0 mt-5 cursor-pointer transition-transform duration-300 transform-gpu hover:scale-105"
             onClick={handleClickCollection}
         >
             <div className="flex flex-col items-center justify-center relative">
@@ -19,7 +19,7 @@ export default function CollectionCard({ collection }: { collection: Collection 
 
                 </div>
                 <Avatar
-                    src='https://static-images.vnncdn.net/files/publish/2022/9/3/bien-vo-cuc-thai-binh-346.jpeg' radius='100%' size='90px'
+                    src={collection.image} radius='100%' size='90px'
                     className="absolute top-1/2"
                 />
             </div>
