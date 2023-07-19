@@ -23,6 +23,8 @@ jobs:
           echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
           echo "VITE_PAYPAL_CLIENT_ID=${{ secrets.VITE_PAYPAL_CLIENT_ID }}" >> .env
           echo "VITE_PAYPAL_SECRET_KEY=${{ secrets.VITE_PAYPAL_SECRET_KEY }}" >> .env
+          echo "VITE_SELLER_REDIRECT_URL=${{ secrets.VITE_SELLER_REDIRECT_URL }}" >> .env
+          echo "VITE_PAYPAL_AUTHORIZATION=${{ secrets.VITE_PAYPAL_AUTHORIZATION }}" >> .env
           cat .env
 
       - name: Install and Build

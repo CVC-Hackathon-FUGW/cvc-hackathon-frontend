@@ -11,6 +11,7 @@ import MarketItem from './marketplace/MarketItem';
 import NftPage from './nft';
 import OffersPage from './offers';
 import MarketplaceCollectionPage from './marketplaceCollection';
+import SellerOnboarding from './seller-onboarding';
 
 const router = createBrowserRouter([
   {
@@ -39,11 +40,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/marketplace/:collectionId',
-    element: <MarketplacePage />
+    element: <MarketplacePage />,
   },
   {
     path: '/collection',
-    element: <MarketplaceCollectionPage/>
+    element: <MarketplaceCollectionPage />,
   },
   {
     path: '/marketplace/:itemId/details',
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
   {
     path: '/check-in',
     element: <CheckIn />,
+  },
+  {
+    path: '/seller-onboarding',
+    element: <SellerOnboarding />,
   },
 ]);
 

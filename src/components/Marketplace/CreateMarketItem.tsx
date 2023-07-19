@@ -9,6 +9,7 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { PayPalMarks, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
@@ -17,6 +18,7 @@ import {
   borrowPrice,
   contractMarket,
 } from 'src/configs/contract';
+import { sellerRedirectUrl } from 'src/configs/payment';
 import api from 'src/services/api';
 import { Collection, Nft } from 'src/types';
 import { parseEther, zeroAddress } from 'viem';
@@ -26,11 +28,9 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
+import NFTCard from './NFTCard';
 import NFTCollection from './NFTCollection';
 import { ListNftContractParams, MarketNft } from './types';
-import NFTCard from './NFTCard';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import { nftSellerPlanId } from 'src/configs/payment';
 
 interface CreateMarketItemProps {
   opened: boolean;
@@ -43,8 +43,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
   const [step, setStep] = useState(0);
 
   const { address } = useAccount();
-  const [{ options, isPending, isResolved }, dispatch] =
-    usePayPalScriptReducer();
+  const [{ isPending }] = usePayPalScriptReducer();
 
   const { onSubmit, getInputProps, values } = useForm({
     initialValues: {
@@ -207,24 +206,15 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
                 {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
               />
               <Collapse in={values.isVisaAccepted}>
-                <PayPalButtons
-                  style={{
-                    label: 'subscribe',
-                  }}
-                  createSubscription={async (_, actions) => {
-                    const orderId = await actions.subscription.create({
-                      plan_id: nftSellerPlanId,
-                    });
-
-                    return orderId;
-                  }}
-                  onApprove={async (data, actions) => {
-                    console.log(data);
-
-                    const order = await actions.order?.capture();
-                    console.log(order);
-                  }}
-                />
+                <Button
+                  variant="light"
+                  component="a"
+                  href={sellerRedirectUrl}
+                  target="_blank"
+                >
+                  Sign up for
+                  <PayPalMarks fundingSource="paypal" />
+                </Button>
               </Collapse>
               <Button type="submit" className="mt-auto">
                 List NFT
