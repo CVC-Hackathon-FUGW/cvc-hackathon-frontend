@@ -93,3 +93,18 @@ export interface Loan
   created_at?: number;
   updated_at?: number;
 }
+
+export interface MarketItemData {
+  item_id?: number;
+  address?: Address;
+  token_id?: number;
+  seller?: string;
+  owner?: string;
+  price?: bigint;
+  is_offerable?: boolean;
+  accept_visa_payment?: boolean;
+  current_offer_value?: bigint;
+  current_offerer?: string;
+  sold?: boolean;
+  is_active?: boolean;
+}

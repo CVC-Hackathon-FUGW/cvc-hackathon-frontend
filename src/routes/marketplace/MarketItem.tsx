@@ -8,7 +8,7 @@ import ShowAddress from 'src/components/common/ShowAddress';
 import { abiNft, contractMarket } from 'src/configs/contract';
 import { getNftSrc } from 'src/helpers/get-nft-src';
 import api from 'src/services/api';
-import { ContractNft, NftMetadata } from 'src/types';
+import { Collection, MarketItemData, NftMetadata } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -17,35 +17,31 @@ const MarketItem = () => {
   const { itemId } = useParams();
   const { address } = useAccount();
 
-  const { data: marketItem } = useContractRead<
-    unknown[],
-    'GetMarketItem',
-    ContractNft
-  >({
-    ...contractMarket,
-    functionName: 'GetMarketItem',
-    args: [BigInt(Number(itemId)!)],
+  const { data: marketItem } = useQuery<MarketItemData>({
+    queryKey: ['MarketItemData', itemId],
+    queryFn: async () => api.get(`/marketItems/${itemId}`),
     enabled: !!itemId,
   });
+
   const {
-    tokenId,
-    nftContract,
+    token_id,
+    address: nftContract,
     seller,
     price,
     sold,
-    isOfferable,
-    currentOfferValue,
-    currentOfferer,
+    is_offerable,
+    current_offer_value,
+    current_offerer,
   } = {
     ...marketItem,
   };
 
-  const { data: uri } = useContractRead<unknown[], 'TokenURI', string>({
+  const { data: uri } = useContractRead<unknown[], 'tokenURI', string>({
     address: nftContract,
     abi: abiNft,
-    functionName: 'tokenURI' as 'TokenURI',
-    args: [tokenId],
-    enabled: !!tokenId && !!nftContract,
+    functionName: 'tokenURI',
+    args: [token_id],
+    enabled: !!token_id && !!nftContract,
   });
 
   const { data } = useQuery<NftMetadata>({
@@ -64,9 +60,9 @@ const MarketItem = () => {
   const { isOwner, numCurrentOfferValue } = useMemo(() => {
     return {
       isOwner: seller === address,
-      numCurrentOfferValue: Number(formatEther(currentOfferValue || 0n)),
+      numCurrentOfferValue: Number(formatEther(current_offer_value || 0n)),
     };
-  }, [address, seller, currentOfferValue]);
+  }, [address, seller, current_offer_value]);
 
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
@@ -78,6 +74,14 @@ const MarketItem = () => {
           ? 'Offer must be higher than current offer'
           : null,
     },
+  });
+
+  const { data: collection } = useQuery({
+    queryKey: ['get-marketItems'],
+    queryFn: () => api.get<void, Collection[]>('/marketCollections'),
+    initialData: [],
+    select: (data) =>
+      data?.find(({ token_address }) => token_address === nftContract),
   });
 
   const { writeAsync: buyNft } = useContractWrite({
@@ -102,8 +106,17 @@ const MarketItem = () => {
   });
 
   const { mutateAsync: deleteMarketItem } = useMutation({
-    mutationKey: ['deleteItems'],
+    mutationKey: ['deleteMarketItem'],
     mutationFn: (id: number) => api.delete(`/marketItems/${id}`),
+  });
+  const { mutateAsync: updateMarketItem } = useMutation({
+    mutationKey: ['updateMarketItem'],
+    mutationFn: (params: MarketItemData) => api.patch(`/marketItems`, params),
+  });
+  const { mutateAsync: updateCollection } = useMutation({
+    mutationKey: ['updateMarketItem'],
+    mutationFn: (params: Partial<Collection>) =>
+      api.patch(`/marketCollections`, params),
   });
 
   return (
@@ -114,19 +127,19 @@ const MarketItem = () => {
           {isOwner ? (
             <div className="flex flex-col gap-2">
               <Text>You are selling this item</Text>
-              {isOfferable && (
+              {is_offerable && (
                 <>
                   <Text>
                     Current offer:{' '}
-                    {Number(currentOfferValue) > 0
+                    {Number(current_offer_value) > 0
                       ? numCurrentOfferValue
                       : 'No offer yet'}
                   </Text>
                   <ShowAddress
                     address={
-                      currentOfferer === zeroAddress
+                      current_offerer === zeroAddress
                         ? 'Be the first!'
-                        : currentOfferer
+                        : current_offerer
                     }
                   >
                     Current offerer:
@@ -135,9 +148,17 @@ const MarketItem = () => {
                     disabled={sold || numCurrentOfferValue === 0}
                     onClick={async () => {
                       await acceptOffer({
-                        args: [nftContract, marketItem?.itemId],
+                        args: [nftContract, itemId],
                       });
-                      await deleteMarketItem(Number(marketItem?.itemId));
+                      await deleteMarketItem(Number(itemId));
+                      if (collection?.collection_id && current_offer_value) {
+                        await updateCollection({
+                          collection_id: collection?.collection_id,
+                          volume:
+                            BigInt(collection?.volume) +
+                            BigInt(current_offer_value),
+                        });
+                      }
                     }}
                   >
                     Accept Offer ({numCurrentOfferValue} XCR)
@@ -149,9 +170,15 @@ const MarketItem = () => {
                 disabled={sold}
                 onClick={async () => {
                   await cancelListing({
-                    args: [nftContract, marketItem?.itemId],
+                    args: [nftContract, itemId],
                   });
-                  await deleteMarketItem(Number(marketItem?.itemId));
+                  await deleteMarketItem(Number(itemId));
+                  if (collection?.collection_id && price) {
+                    await updateCollection({
+                      collection_id: collection?.collection_id,
+                      volume: BigInt(collection?.volume) + BigInt(price),
+                    });
+                  }
                 }}
               >
                 Cancel Listing
@@ -164,35 +191,41 @@ const MarketItem = () => {
                 onClick={async () => {
                   buyNft({
                     value: price,
-                    args: [nftContract, marketItem?.itemId],
+                    args: [nftContract, itemId],
                   });
-                  await deleteMarketItem(Number(marketItem?.itemId));
+                  await deleteMarketItem(Number(itemId));
+                  // updateCollection({});
                 }}
               >
                 Buy
               </Button>
-              {isOfferable && (
+              {is_offerable && (
                 <form
                   className="flex flex-col gap-1"
-                  onSubmit={onSubmit(({ offer }) => {
+                  onSubmit={onSubmit(async ({ offer }) => {
                     const value = parseEther(offer.toString());
-                    return offerNft({
+                    await offerNft({
                       value,
-                      args: [marketItem?.itemId],
+                      args: [itemId],
+                    });
+
+                    await updateMarketItem({
+                      item_id: Number(itemId),
+                      current_offer_value: value,
                     });
                   })}
                 >
                   <Text>
                     Current offer:{' '}
-                    {Number(currentOfferValue) > 0
+                    {Number(current_offer_value) > 0
                       ? numCurrentOfferValue
                       : 'No offer yet'}
                   </Text>
                   <ShowAddress
                     address={
-                      currentOfferer === zeroAddress
+                      current_offerer === zeroAddress
                         ? 'Be the first!'
-                        : currentOfferer
+                        : current_offerer
                     }
                   >
                     Current offerer:
