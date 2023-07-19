@@ -27,7 +27,7 @@ export default function Marketplace() {
     queryFn: () => api.get<void, MarketNft[]>('/marketItems'),
     select: (data) => data.map((item) => marketToContract(item)) || [],
   });
-
+  
   let dataRender = marketItems
   if (collectionId) {
     const { data: collection } = useQuery({
@@ -64,7 +64,7 @@ export default function Marketplace() {
             key={Number(rest.itemId)}
             nftContract={nftContract}
             {...rest}
-            onClick={({ itemId }) => navigate(`${itemId}/details`)}
+            onClick={({ itemId }) => collectionId? navigate(`../marketplace/${itemId}/details`):navigate(`${itemId}/details`)}
           />
         ))}
       </div>
