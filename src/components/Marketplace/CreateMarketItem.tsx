@@ -139,7 +139,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
         reset();
         onClose();
       }}
-      size={'xl'}
+      size="85%"
       centered
     >
       <Stepper

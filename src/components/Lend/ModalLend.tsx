@@ -35,6 +35,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
   };
   const { address } = useAccount();
   const { data: balance } = useBalance({ address, enabled: opened });
+  console.log(data);
 
   const { data: floorPriceGwei } = useContractRead({
     ...contractMortgage,

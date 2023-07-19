@@ -89,7 +89,7 @@ export interface Loan
   borrower?: Address;
   amount: bigint;
   start_time?: number;
-  token_id?: bigint;
+  token_id?: number;
   created_at?: number;
   updated_at?: number;
 }
