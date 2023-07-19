@@ -35,7 +35,6 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
   };
   const { address } = useAccount();
   const { data: balance } = useBalance({ address, enabled: opened });
-  console.log(data);
 
   const { data: floorPriceGwei } = useContractRead({
     ...contractMortgage,
@@ -95,6 +94,8 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
       duration,
       token_address,
       start_time: 0,
+      token_id: 0,
+      state: false,
     });
     await updatePool({
       pool_id,
