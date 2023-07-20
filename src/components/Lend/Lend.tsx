@@ -24,18 +24,12 @@ const columns = [
     accessor: 'totalPoolAmount',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ pool: { total_pool_amount } }: WrappedPool) => (
+    render: ({ pool: { total_pool_amount }, loan_count }: WrappedPool) => (
       <AvailablePool
         number={formatEther(total_pool_amount || 0n)}
-        description="1344 of 1410 offers taken"
+        description={loan_count}
       />
     ),
-  },
-  {
-    accessor: 'loan count',
-    sortable: true,
-    titleStyle: { fontSize: '25px' },
-    render: ({ loan_count }: WrappedPool) => loan_count,
   },
   {
     accessor: 'bestOffer',
