@@ -9,6 +9,7 @@ import { formatEther } from 'viem';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
 import ModalLend from './ModalLend';
+import { debounce } from 'lodash';
 
 const columns = [
   {
@@ -65,10 +66,14 @@ const columns = [
 
 export default function Lend() {
   const [pool, setPool] = useState<Pool>();
+  const [nameSearch, setNameSearch] = useState('')
+  const handleSearch = debounce((value) => {
+    setNameSearch(value.target.value);
+  }, 400);
 
   const { data: pools } = useQuery<Pool[]>({
-    queryKey: ['pools'],
-    queryFn: () => api.get('/pools'),
+    queryKey: ['pools',nameSearch],
+    queryFn: () => api.get(`/pools?name=${nameSearch}`),
   });
 
   return (
@@ -95,6 +100,7 @@ export default function Lend() {
             variant="filled"
             size="xl"
             placeholder="search collections..."
+            onChange={handleSearch}
           />
         </div>
 

@@ -31,7 +31,7 @@ export default function MarketPlaceCollection() {
   return (
     <div className="pl-20 pr-20">
       <div>
-        <h1 className="text-[#7645D9]">Collections</h1>
+        <h1 className="text-[#7645D9]">Browse NFT Collection</h1>
 
         <div className="flex items-center gap-8">
           <div className="mt-7 flex gap-1">

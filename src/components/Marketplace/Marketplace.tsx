@@ -46,15 +46,8 @@ export default function Marketplace() {
       <div className="flex justify-center mb-4">
         <Title>MARKETPLACE</Title>
       </div>
-      <div className="flex flex-row items-center justify-between">
-        <Input
-          icon={<IconSearch />}
-          variant="filled"
-          size="sm"
-          placeholder="search collectibles by name..."
-          w={500}
-        />
-        <Button onClick={open}>List NFT</Button>
+      <div className="flex flex-row items-center justify-center">
+        <Button onClick={open} size='lg' className='w-[200px]'>List NFT</Button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {(collectionId ? marketItemsAddress : marketItems)?.map(

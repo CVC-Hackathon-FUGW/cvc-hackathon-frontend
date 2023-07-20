@@ -9,6 +9,7 @@ import { formatEther } from 'viem';
 import AvailablePool from '../Lend/AvailablePool';
 import Collection from '../Lend/Collection';
 import DrawerBorrow from './DrawerBorrow';
+import { debounce } from 'lodash';
 
 const columns = [
   {
@@ -67,12 +68,14 @@ const columns = [
 
 export default function Borrow() {
   const [pool, setPool] = useState<Pool>();
-
+  const [nameSearch, setNameSearch] = useState('')
+  const handleSearch = debounce((value) => {
+    setNameSearch(value.target.value);
+  }, 400);
   const { data: pools } = useQuery<Pool[]>({
-    queryKey: ['pools'],
-    queryFn: () => api.get('/pools'),
+    queryKey: ['pools', nameSearch],
+    queryFn: () => api.get(`/pools?name=${nameSearch}`),
   });
-
   return (
     <>
       <DrawerBorrow
@@ -97,6 +100,7 @@ export default function Borrow() {
             variant="filled"
             size="xl"
             placeholder="search collections..."
+            onChange={handleSearch}
           />
         </div>
 
