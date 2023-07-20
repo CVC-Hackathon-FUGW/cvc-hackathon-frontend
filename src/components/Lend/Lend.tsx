@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
 import api from 'src/services/api';
-import { Pool } from 'src/types';
+import { Pool, WrappedPool } from 'src/types';
 import { formatEther } from 'viem';
 import AvailablePool from './AvailablePool';
 import Collection from './Collection';
@@ -14,19 +14,17 @@ import { debounce } from 'lodash';
 const columns = [
   {
     accessor: 'collection',
-    width: '25%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ collection_name, image }: Pool) => (
+    render: ({ pool: { collection_name, image } }: WrappedPool) => (
       <Collection img={image} name={collection_name} />
     ),
   },
   {
     accessor: 'totalPoolAmount',
-    width: '20%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ total_pool_amount }: Pool) => (
+    render: ({ pool: { total_pool_amount } }: WrappedPool) => (
       <AvailablePool
         number={formatEther(total_pool_amount || 0n)}
         description="1344 of 1410 offers taken"
@@ -34,18 +32,25 @@ const columns = [
     ),
   },
   {
+    accessor: 'loan count',
+    sortable: true,
+    titleStyle: { fontSize: '25px' },
+    render: ({ loan_count }: WrappedPool) => loan_count,
+  },
+  {
     accessor: 'bestOffer',
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: () => 'Pending',
+    render: ({ loan_max_amount }: WrappedPool) =>
+      formatEther(loan_max_amount || 0n),
   },
   {
     accessor: 'APY',
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ apy }: Pool) => (
+    render: ({ pool: { apy } }: WrappedPool) => (
       <Text size="30px" weight={700} color="green">
         {Number(apy)}%
       </Text>
@@ -56,7 +61,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: Pool) => (
+    render: ({ pool: { duration } }: WrappedPool) => (
       <Text size="30px" weight={700}>
         {Number(duration)}d
       </Text>
@@ -66,14 +71,14 @@ const columns = [
 
 export default function Lend() {
   const [pool, setPool] = useState<Pool>();
-  const [nameSearch, setNameSearch] = useState('')
+  const [nameSearch, setNameSearch] = useState('');
   const handleSearch = debounce((value) => {
     setNameSearch(value.target.value);
   }, 400);
 
-  const { data: pools } = useQuery<Pool[]>({
+  const { data: pools } = useQuery<WrappedPool[]>({
     queryKey: ['pools', nameSearch],
-    queryFn: () => api.get(`/pools?name=${nameSearch}`),
+    queryFn: () => api.get(`/pools/loan?name=${nameSearch}`),
   });
 
   return (
@@ -87,10 +92,11 @@ export default function Lend() {
         <div style={{ maxWidth: '990px' }}>
           <Title size="3.2rem">Make loan offers on NFT collections.</Title>
           <Text fz="lg">
-            Choose your pricing while perusing the collections below.
-            Borrowers will be presented with the current best offer.
-            The smart contract take one NFT from that collection to be used as collateral in order to accept your offer.
-            At the end of the loan, you will be paid back plus interest. In that case, you are allowed to maintain the NFT.
+            Choose your pricing while perusing the collections below. Borrowers
+            will be presented with the current best offer. The smart contract
+            take one NFT from that collection to be used as collateral in order
+            to accept your offer. At the end of the loan, you will be paid back
+            plus interest. In that case, you are allowed to maintain the NFT.
           </Text>
         </div>
         <div style={{ marginTop: '40px', marginBottom: '40px' }}>
@@ -104,14 +110,14 @@ export default function Lend() {
         </div>
 
         <DataTable
-          records={(pools as Pool[])?.filter(({ state }) => state) || []}
+          records={pools?.filter(({ pool: { state } }) => state) || []}
           columns={[
             ...columns,
             {
               accessor: ' ',
               width: '10%',
-              render: (dataPool) => (
-                <Button onClick={() => setPool(dataPool)} size="md">
+              render: ({ pool }) => (
+                <Button onClick={() => setPool(pool)} size="md">
                   Lend
                 </Button>
               ),

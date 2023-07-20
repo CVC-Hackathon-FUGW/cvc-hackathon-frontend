@@ -108,3 +108,9 @@ export interface MarketItemData {
   sold?: boolean;
   is_active?: boolean;
 }
+
+export interface WrappedPool {
+  loan_count: string;
+  loan_max_amount: bigint;
+  pool: Pool;
+}

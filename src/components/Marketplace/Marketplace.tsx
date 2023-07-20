@@ -1,6 +1,5 @@
-import { Button, Input, Title } from '@mantine/core';
+import { Button, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { marketToContract } from 'src/helpers/transform.market-item';
@@ -47,9 +46,11 @@ export default function Marketplace() {
         <Title>MARKETPLACE</Title>
       </div>
       <div className="flex flex-row items-center justify-center">
-        <Button onClick={open} size='lg' className='w-[200px]'>List NFT</Button>
+        <Button onClick={open} size="lg" className="w-[200px]">
+          List NFT
+        </Button>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {(collectionId ? marketItemsAddress : marketItems)?.map(
           ({ nftContract, ...rest }) => (
             <NFTCard
