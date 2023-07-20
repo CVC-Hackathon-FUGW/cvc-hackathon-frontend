@@ -38,8 +38,6 @@ export default function Marketplace() {
     enabled: !!collection?.token_address,
   });
 
-  console.log(marketItemsAddress);
-
   return (
     <div className="container flex flex-col gap-4 pl-20 pr-20">
       <div className="flex justify-center mb-4">

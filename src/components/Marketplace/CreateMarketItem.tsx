@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Collapse,
   Group,
@@ -31,6 +32,8 @@ import {
 import NFTCard from './NFTCard';
 import NFTCollection from './NFTCollection';
 import { ListNftContractParams, MarketNft } from './types';
+import useMerchantId from 'src/hooks/useMerchantId';
+import PayPalMerchantId from '../common/PayPalMerchantId';
 
 interface CreateMarketItemProps {
   opened: boolean;
@@ -44,6 +47,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
 
   const { address } = useAccount();
   const [{ isPending }] = usePayPalScriptReducer();
+  const merchantId = useMerchantId();
 
   const { onSubmit, getInputProps, values } = useForm({
     initialValues: {
@@ -193,6 +197,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
                   price: values.price.toString(),
                   nftContract: selectedNft?.nftContract,
                   tokenId: selectedNft?.tokenId,
+                  merchantId,
                 })
               )}
             >
@@ -211,17 +216,25 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
                 {...getInputProps('isVisaAccepted', { type: 'checkbox' })}
               />
               <Collapse in={values.isVisaAccepted}>
-                <Button
-                  variant="light"
-                  component="a"
-                  href={sellerRedirectUrl}
-                  target="_blank"
-                >
-                  Sign up for
-                  <PayPalMarks fundingSource="paypal" />
-                </Button>
+                {merchantId ? (
+                  <PayPalMerchantId merchantId={merchantId} size="lg" />
+                ) : (
+                  <Button
+                    variant="light"
+                    component="a"
+                    href={sellerRedirectUrl}
+                    target="_blank"
+                  >
+                    Sign up for
+                    <PayPalMarks fundingSource="paypal" />
+                  </Button>
+                )}
               </Collapse>
-              <Button type="submit" className="mt-auto">
+              <Button
+                type="submit"
+                className="mt-auto"
+                disabled={values.isVisaAccepted && !merchantId}
+              >
                 List NFT
               </Button>
               <LoadingOverlay visible={isPending} />
