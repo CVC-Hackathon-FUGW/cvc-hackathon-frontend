@@ -95,7 +95,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="container">
+    <div className="container" style={{ padding: '20px 70px' }}>
       <Title>Mortgages</Title>
       <Group position="right">
         <Button onClick={() => setCreateAction('pool')}>Create Pool</Button>

@@ -87,11 +87,9 @@ export default function Borrow() {
         <div style={{ maxWidth: '990px' }}>
           <Title size="3.2rem">Make loan offers on NFT collections.</Title>
           <Text fz="lg">
-            Browse collections below, and name your price. The current best
-            offer will be shown to borrowers. To take your offer, they lock in
-            an NFT from that collection to use as collateral. You will be repaid
-            at the end of the loan, plus interest. If they fail to repay, you
-            get to keep the NFT.
+            When a borrower accepts your offer, the NFT will be sent to the smart contract.
+            You will receive payment for the entire XCR (debt with interest) when the loan is paid off.
+            You can foreclose in the event of a default, which will transfer the collateral NFT to your wallet.
           </Text>
         </div>
         <div style={{ marginTop: '40px', marginBottom: '40px' }}>

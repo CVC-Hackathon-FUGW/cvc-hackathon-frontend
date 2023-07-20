@@ -62,7 +62,7 @@ const CheckIn = () => {
   });
 
   return (
-    <div className="container flex flex-col gap-4">
+    <div className="container flex flex-col gap-4" style={{ padding: '20px 70px' }}>
       <Card
         shadow="sm"
         padding="xl"
@@ -80,10 +80,9 @@ const CheckIn = () => {
           </ShowAddress>
         </div>
         <Text fz="lg">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis,
-          libero eius quod quos eligendi dolores optio eaque voluptatem corporis
-          maiores tempora ducimus exercitationem, recusandae dolorum molestias
-          rem rerum sit ipsam.
+          You can check in once a day. Each time you check in, you will receive 100 RENT,
+          and you can use RENT to exchange to XCR,
+          NFT and so much gifts will be added later.
         </Text>
         <Group position="center" className="flex flex-row gap-4">
           <Button

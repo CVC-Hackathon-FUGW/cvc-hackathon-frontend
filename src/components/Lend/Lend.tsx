@@ -72,7 +72,7 @@ export default function Lend() {
   }, 400);
 
   const { data: pools } = useQuery<Pool[]>({
-    queryKey: ['pools',nameSearch],
+    queryKey: ['pools', nameSearch],
     queryFn: () => api.get(`/pools?name=${nameSearch}`),
   });
 
@@ -83,15 +83,14 @@ export default function Lend() {
         close={() => setPool(undefined)}
         data={pool}
       />
-      <div className="container">
+      <div className="container" style={{ padding: '20px 70px' }}>
         <div style={{ maxWidth: '990px' }}>
           <Title size="3.2rem">Make loan offers on NFT collections.</Title>
           <Text fz="lg">
-            Browse collections below, and name your price. The current best
-            offer will be shown to borrowers. To take your offer, they lock in
-            an NFT from that collection to use as collateral. You will be repaid
-            at the end of the loan, plus interest. If they fail to repay, you
-            get to keep the NFT.
+            Choose your pricing while perusing the collections below.
+            Borrowers will be presented with the current best offer.
+            The smart contract take one NFT from that collection to be used as collateral in order to accept your offer.
+            At the end of the loan, you will be paid back plus interest. In that case, you are allowed to maintain the NFT.
           </Text>
         </div>
         <div style={{ marginTop: '40px', marginBottom: '40px' }}>
