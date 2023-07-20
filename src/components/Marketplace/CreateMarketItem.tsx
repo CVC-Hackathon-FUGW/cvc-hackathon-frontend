@@ -1,5 +1,4 @@
 import {
-  Badge,
   Button,
   Collapse,
   Group,
@@ -20,6 +19,7 @@ import {
   contractMarket,
 } from 'src/configs/contract';
 import { sellerRedirectUrl } from 'src/configs/payment';
+import useMerchantId from 'src/hooks/useMerchantId';
 import api from 'src/services/api';
 import { Collection, Nft } from 'src/types';
 import { parseEther, zeroAddress } from 'viem';
@@ -29,11 +29,10 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
+import PayPalMerchantId from '../common/PayPalMerchantId';
 import NFTCard from './NFTCard';
 import NFTCollection from './NFTCollection';
 import { ListNftContractParams, MarketNft } from './types';
-import useMerchantId from 'src/hooks/useMerchantId';
-import PayPalMerchantId from '../common/PayPalMerchantId';
 
 interface CreateMarketItemProps {
   opened: boolean;
