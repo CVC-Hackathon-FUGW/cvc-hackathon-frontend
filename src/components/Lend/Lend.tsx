@@ -104,7 +104,7 @@ export default function Lend() {
         </div>
 
         <DataTable
-          records={pools?.filter(({ pool: { state } }) => state) || []}
+          records={pools?.filter(({ pool }) => pool?.state) || []}
           columns={[
             ...columns,
             {
