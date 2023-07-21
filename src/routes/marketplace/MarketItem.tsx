@@ -1,14 +1,17 @@
 import { Avatar, Button, Image, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import { PayPalButtons } from '@paypal/react-paypal-js';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ShowAddress from 'src/components/common/ShowAddress';
 import { abiNft, contractMarket } from 'src/configs/contract';
 import { getNftSrc } from 'src/helpers/get-nft-src';
 import api from 'src/services/api';
 import { Collection, MarketItemData, NftMetadata } from 'src/types';
+import { xrcRate } from 'src/utils/contains';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
@@ -16,6 +19,7 @@ import { useAccount, useContractRead, useContractWrite } from 'wagmi';
 const MarketItem = () => {
   const { itemId } = useParams();
   const { address } = useAccount();
+  const navigate = useNavigate();
 
   const { data: marketItem } = useQuery<MarketItemData>({
     queryKey: ['MarketItemData', itemId],
@@ -32,6 +36,8 @@ const MarketItem = () => {
     is_offerable,
     current_offer_value,
     current_offerer,
+    accept_visa_payment,
+    merchant_id,
   } = {
     ...marketItem,
   };
@@ -71,7 +77,7 @@ const MarketItem = () => {
     validate: {
       offer: (value) =>
         Number(value) < numCurrentOfferValue
-          ? 'Offer must be higher than current offer'
+          ? 'New offer must be higher than current offer'
           : null,
     },
   });
@@ -88,6 +94,10 @@ const MarketItem = () => {
     ...contractMarket,
     functionName: 'Buy',
     account: address,
+  });
+  const { writeAsync: instantBuy } = useContractWrite({
+    ...contractMarket,
+    functionName: 'InstantBuy',
   });
 
   const { writeAsync: offerNft } = useContractWrite({
@@ -108,6 +118,7 @@ const MarketItem = () => {
   const { mutateAsync: deleteMarketItem } = useMutation({
     mutationKey: ['deleteMarketItem'],
     mutationFn: (id: number) => api.delete(`/marketItems/${id}`),
+    onSuccess: () => navigate(-1),
   });
   const { mutateAsync: updateMarketItem } = useMutation({
     mutationKey: ['updateMarketItem'],
@@ -118,6 +129,8 @@ const MarketItem = () => {
     mutationFn: (params: Partial<Collection>) =>
       api.patch(`/marketCollections`, params),
   });
+
+  console.log(merchant_id);
 
   return (
     <div className="container grid place-items-center">
@@ -141,6 +154,7 @@ const MarketItem = () => {
                         ? 'Be the first!'
                         : current_offerer
                     }
+                    canBeCopied={current_offerer !== zeroAddress}
                   >
                     Current offerer:
                   </ShowAddress>
@@ -173,12 +187,6 @@ const MarketItem = () => {
                     args: [nftContract, itemId],
                   });
                   await deleteMarketItem(Number(itemId));
-                  if (collection?.collection_id && price) {
-                    await updateCollection({
-                      collection_id: collection?.collection_id,
-                      volume: BigInt(collection?.volume) + BigInt(price),
-                    });
-                  }
                 }}
               >
                 Cancel Listing
@@ -189,12 +197,18 @@ const MarketItem = () => {
               <Button
                 disabled={sold}
                 onClick={async () => {
-                  buyNft({
-                    value: price,
+                  if (!price) return;
+                  await buyNft({
+                    value: BigInt(price),
                     args: [nftContract, itemId],
                   });
                   await deleteMarketItem(Number(itemId));
-                  // updateCollection({});
+                  if (collection?.collection_id && price) {
+                    await updateCollection({
+                      collection_id: collection?.collection_id,
+                      volume: BigInt(collection?.volume) + BigInt(price),
+                    });
+                  }
                 }}
               >
                 Buy
@@ -212,6 +226,7 @@ const MarketItem = () => {
                     await updateMarketItem({
                       item_id: Number(itemId),
                       current_offer_value: value,
+                      current_offerer: address,
                     });
                   })}
                 >
@@ -227,6 +242,7 @@ const MarketItem = () => {
                         ? 'Be the first!'
                         : current_offerer
                     }
+                    canBeCopied={current_offerer !== zeroAddress}
                   >
                     Current offerer:
                   </ShowAddress>
@@ -240,12 +256,56 @@ const MarketItem = () => {
                   </Button>
                 </form>
               )}
+              {accept_visa_payment && (
+                <PayPalButtons
+                  createOrder={(_, actions) => {
+                    if (!price || !merchant_id)
+                      return Promise.reject({
+                        name: 'Price or merchant id is not defined',
+                      });
+                    return actions.order.create({
+                      intent: 'CAPTURE',
+                      purchase_units: [
+                        {
+                          amount: {
+                            value: (
+                              Number(formatEther(price || 0n)) * xrcRate
+                            ).toFixed(2),
+                          },
+                          payee: {
+                            merchant_id,
+                          },
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={async (_, actions) => {
+                    await actions.order?.capture();
+                    await instantBuy({
+                      args: [nftContract, itemId, true],
+                    });
+                    await deleteMarketItem(Number(itemId));
+                    if (collection?.collection_id && price) {
+                      await updateCollection({
+                        collection_id: collection?.collection_id,
+                        volume: BigInt(collection?.volume) + BigInt(price),
+                      });
+                    }
+                  }}
+                  onError={(err: any) =>
+                    notifications.show({
+                      message: err.name,
+                      color: 'red',
+                    })
+                  }
+                />
+              )}
             </div>
           )}
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex flex-row items-center gap-1">
-            <Avatar radius="xl" />
+            <Avatar size="lg" radius="xl" src={collection?.image} />
             <Text>{collectionName}</Text>
           </div>
           <Text size="xl" weight="bolder">

@@ -23,12 +23,12 @@ const ShowAddress = ({
         if (canBeCopied) {
           copy(address);
           notifications.show({
-            title: 'Address copied',
+            title: 'Copied',
             message: 'You can paste it anywhere now',
           });
         }
       }}
-      className="cursor-pointer"
+      className={`${canBeCopied ? 'cursor-pointer' : ''}`}
       {...rest}
     >
       {children} {truncateMiddle(address, { length })}

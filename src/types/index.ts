@@ -107,6 +107,7 @@ export interface MarketItemData {
   current_offerer?: string;
   sold?: boolean;
   is_active?: boolean;
+  merchant_id?: string;
 }
 
 export interface WrappedPool {
