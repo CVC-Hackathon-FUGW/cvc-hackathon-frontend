@@ -1,24 +1,22 @@
-import { Button, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { marketToContract } from 'src/helpers/transform.market-item';
 import api from 'src/services/api';
 import { Collection } from 'src/types';
-import CreateMarketItem from './CreateMarketItem';
 import NFTCard from './NFTCard';
 import { MarketNft } from './types';
 
 export default function Marketplace() {
-  const [opened, { close, open }] = useDisclosure();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const collectionId = searchParams.get('collectionId');
+
+  const { collectionId } = useParams();
+  console.log(collectionId);
 
   const { data: marketItems } = useQuery({
     queryKey: ['fetchMarketItems'],
     queryFn: () => api.get<void, MarketNft[]>('/marketItems'),
-    select: (data) => data.map((item) => marketToContract(item)) || [],
+    select: (data) => data?.map((item) => marketToContract(item)) || [],
   });
 
   const { data: collection } = useQuery({
@@ -34,7 +32,7 @@ export default function Marketplace() {
       api.get<void, MarketNft[]>(
         `/marketItems/address/${collection?.token_address}`
       ),
-    select: (data) => data.map((item) => marketToContract(item)) || [],
+    select: (data) => data?.map((item) => marketToContract(item)) || [],
     enabled: !!collection?.token_address,
   });
 
@@ -43,11 +41,7 @@ export default function Marketplace() {
       <div className="flex justify-center mb-4">
         <Title>MARKETPLACE</Title>
       </div>
-      <div className="flex flex-row items-center justify-center">
-        <Button onClick={open} size="lg" className="w-[200px]">
-          List NFT
-        </Button>
-      </div>
+      <div className="flex flex-row items-center justify-center"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {(collectionId ? marketItemsAddress : marketItems)?.map(
           ({ nftContract, ...rest }) => (
@@ -64,7 +58,6 @@ export default function Marketplace() {
           )
         )}
       </div>
-      <CreateMarketItem opened={opened} onClose={close} />
     </div>
   );
 }

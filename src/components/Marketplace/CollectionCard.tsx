@@ -9,7 +9,7 @@ export default function CollectionCard({
 }) {
   const navigate = useNavigate();
   const handleClickCollection = () => {
-    navigate(`/marketplace?collectionId=${collection.collection_id}`);
+    navigate(`/marketplace/collection/${collection.collection_id}`);
   };
 
   return (

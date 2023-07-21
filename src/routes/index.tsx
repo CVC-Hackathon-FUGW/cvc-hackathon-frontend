@@ -36,11 +36,11 @@ const router: RouteProps[] = [
   },
   {
     path: '/marketplace',
-    element: <MarketplacePage />,
+    element: <MarketplaceCollectionPage />,
   },
   {
-    path: '/marketplace/collection',
-    element: <MarketplaceCollectionPage />,
+    path: '/marketplace/collection/:collectionId',
+    element: <MarketplacePage />,
   },
   {
     path: '/marketplace/:itemId/details',

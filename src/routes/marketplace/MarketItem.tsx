@@ -51,7 +51,7 @@ const MarketItem = () => {
   });
 
   const { data } = useQuery<NftMetadata>({
-    queryKey: ['nft', uri],
+    queryKey: ['get-marketItem', uri],
     queryFn: async () => uri && axios.get(uri).then((res) => res.data),
     enabled: !!uri,
   });
@@ -83,7 +83,7 @@ const MarketItem = () => {
   });
 
   const { data: collection } = useQuery({
-    queryKey: ['get-marketItems'],
+    queryKey: ['get-marketCollections'],
     queryFn: () => api.get<void, Collection[]>('/marketCollections'),
     initialData: [],
     select: (data) =>

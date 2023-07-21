@@ -116,7 +116,9 @@ const MyHeader = () => {
                   }}
                 >
                   <Text
-                    variant={pathname === `/${value}` ? 'gradient' : 'text'}
+                    variant={
+                      pathname?.split('/')[1] === value ? 'gradient' : 'text'
+                    }
                     key={label}
                     className={classes.link}
                   >

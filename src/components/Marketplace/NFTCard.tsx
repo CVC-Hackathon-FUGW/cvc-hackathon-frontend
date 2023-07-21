@@ -43,7 +43,11 @@ const NFTCard = (props: NFTCardProps) => {
       bg={selectedNft?.tokenId === tokenId ? 'cyan' : undefined}
     >
       <Card.Section>
-        <Image src={getNftSrc(data?.image)} alt="Norway" />
+        <Image
+          src={getNftSrc(data?.image)}
+          alt={data?.name || 'NFT Image'}
+          withPlaceholder
+        />
       </Card.Section>
       <Group position="apart" mt="md" mb="xs">
         <Text weight={500}>{data?.name}</Text>
