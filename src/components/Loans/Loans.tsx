@@ -11,6 +11,7 @@ import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
+import { calTimeRemain } from 'src/helpers/cal-time-remain';
 
 const columns = [
   {
@@ -18,7 +19,7 @@ const columns = [
     width: '15%',
     titleStyle: { fontSize: '25px' },
     render: ({ duration }: Loan) => (
-      <Text weight={700}>{Number(duration)}d</Text>
+      <Text weight={'bold'}>{Number(duration)}d</Text>
     ),
   },
   {
@@ -28,7 +29,7 @@ const columns = [
     render: ({ start_time }: Loan) => {
       const unixTime = Number(start_time);
       return (
-        <Text weight={700}>
+        <Text weight={'bold'}>
           {unixTime > 0 ? new Date(unixTime * 1000).toLocaleDateString() : '-'}
         </Text>
       );
@@ -40,17 +41,16 @@ const columns = [
     titleStyle: { fontSize: '25px' },
     render: ({ start_time, duration }: Loan) => {
       if (Number(start_time) === 0) {
-        return <Text weight={700}>-</Text>;
+        return <Text weight={'bold'}>-</Text>;
       }
 
-      const unixTime =
-        Number(start_time) +
-        Number(duration) * 86400 -
-        Math.floor(Date.now() / 1000);
+      const unixTime = calTimeRemain(duration, start_time);
 
       return (
-        <Text weight={700}>
-          {dayjs.duration(unixTime, 'seconds').format('D[d] H[h] m[m]')}
+        <Text weight={'bold'}>
+          {unixTime > 0
+            ? dayjs.duration(unixTime, 'seconds').format('D[d] H[h] m[m]')
+            : 'Passed'}
         </Text>
       );
     },
@@ -59,7 +59,9 @@ const columns = [
     accessor: 'borrower',
     titleStyle: { fontSize: '25px' },
     render: ({ borrower }: Loan) => (
-      <Text>{borrower === zeroAddress ? '-' : truncateMiddle(borrower)}</Text>
+      <Text weight={'bold'}>
+        {borrower === zeroAddress ? '-' : truncateMiddle(borrower)}
+      </Text>
     ),
   },
   {
@@ -67,7 +69,7 @@ const columns = [
     width: '20%',
     titleStyle: { fontSize: '25px' },
     render: ({ amount }: Loan) => (
-      <Text weight={700}>{formatEther(amount)}</Text>
+      <Text weight={'bold'}>{formatEther(amount)}</Text>
     ),
   },
 ];
@@ -141,7 +143,7 @@ export default function Loans() {
             <Text size="14px" weight={500} color="grey">
               BORROW PRICE
             </Text>
-            <Text size="36px" weight={700}>
+            <Text size="36px" weight={'bold'}>
               XCR {formatEther(borrowPrice)}
             </Text>
           </Card>
@@ -189,7 +191,7 @@ export default function Loans() {
               }
 
               return (
-                <Text weight={700}>
+                <Text weight={'bold'}>
                   {calculateInterest(
                     Number(formatEther(amount)),
                     Number(pool?.apy),
@@ -202,9 +204,15 @@ export default function Loans() {
           {
             accessor: ' ',
             width: '10%',
-            render: (loan) => (
-              <Button onClick={() => handlePay(loan)}>Pay</Button>
-            ),
+            render: (loan) => {
+              const { start_time, duration } = loan;
+              const unixTime = calTimeRemain(duration, start_time);
+              if (unixTime < 0) {
+                return null;
+              }
+
+              return <Button onClick={() => handlePay(loan)}>Pay</Button>;
+            },
           },
         ]}
       />

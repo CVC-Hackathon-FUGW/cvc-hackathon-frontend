@@ -36,8 +36,11 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ loan_max_amount }: WrappedPool) =>
-      formatEther(loan_max_amount || 0n),
+    render: ({ loan_max_amount }: WrappedPool) => (
+      <Text size="lg" weight={700}>
+        {formatEther(loan_max_amount || 0n)}
+      </Text>
+    ),
   },
   {
     accessor: 'APY',
@@ -45,7 +48,7 @@ const columns = [
     sortable: true,
     titleStyle: { fontSize: '25px' },
     render: ({ pool: { apy } }: WrappedPool) => (
-      <Text size="30px" weight={700} color="green">
+      <Text size="lg" weight={700} color="green">
         {Number(apy)}%
       </Text>
     ),
@@ -56,7 +59,7 @@ const columns = [
     sortable: true,
     titleStyle: { fontSize: '25px' },
     render: ({ pool: { duration } }: WrappedPool) => (
-      <Text size="30px" weight={700}>
+      <Text size="lg" weight={700}>
         {Number(duration)}d
       </Text>
     ),

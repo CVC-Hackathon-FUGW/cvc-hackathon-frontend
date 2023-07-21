@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
 import api from 'src/services/api';
-import { Pool } from 'src/types';
+import { Pool, WrappedPool } from 'src/types';
 import { formatEther } from 'viem';
 import AvailablePool from '../Lend/AvailablePool';
 import Collection from '../Lend/Collection';
@@ -17,7 +17,7 @@ const columns = [
     width: '25%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ collection_name, image }: Pool) => (
+    render: ({ pool: { collection_name, image } }: WrappedPool) => (
       <Collection name={collection_name} img={image} />
     ),
   },
@@ -26,10 +26,10 @@ const columns = [
     width: '20%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ total_pool_amount }: Pool) => (
+    render: ({ pool: { total_pool_amount }, loan_count }: WrappedPool) => (
       <AvailablePool
         number={formatEther(total_pool_amount || 0n)}
-        description="1344 of 1410 offers taken"
+        description={loan_count}
       />
     ),
   },
@@ -38,16 +38,18 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: () => {
-      return 'Pending';
-    },
+    render: ({ loan_max_amount }: WrappedPool) => (
+      <Text size="lg" weight={700}>
+        {formatEther(loan_max_amount || 0n)}
+      </Text>
+    ),
   },
   {
     accessor: 'APY',
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ apy }: Pool) => (
+    render: ({ pool: { apy } }: WrappedPool) => (
       <Text size="30px" weight={700} color="green">
         {Number(apy)}%
       </Text>
@@ -58,7 +60,7 @@ const columns = [
     width: '15%',
     sortable: true,
     titleStyle: { fontSize: '25px' },
-    render: ({ duration }: Pool) => (
+    render: ({ pool: { duration } }: WrappedPool) => (
       <Text size="30px" weight={700}>
         {Number(duration)}d
       </Text>
@@ -72,9 +74,9 @@ export default function Borrow() {
   const handleSearch = debounce((value) => {
     setNameSearch(value.target.value);
   }, 400);
-  const { data: pools } = useQuery<Pool[]>({
+  const { data: pools } = useQuery<WrappedPool[]>({
     queryKey: ['pools', nameSearch],
-    queryFn: () => api.get(`/pools?name=${nameSearch}`),
+    queryFn: () => api.get(`/pools/loan?name=${nameSearch}`),
   });
   return (
     <>
@@ -105,14 +107,14 @@ export default function Borrow() {
         </div>
 
         <DataTable
-          records={pools?.filter(({ state }) => state) || []}
+          records={pools?.filter(({ pool }) => pool?.state) || []}
           columns={[
             ...columns,
             {
               accessor: ' ',
               width: '10%',
               render: (dataPool) => (
-                <Button onClick={() => setPool(dataPool)} size="md">
+                <Button onClick={() => setPool(dataPool.pool)} size="md">
                   Borrow
                 </Button>
               ),
