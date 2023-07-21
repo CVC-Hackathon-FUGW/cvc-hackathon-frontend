@@ -2,7 +2,7 @@ import HeroImage from './components/Hero';
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="container">
       <HeroImage />
     </div>
   );

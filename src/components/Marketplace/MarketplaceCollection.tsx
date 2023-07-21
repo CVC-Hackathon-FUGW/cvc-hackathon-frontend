@@ -29,7 +29,7 @@ export default function MarketPlaceCollection() {
     return;
   });
   return (
-    <div className="pl-20 pr-20">
+    <div className="container">
       <div>
         <h1 className="text-[#7645D9]">Browse NFT Collection</h1>
 

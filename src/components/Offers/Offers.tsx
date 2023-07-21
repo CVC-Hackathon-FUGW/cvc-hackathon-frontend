@@ -138,7 +138,7 @@ export default function Offers() {
   };
 
   return (
-    <div style={{ padding: '20px 70px' }}>
+    <div className="container">
       <div style={{ maxWidth: '1200px' }}>
         <Title size="3.2rem">My offers and contracts</Title>
         <Text fz="lg">
