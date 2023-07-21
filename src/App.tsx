@@ -6,7 +6,7 @@ import {
   w3mProvider,
 } from '@web3modal/ethereum';
 import { Web3Modal } from '@web3modal/react';
-import { RouterProvider } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { WagmiConfig, configureChains, createConfig } from 'wagmi';
 import MyHeader from './components/Layout/Header';
 import { cvcTestnet } from './configs/networks';
@@ -45,11 +45,21 @@ function App() {
       <WagmiConfig config={wagmiConfig}>
         <MantineProvider withGlobalStyles withNormalizeCSS>
           <PayPalScriptProvider options={paypalOptions}>
-            <ModalsProvider>
-              <AppShell padding="md" header={<MyHeader />}>
-                <RouterProvider router={router} />
-              </AppShell>
-            </ModalsProvider>
+            <BrowserRouter>
+              <ModalsProvider>
+                <AppShell padding="md" header={<MyHeader />}>
+                  <Routes>
+                    {router.map((route) => (
+                      <Route
+                        key={route.path}
+                        path={route.path}
+                        element={route.element}
+                      />
+                    ))}
+                  </Routes>
+                </AppShell>
+              </ModalsProvider>
+            </BrowserRouter>
           </PayPalScriptProvider>
         </MantineProvider>
       </WagmiConfig>

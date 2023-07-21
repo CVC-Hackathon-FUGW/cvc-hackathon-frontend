@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { RouteProps } from 'react-router-dom';
 import NftDetails from 'src/components/Nft/NftDetails';
 import HomePage from './Home';
 import Admin from './admin/Index';
@@ -8,12 +8,12 @@ import LendPage from './lend';
 import LoansPage from './loans';
 import MarketplacePage from './marketplace';
 import MarketItem from './marketplace/MarketItem';
+import MarketplaceCollectionPage from './marketplaceCollection';
 import NftPage from './nft';
 import OffersPage from './offers';
-import MarketplaceCollectionPage from './marketplaceCollection';
 import SellerOnboarding from './seller-onboarding';
 
-const router = createBrowserRouter([
+const router: RouteProps[] = [
   {
     path: '/',
     element: <HomePage />,
@@ -67,6 +67,6 @@ const router = createBrowserRouter([
     path: '/seller-onboarding',
     element: <SellerOnboarding />,
   },
-]);
+];
 
 export default router;

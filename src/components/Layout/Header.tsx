@@ -6,6 +6,7 @@ import {
   Group,
   Header,
   Menu,
+  SegmentedControl,
   Text,
   createStyles,
   rem,
@@ -20,49 +21,53 @@ import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { useAccount, useDisconnect, useNetwork } from 'wagmi';
 import SwitchNetworkModal from './SwitchNetworkModal';
 import useAdmin from 'src/hooks/useAdmin';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const HEADER_HEIGHT = rem(60);
 
 const routes = [
   {
-    link: '/marketplace',
+    value: 'marketplace',
     label: 'Marketplace',
   },
   {
-    link: '/lend',
+    value: 'lend',
     label: 'Lend',
   },
   {
-    link: '/offers',
+    value: 'offers',
     label: 'Offers',
   },
   {
-    link: '/borrow',
+    value: 'borrow',
     label: 'Borrow',
   },
   {
-    link: '/loans',
+    value: 'loans',
     label: 'Loans',
   },
   {
-    link: '/check-in',
+    value: 'check-in',
     label: 'Check in',
   },
 ];
 
 const adminRoutes = [
   {
-    link: '/admin',
+    value: 'admin',
     label: 'Admin',
   },
 ];
 
 const MyHeader = () => {
-  const { classes } = useStyles();
   const [openedBurger, { toggle: toggleBurger }] = useDisclosure(false);
   const [openedModal, { open: openModal, close: closeModal }] =
     useDisclosure(false);
 
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const { classes } = useStyles();
   const { copy } = useClipboard();
   const { open } = useWeb3Modal();
   const { address, isConnected } = useAccount();
@@ -89,7 +94,7 @@ const MyHeader = () => {
   }, [chain, openModal]);
 
   return (
-    <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT}>
+    <Header height={HEADER_HEIGHT} mb={HEADER_HEIGHT} sx={{ borderBottom: 0 }}>
       <Container className={classes.inner} fluid>
         <Group>
           <Menu>
@@ -102,16 +107,18 @@ const MyHeader = () => {
               />
             </Menu.Target>
             <Menu.Dropdown>
-              {roleRoutes.map(({ link, label }) => (
-                <Menu.Item key={label} onClick={toggleBurger}>
+              {roleRoutes.map(({ value, label }) => (
+                <Menu.Item
+                  key={label}
+                  onClick={() => {
+                    navigate(`/${value}`);
+                    toggleBurger();
+                  }}
+                >
                   <Text
-                    variant={
-                      window?.location?.pathname === link ? 'gradient' : 'text'
-                    }
+                    variant={pathname === `/${value}` ? 'gradient' : 'text'}
                     key={label}
-                    href={link}
                     className={classes.link}
-                    component="a"
                   >
                     {label}
                   </Text>
@@ -123,28 +130,21 @@ const MyHeader = () => {
             <Avatar src={logo} size="lg" />
           </a>
         </Group>
-        <Group spacing={5} className={classes.links}>
-          {roleRoutes.map(({ link, label }) => (
-            <Text
-              variant={
-                window?.location?.pathname === link ? 'gradient' : 'text'
-              }
-              key={label}
-              href={link}
-              className={classes.link}
-              component="a"
-            >
-              {label}
-            </Text>
-          ))}
-        </Group>
+        <SegmentedControl
+          radius="xl"
+          size="md"
+          data={roleRoutes}
+          classNames={classes}
+          value={pathname?.split('/')[1]}
+          onChange={(value) => navigate(`/${value}`)}
+        />
         <Menu shadow="md" trigger="hover">
           <Menu.Target>
             <Button
               radius="xl"
-              h={30}
               variant="gradient"
               onClick={isConnected ? undefined : open}
+              className={classes.button}
             >
               {truncateMiddle(address) || `Connect Wallet`}
             </Button>
@@ -178,6 +178,41 @@ const MyHeader = () => {
 export default MyHeader;
 
 const useStyles = createStyles((theme) => ({
+  root: {
+    backgroundColor:
+      theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+    boxShadow: theme.shadows.md,
+    border: `${rem(1)} solid ${
+      theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1]
+    }`,
+    [theme.fn.smallerThan('md')]: {
+      display: 'none',
+    },
+  },
+
+  indicator: {
+    backgroundImage: theme.fn.gradient(),
+  },
+
+  control: {
+    border: '0 !important',
+  },
+  button: {
+    backgroundColor:
+      theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+    boxShadow: theme.shadows.md,
+    border: `${rem(1)} solid ${
+      theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[1]
+    }`,
+  },
+
+  label: {
+    '&, &:hover': {
+      '&[data-active]': {
+        color: theme.white,
+      },
+    },
+  },
   inner: {
     height: HEADER_HEIGHT,
     display: 'flex',
@@ -185,14 +220,8 @@ const useStyles = createStyles((theme) => ({
     alignItems: 'center',
   },
 
-  links: {
-    [theme.fn.smallerThan('sm')]: {
-      display: 'none',
-    },
-  },
-
   burger: {
-    [theme.fn.largerThan('sm')]: {
+    [theme.fn.largerThan('md')]: {
       display: 'none',
     },
   },

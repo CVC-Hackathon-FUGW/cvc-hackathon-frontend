@@ -62,7 +62,10 @@ const CheckIn = () => {
   });
 
   return (
-    <div className="container flex flex-col gap-4" style={{ padding: '20px 70px' }}>
+    <div
+      className="container flex flex-col gap-4"
+      style={{ padding: '20px 70px' }}
+    >
       <Card
         shadow="sm"
         padding="xl"
@@ -80,9 +83,9 @@ const CheckIn = () => {
           </ShowAddress>
         </div>
         <Text fz="lg">
-          You can check in once a day. Each time you check in, you will receive 100 RENT,
-          and you can use RENT to exchange to XCR,
-          NFT and so much gifts will be added later.
+          You can check in once a day. Each time you check in, you will receive
+          100 RENT, and you can use RENT to exchange to XCR, NFT and so much
+          gifts will be added later.
         </Text>
         <Group position="center" className="flex flex-row gap-4">
           <Button
@@ -92,9 +95,13 @@ const CheckIn = () => {
           >
             Check in
           </Button>
-          <Badge>
-            {dayjs.duration(count, 'seconds').format('D[d] H[h] m[m]')} left
-          </Badge>
+          {count > 0 ? (
+            <Badge>
+              {dayjs.duration(count, 'seconds').format('D[d] H[h] m[m]')} left
+            </Badge>
+          ) : (
+            <Badge>You can check in now</Badge>
+          )}
         </Group>
         <form
           className="flex flex-col gap-8"
