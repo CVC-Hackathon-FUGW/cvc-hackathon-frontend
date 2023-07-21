@@ -83,11 +83,9 @@ const MarketItem = () => {
   });
 
   const { data: collection } = useQuery({
-    queryKey: ['get-marketCollections'],
-    queryFn: () => api.get<void, Collection[]>('/marketCollections'),
-    initialData: [],
-    select: (data) =>
-      data?.find(({ token_address }) => token_address === nftContract),
+    queryKey: ['get-marketCollection', nftContract],
+    queryFn: () =>
+      api.get<void, Collection>(`/marketCollections/address/${nftContract}`),
   });
 
   const { writeAsync: buyNft } = useContractWrite({
