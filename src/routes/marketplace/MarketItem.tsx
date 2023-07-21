@@ -85,7 +85,9 @@ const MarketItem = () => {
   const { data: collection } = useQuery({
     queryKey: ['get-marketCollection', nftContract],
     queryFn: () =>
-      api.get<void, Collection>(`/marketCollections/address/${nftContract}`),
+      api.get<void, Collection[]>(`/marketCollections/address/${nftContract}`),
+    initialData: [{}] as Collection[],
+    select: (data) => data[0],
   });
 
   const { writeAsync: buyNft } = useContractWrite({
@@ -128,8 +130,6 @@ const MarketItem = () => {
       api.patch(`/marketCollections`, params),
   });
 
-  console.log(merchant_id);
-
   return (
     <div className="container grid place-items-center">
       <div className="flex flex-row gap-6">
@@ -162,15 +162,14 @@ const MarketItem = () => {
                       await acceptOffer({
                         args: [nftContract, itemId],
                       });
+
+                      await updateCollection({
+                        collection_id: collection?.collection_id,
+                        volume:
+                          BigInt(collection.volume!) +
+                          BigInt(current_offer_value!),
+                      });
                       await deleteMarketItem(Number(itemId));
-                      if (collection?.collection_id && current_offer_value) {
-                        await updateCollection({
-                          collection_id: collection?.collection_id,
-                          volume:
-                            BigInt(collection?.volume) +
-                            BigInt(current_offer_value),
-                        });
-                      }
                     }}
                   >
                     Accept Offer ({numCurrentOfferValue} XCR)
@@ -200,13 +199,12 @@ const MarketItem = () => {
                     value: BigInt(price),
                     args: [nftContract, itemId],
                   });
+
+                  await updateCollection({
+                    collection_id: collection?.collection_id,
+                    volume: BigInt(collection?.volume) + BigInt(price),
+                  });
                   await deleteMarketItem(Number(itemId));
-                  if (collection?.collection_id && price) {
-                    await updateCollection({
-                      collection_id: collection?.collection_id,
-                      volume: BigInt(collection?.volume) + BigInt(price),
-                    });
-                  }
                 }}
               >
                 Buy
@@ -282,13 +280,11 @@ const MarketItem = () => {
                     await instantBuy({
                       args: [nftContract, itemId, true],
                     });
+                    await updateCollection({
+                      collection_id: collection?.collection_id,
+                      volume: BigInt(collection?.volume) + BigInt(price!),
+                    });
                     await deleteMarketItem(Number(itemId));
-                    if (collection?.collection_id && price) {
-                      await updateCollection({
-                        collection_id: collection?.collection_id,
-                        volume: BigInt(collection?.volume) + BigInt(price),
-                      });
-                    }
                   }}
                   onError={(err: any) =>
                     notifications.show({
