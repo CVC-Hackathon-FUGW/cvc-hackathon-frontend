@@ -7,6 +7,7 @@ import { ContractNft, Nft } from 'src/types';
 import { xrcRate } from 'src/utils/contains';
 import { formatEther } from 'viem';
 import { useContractRead } from 'wagmi';
+import 'src/styles/nft-card.css';
 
 interface NFTCardProps extends Partial<ContractNft> {
   selectedNft?: Nft;
@@ -33,41 +34,45 @@ const NFTCard = (props: NFTCardProps) => {
   });
 
   return (
-    <Card
-      shadow="sm"
-      padding="lg"
-      radius="md"
-      withBorder
-      className="cursor-pointer grid gap-1 transition-transform duration-300 transform-gpu hover:scale-105"
-      onClick={() => onClick?.({ nftContract: nftContract!, tokenId, ...rest })}
-      bg={selectedNft?.tokenId === tokenId ? 'cyan' : undefined}
-    >
-      <Card.Section>
-        <Image
-          src={getNftSrc(data?.image)}
-          alt={data?.name || 'NFT Image'}
-          withPlaceholder
-        />
-      </Card.Section>
-      <Group position="apart" mt="md" mb="xs">
-        <Text weight={500}>{data?.name}</Text>
-        <Badge>#{tokenId?.toString()}</Badge>
-      </Group>
-      {price ? (
-        <Group position="apart" mt="xs">
-          <Text weight={500}>Price</Text>
-          <Group position="right">
-            <Text weight={500}>XRC {formatEther(price || 0n)}</Text>
-            <Text color="dimmed">
-              ≈ $ {(Number(formatEther(price)) * xrcRate).toFixed(3)}
-            </Text>
-          </Group>
+    <div className="card-container">
+      <Card
+        shadow="lg"
+        padding="lg"
+        radius="md"
+        withBorder
+        className="cursor-pointer grid gap-1 w-full card"
+        onClick={() =>
+          onClick?.({ nftContract: nftContract!, tokenId, ...rest })
+        }
+        bg={selectedNft?.tokenId === tokenId ? 'cyan' : undefined}
+      >
+        <Card.Section>
+          <Image
+            src={getNftSrc(data?.image)}
+            alt={data?.name || 'NFT Image'}
+            withPlaceholder
+          />
+        </Card.Section>
+        <Group position="apart" mt="md" mb="xs">
+          <Text weight={500}>{data?.name}</Text>
+          <Badge>#{tokenId?.toString()}</Badge>
         </Group>
-      ) : null}
-      <Text size={'xs'} color={'dimmed'} className="italic">
-        {data?.description}
-      </Text>
-    </Card>
+        {price ? (
+          <Group position="apart" mt="xs">
+            <Text weight={500}>Price</Text>
+            <Group position="right">
+              <Text weight={500}>XRC {formatEther(price || 0n)}</Text>
+              <Text color="dimmed">
+                ≈ $ {(Number(formatEther(price)) * xrcRate).toFixed(3)}
+              </Text>
+            </Group>
+          </Group>
+        ) : null}
+        <Text size={'xs'} color={'dimmed'} className="italic">
+          {data?.description}
+        </Text>
+      </Card>
+    </div>
   );
 };
 
