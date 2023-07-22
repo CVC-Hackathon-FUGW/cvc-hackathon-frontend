@@ -46,16 +46,19 @@ const routes = [
     value: 'loans',
     label: 'Loans',
   },
-  {
-    value: 'check-in',
-    label: 'Check in',
-  },
 ];
 
 const adminRoutes = [
   {
     value: 'admin',
     label: 'Admin',
+  },
+];
+
+const userRoutes = [
+  {
+    value: 'profile',
+    label: 'Profile',
   },
 ];
 
@@ -83,8 +86,13 @@ const MyHeader = () => {
   }, [copy, address]);
 
   const roleRoutes = useMemo(
-    () => (isAdmin ? [...adminRoutes, ...routes] : routes),
-    [isAdmin]
+    () =>
+      isAdmin
+        ? [...adminRoutes, ...routes]
+        : isConnected
+        ? [...userRoutes, ...routes]
+        : routes,
+    [isAdmin, isConnected]
   );
 
   useEffect(() => {

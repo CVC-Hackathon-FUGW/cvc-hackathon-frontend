@@ -10,6 +10,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import usePoolUpdate from 'src/hooks/usePoolUpdate';
@@ -33,6 +34,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
   const { apy, duration, image, pool_id, token_address, collection_name } = {
     ...data,
   };
+  const navigate = useNavigate();
   const { address } = useAccount();
   const { data: balance } = useBalance({ address, enabled: opened });
 
@@ -76,7 +78,10 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     ...contractMortgage,
     functionName: 'LenderOffer',
     account: address,
-    onSuccess: close,
+    onSuccess: () => {
+      close();
+      navigate('/offers');
+    },
   });
   console.log(pool);
 

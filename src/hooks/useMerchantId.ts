@@ -11,6 +11,9 @@ const useMerchantId = () => {
       api.get<void, { merchant_id: string }>(`/sellers/address/${address}`),
     enabled: !!address,
     select: (data) => data?.merchant_id,
+    onError: () => {
+      //
+    },
   });
 
   return merchantId;

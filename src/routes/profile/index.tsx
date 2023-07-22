@@ -1,10 +1,14 @@
 import { Badge, Button, Card, Group, Input, Text, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useInterval } from '@mantine/hooks';
+import { PayPalMarks } from '@paypal/react-paypal-js';
 import { DataTable } from 'mantine-datatable';
 import { useState } from 'react';
+import PayPalMerchantId from 'src/components/common/PayPalMerchantId';
 import ShowAddress from 'src/components/common/ShowAddress';
 import { addressCheckIn, contractCheckIn } from 'src/configs/contract';
+import { sellerRedirectUrl } from 'src/configs/payment';
+import useMerchantId from 'src/hooks/useMerchantId';
 import dayjs from 'src/utils/dayjs';
 import {
   useAccount,
@@ -13,10 +17,11 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 
-const CheckIn = () => {
+const Profile = () => {
   const { address } = useAccount();
   const [count, setCount] = useState(0);
   const { start } = useInterval(() => setCount((prev) => prev - 1), 1000 * 60);
+  const merchantId = useMerchantId();
 
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
@@ -63,7 +68,7 @@ const CheckIn = () => {
 
   return (
     <div
-      className="container flex flex-col gap-4"
+      className="container grid grid-cols-3 gap-4"
       style={{ padding: '20px 70px' }}
     >
       <Card
@@ -71,6 +76,27 @@ const CheckIn = () => {
         padding="xl"
         radius="md"
         className="flex flex-col gap-4"
+      >
+        {merchantId ? (
+          <PayPalMerchantId merchantId={merchantId} size="lg" />
+        ) : (
+          <Button
+            variant="light"
+            component="a"
+            href={sellerRedirectUrl}
+            target="_blank"
+          >
+            Sign up for
+            <PayPalMarks fundingSource="paypal" />
+          </Button>
+        )}
+      </Card>
+
+      <Card
+        shadow="sm"
+        padding="xl"
+        radius="md"
+        className="col-span-2 flex flex-col gap-4"
       >
         <div className="flex flex-row items-center justify-between">
           <Title order={1}>Check in</Title>
@@ -150,7 +176,7 @@ const CheckIn = () => {
   );
 };
 
-export default CheckIn;
+export default Profile;
 
 const convertRate = [
   {

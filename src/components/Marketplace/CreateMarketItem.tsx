@@ -9,8 +9,9 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { PayPalMarks, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { IconExternalLink } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   abiNft,
@@ -18,7 +19,6 @@ import {
   borrowPrice,
   contractMarket,
 } from 'src/configs/contract';
-import { sellerRedirectUrl } from 'src/configs/payment';
 import useMerchantId from 'src/hooks/useMerchantId';
 import api from 'src/services/api';
 import { Collection, Nft } from 'src/types';
@@ -37,10 +37,11 @@ import { ListNftContractParams, MarketNft } from './types';
 interface CreateMarketItemProps {
   opened: boolean;
   onClose: () => void;
+  collection?: Collection;
 }
 
 const CreateMarketItem = (props: CreateMarketItemProps) => {
-  const { opened, onClose } = props;
+  const { opened, onClose, collection } = props;
   const [selectedNft, setSelectedNft] = useState<Nft>();
   const [step, setStep] = useState(0);
 
@@ -54,13 +55,6 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       isVisaAccepted: false,
       isOfferable: false,
     },
-  });
-
-  const { data: listNftContract } = useQuery({
-    queryKey: ['get-marketItems'],
-    queryFn: () => api.get<void, Collection[]>('/marketCollections'),
-    initialData: [],
-    select: (data) => data?.map(({ token_address }) => token_address) || [],
   });
 
   const {
@@ -153,14 +147,11 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       >
         <Stepper.Step label="Select NFT" description="Select NFT to list">
           <div className="flex flex-col gap-4">
-            {listNftContract?.map((nftContract) => (
-              <NFTCollection
-                key={nftContract}
-                nftContract={opened ? nftContract : undefined}
-                selectedNft={selectedNft}
-                onItemClick={setSelectedNft as any}
-              />
-            ))}
+            <NFTCollection
+              nftContract={opened ? collection?.token_address : undefined}
+              selectedNft={selectedNft}
+              onItemClick={setSelectedNft as any}
+            />
           </div>
           <Group position="center" m={'md'}>
             <Button
@@ -221,11 +212,11 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
                   <Button
                     variant="light"
                     component="a"
-                    href={sellerRedirectUrl}
+                    href={'/profile'}
                     target="_blank"
+                    rightIcon={<IconExternalLink />}
                   >
-                    Sign up for
-                    <PayPalMarks fundingSource="paypal" />
+                    Connect PayPal
                   </Button>
                 )}
               </Collapse>

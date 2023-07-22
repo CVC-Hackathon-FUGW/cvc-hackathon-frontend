@@ -1,4 +1,4 @@
-import { Button, Input, Select, Title } from '@mantine/core';
+import { Input, Select, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import _, { debounce } from 'lodash';
@@ -6,13 +6,10 @@ import { useState } from 'react';
 import api from 'src/services/api';
 import { Collection } from 'src/types';
 import CollectionCard from './CollectionCard';
-import { useDisclosure } from '@mantine/hooks';
-import CreateMarketItem from './CreateMarketItem';
 
 export default function MarketPlaceCollection() {
   const [sortField, setSortField] = useState('');
   const [nameSearch, setNameSearch] = useState('');
-  const [opened, { close, open }] = useDisclosure();
 
   const { data: collections } = useQuery({
     queryKey: ['fetchMarketItems', nameSearch, sortField],
@@ -33,12 +30,8 @@ export default function MarketPlaceCollection() {
   });
   return (
     <div className="container flex flex-col gap-4">
-      <CreateMarketItem opened={opened} onClose={close} />
       <div className="flex flex-row items-center justify-between">
         <Title>Browse NFT Collection</Title>
-        <Button onClick={open} size="lg" className="w-40">
-          List NFT
-        </Button>
       </div>
       <div>
         <div className="flex items-center gap-8">

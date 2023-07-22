@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Button, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { marketToContract } from 'src/helpers/transform.market-item';
@@ -6,12 +6,13 @@ import api from 'src/services/api';
 import { Collection } from 'src/types';
 import NFTCard from './NFTCard';
 import { MarketNft } from './types';
+import { useDisclosure } from '@mantine/hooks';
+import CreateMarketItem from './CreateMarketItem';
 
 export default function Marketplace() {
   const navigate = useNavigate();
-
   const { collectionId } = useParams();
-  console.log(collectionId);
+  const [opened, { close, open }] = useDisclosure();
 
   const { data: marketItems } = useQuery({
     queryKey: ['fetchMarketItems'],
@@ -38,8 +39,20 @@ export default function Marketplace() {
 
   return (
     <div className="container flex flex-col gap-4">
-      <div className="flex justify-center mb-4">
-        <Title>MARKETPLACE</Title>
+      <CreateMarketItem
+        opened={opened}
+        onClose={close}
+        collection={collection}
+      />
+      <div className="flex flex-row items-center justify-between mb-4">
+        <Title>
+          {collectionId
+            ? collection?.collection_name
+            : 'Browse NFT Marketplace'}
+        </Title>
+        <Button onClick={open} size="lg" className="w-40">
+          List NFT
+        </Button>
       </div>
       <div className="flex flex-row items-center justify-center"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

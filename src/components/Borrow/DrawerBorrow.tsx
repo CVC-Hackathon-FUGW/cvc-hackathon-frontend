@@ -32,6 +32,7 @@ import {
   useWaitForTransaction,
 } from 'wagmi';
 import NFTCollection from '../Marketplace/NFTCollection';
+import { useNavigate } from 'react-router-dom';
 
 interface ModalLendProps {
   opened: boolean;
@@ -46,6 +47,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const [selectedNft, setSelectedNft] = useState<Nft>();
 
   const { address } = useAccount();
+  const navigate = useNavigate();
 
   const { data: allLoans } = useQuery<Loan[]>({
     queryKey: ['loans'],
@@ -68,12 +70,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     enabled: !!selectedNft?.tokenId,
     select: (value) => value === addressMortgage,
   });
-  // const { data: pool1 } = useContractRead({
-  //   ...contractMortgage,
-  //   functionName: 'idToPool',
-  //   args: [1n],
-  // });
-  // console.log(pool1);
 
   const {
     write: approve,
@@ -83,6 +79,11 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     address: token_address,
     abi: abiNft,
     functionName: 'approve',
+  });
+
+  const { isLoading, isSuccess } = useWaitForTransaction({
+    hash: allowance?.hash,
+    onSuccess: () => setStep(1),
   });
 
   const { pool, mutateAsync: updatePool } = usePoolUpdate({
@@ -102,12 +103,8 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       reset();
       close();
       setStep(0);
+      navigate('/loans');
     },
-  });
-
-  const { isLoading, isSuccess } = useWaitForTransaction({
-    hash: allowance?.hash,
-    onSuccess: () => setStep(1),
   });
 
   const loans = useMemo(() => {

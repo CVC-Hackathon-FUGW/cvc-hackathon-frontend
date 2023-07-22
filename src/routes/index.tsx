@@ -3,7 +3,7 @@ import NftDetails from 'src/components/Nft/NftDetails';
 import HomePage from './Home';
 import Admin from './admin/Index';
 import BorrowPage from './borrow';
-import CheckIn from './checkIn';
+import Profile from './profile';
 import LendPage from './lend';
 import LoansPage from './loans';
 import MarketplacePage from './marketplace';
@@ -60,8 +60,8 @@ const router: RouteProps[] = [
     element: <Admin />,
   },
   {
-    path: '/check-in',
-    element: <CheckIn />,
+    path: '/profile',
+    element: <Profile />,
   },
   {
     path: '/seller-onboarding',
