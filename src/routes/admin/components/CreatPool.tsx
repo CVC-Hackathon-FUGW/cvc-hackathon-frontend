@@ -12,6 +12,7 @@ import useImageUploader from 'src/hooks/useImageUploader';
 import api from 'src/services/api';
 import { Pool } from 'src/types';
 import { Address, useContractWrite, useWaitForTransaction } from 'wagmi';
+import { waitForTransaction } from 'wagmi/actions';
 
 interface CreatePoolProps {
   opened: boolean;
@@ -61,10 +62,12 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
             const image = await uploadImage();
 
             if (image) {
-              await create?.({
+              const data = await create?.({
                 args: [tokenAddress, BigInt(APY), BigInt(duration)],
               });
-
+              await waitForTransaction({
+                hash: data?.hash,
+              });
               await createPool({
                 apy: BigInt(APY),
                 duration: BigInt(duration),

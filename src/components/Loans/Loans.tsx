@@ -12,6 +12,7 @@ import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
 import { calTimeRemain } from 'src/helpers/cal-time-remain';
+import { waitForTransaction } from 'wagmi/actions';
 
 const columns = [
   {
@@ -114,9 +115,13 @@ export default function Loans() {
     );
 
     const value = parseEther(interest) + BigInt(borrowPrice) + BigInt(amount);
-    await pay({
+    const data = await pay({
       value,
       args: [loan.pool_id, loan.loan_id],
+    });
+
+    await waitForTransaction({
+      hash: data?.hash,
     });
 
     deleteLend(loan.loan_id);

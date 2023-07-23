@@ -23,6 +23,7 @@ import {
   useContractRead,
   useContractWrite,
 } from 'wagmi';
+import { waitForTransaction } from 'wagmi/actions';
 
 interface ModalLendProps {
   opened: boolean;
@@ -87,9 +88,12 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
 
   const handleLend = async ({ offerAmount = 0 }) => {
     const value = parseEther(offerAmount.toString());
-    await lend({
+    const data = await lend({
       value,
       args: [pool_id],
+    });
+    await waitForTransaction({
+      hash: data?.hash,
     });
     await createLend({
       amount: value,

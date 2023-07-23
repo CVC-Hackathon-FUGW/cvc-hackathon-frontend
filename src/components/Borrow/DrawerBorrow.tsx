@@ -33,6 +33,7 @@ import {
 } from 'wagmi';
 import NFTCollection from '../Marketplace/NFTCollection';
 import { useNavigate } from 'react-router-dom';
+import { waitForTransaction } from 'wagmi/actions';
 
 interface ModalLendProps {
   opened: boolean;
@@ -258,12 +259,15 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
               disabled={!selectedLoan}
               onClick={async () => {
                 if (isSuccess || approved) {
-                  await borrow({
+                  const data = await borrow({
                     args: [
                       pool_id,
                       selectedNft?.tokenId,
                       selectedLoan?.loan_id,
                     ],
+                  });
+                  await waitForTransaction({
+                    hash: data?.hash,
                   });
 
                   await updatePool({

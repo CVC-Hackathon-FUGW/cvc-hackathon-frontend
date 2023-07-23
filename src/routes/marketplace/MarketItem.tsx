@@ -15,6 +15,7 @@ import { xrcRate } from 'src/utils/contains';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import { waitForTransaction } from 'wagmi/actions';
 
 const MarketItem = () => {
   const { itemId } = useParams();
@@ -159,10 +160,12 @@ const MarketItem = () => {
                   <Button
                     disabled={sold || numCurrentOfferValue === 0}
                     onClick={async () => {
-                      await acceptOffer({
+                      const data = await acceptOffer({
                         args: [nftContract, itemId],
                       });
-
+                      await waitForTransaction({
+                        hash: data?.hash,
+                      });
                       await updateCollection({
                         collection_id: collection?.collection_id,
                         volume:
@@ -180,8 +183,11 @@ const MarketItem = () => {
                 color="red"
                 disabled={sold}
                 onClick={async () => {
-                  await cancelListing({
+                  const data = await cancelListing({
                     args: [nftContract, itemId],
+                  });
+                  await waitForTransaction({
+                    hash: data?.hash,
                   });
                   await deleteMarketItem(Number(itemId));
                 }}
@@ -195,11 +201,13 @@ const MarketItem = () => {
                 disabled={sold}
                 onClick={async () => {
                   if (!price) return;
-                  await buyNft({
+                  const data = await buyNft({
                     value: BigInt(price),
                     args: [nftContract, itemId],
                   });
-
+                  await waitForTransaction({
+                    hash: data?.hash,
+                  });
                   await updateCollection({
                     collection_id: collection?.collection_id,
                     volume: BigInt(collection?.volume) + BigInt(price),
@@ -214,9 +222,12 @@ const MarketItem = () => {
                   className="flex flex-col gap-1"
                   onSubmit={onSubmit(async ({ offer }) => {
                     const value = parseEther(offer.toString());
-                    await offerNft({
+                    const data = await offerNft({
                       value,
                       args: [itemId],
+                    });
+                    await waitForTransaction({
+                      hash: data?.hash,
                     });
 
                     await updateMarketItem({
@@ -277,8 +288,11 @@ const MarketItem = () => {
                   }}
                   onApprove={async (_, actions) => {
                     await actions.order?.capture();
-                    await instantBuy({
+                    const data = await instantBuy({
                       args: [nftContract, itemId, true],
+                    });
+                    await waitForTransaction({
+                      hash: data?.hash,
                     });
                     await updateCollection({
                       collection_id: collection?.collection_id,

@@ -13,6 +13,7 @@ import { formatEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
 import Collection from '../Lend/Collection';
 import usePoolUpdate from 'src/hooks/usePoolUpdate';
+import { waitForTransaction } from 'wagmi/actions';
 
 const columns = [
   {
@@ -96,8 +97,11 @@ export default function Offers() {
       title: 'Revoke offer',
       centered: true,
       onConfirm: async () => {
-        await revoke({
+        const data = await revoke({
           args: [pool_id, loan_id],
+        });
+        await waitForTransaction({
+          hash: data?.hash,
         });
         const pool = await api.get<void, Pool>(`/pools/${pool_id}`);
         await updatePool({
@@ -124,8 +128,11 @@ export default function Offers() {
   });
 
   const handleClaim = async (loan: Loan) => {
-    await claim({
+    const data = await claim({
       args: [loan.pool_id, loan.loan_id],
+    });
+    await waitForTransaction({
+      hash: data?.hash,
     });
     const pool = await api.get<void, Pool>(`/pools/${loan.pool_id}`);
     await updatePool({

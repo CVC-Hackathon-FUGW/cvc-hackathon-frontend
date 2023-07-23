@@ -12,6 +12,7 @@ import { contractMortgage } from 'src/configs/contract';
 import api from 'src/services/api';
 import { Pool } from 'src/types';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import { waitForTransaction } from 'wagmi/actions';
 
 interface EditPoolProps {
   opened: boolean;
@@ -54,8 +55,11 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
           async ({ APY, duration, state, collection_name }) => {
             const _poolId = editingPool?.pool_id;
 
-            await update?.({
+            const data = await update?.({
               args: [_poolId, BigInt(APY), BigInt(duration), state],
+            });
+            await waitForTransaction({
+              hash: data?.hash,
             });
             updatePool({
               ...editingPool,
