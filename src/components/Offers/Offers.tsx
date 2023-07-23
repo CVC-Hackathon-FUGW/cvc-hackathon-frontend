@@ -11,9 +11,8 @@ import { Loan, Pool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
-import Collection from '../Lend/Collection';
-import usePoolUpdate from 'src/hooks/usePoolUpdate';
 import { waitForTransaction } from 'wagmi/actions';
+import Collection from '../Lend/Collection';
 
 const columns = [
   {
@@ -85,14 +84,14 @@ export default function Offers() {
     ...contractMortgage,
     functionName: 'LenderRevokeOffer',
   });
-  const { mutateAsync: deleteLend } = useMutation({
-    mutationKey: ['delete-lend'],
-    mutationFn: (id?: number) => api.delete(`/loans/${id}`),
+
+  const { mutateAsync: deleteLoan } = useMutation({
+    mutationKey: ['delete-loan'],
+    mutationFn: ({ id, withPool }: { id?: number; withPool?: boolean }) =>
+      api.delete(`/loans/${id}?with-pool=${withPool}`),
   });
 
-  const { mutateAsync: updatePool } = usePoolUpdate({});
-
-  const openRevokeModal = ({ pool_id, loan_id, amount }: Loan) => {
+  const openRevokeModal = ({ pool_id, loan_id }: Loan) => {
     modals.openConfirmModal({
       title: 'Revoke offer',
       centered: true,
@@ -103,14 +102,10 @@ export default function Offers() {
         await waitForTransaction({
           hash: data?.hash,
         });
-        const pool = await api.get<void, Pool>(`/pools/${pool_id}`);
-        await updatePool({
-          pool_id: pool_id,
-          total_pool_amount:
-            BigInt(pool?.total_pool_amount?.toString() || '0') -
-            BigInt(amount.toString() || '0'),
+        await deleteLoan({
+          id: loan_id,
+          withPool: true,
         });
-        deleteLend(loan_id);
       },
       confirmProps: { color: 'red' },
       labels: {
@@ -134,14 +129,10 @@ export default function Offers() {
     await waitForTransaction({
       hash: data?.hash,
     });
-    const pool = await api.get<void, Pool>(`/pools/${loan.pool_id}`);
-    await updatePool({
-      pool_id: loan.pool_id,
-      total_pool_amount:
-        BigInt(pool?.total_pool_amount?.toString() || '0') -
-        BigInt(loan.amount.toString() || '0'),
+    await deleteLoan({
+      id: loan.loan_id,
+      withPool: false,
     });
-    deleteLend(loan.loan_id);
   };
 
   return (

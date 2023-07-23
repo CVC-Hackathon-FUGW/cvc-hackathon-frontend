@@ -118,17 +118,20 @@ const MarketItem = () => {
 
   const { mutateAsync: deleteMarketItem } = useMutation({
     mutationKey: ['deleteMarketItem'],
-    mutationFn: (id: number) => api.delete(`/marketItems/${id}`),
+    mutationFn: (id: string) => api.delete(`/marketItems/${id}`),
     onSuccess: () => navigate(-1),
   });
   const { mutateAsync: updateMarketItem } = useMutation({
     mutationKey: ['updateMarketItem'],
     mutationFn: (params: MarketItemData) => api.patch(`/marketItems`, params),
   });
-  const { mutateAsync: updateCollection } = useMutation({
-    mutationKey: ['updateMarketItem'],
-    mutationFn: (params: Partial<Collection>) =>
-      api.patch(`/marketCollections`, params),
+  const { mutateAsync: buyMarketItem } = useMutation({
+    mutationKey: ['buy-marketItem'],
+    mutationFn: (id: string) => api.post(`/buy/${id}`),
+  });
+  const { mutateAsync: acceptOfferItem } = useMutation({
+    mutationKey: ['offer-marketItem'],
+    mutationFn: (id: string) => api.post(`/offer/${id}`),
   });
 
   return (
@@ -160,19 +163,14 @@ const MarketItem = () => {
                   <Button
                     disabled={sold || numCurrentOfferValue === 0}
                     onClick={async () => {
+                      if (!itemId) return;
                       const data = await acceptOffer({
                         args: [nftContract, itemId],
                       });
                       await waitForTransaction({
                         hash: data?.hash,
                       });
-                      await updateCollection({
-                        collection_id: collection?.collection_id,
-                        volume:
-                          BigInt(collection.volume!) +
-                          BigInt(current_offer_value!),
-                      });
-                      await deleteMarketItem(Number(itemId));
+                      await acceptOfferItem(itemId);
                     }}
                   >
                     Accept Offer ({numCurrentOfferValue} XCR)
@@ -183,13 +181,14 @@ const MarketItem = () => {
                 color="red"
                 disabled={sold}
                 onClick={async () => {
+                  if (!itemId) return;
                   const data = await cancelListing({
                     args: [nftContract, itemId],
                   });
                   await waitForTransaction({
                     hash: data?.hash,
                   });
-                  await deleteMarketItem(Number(itemId));
+                  await deleteMarketItem(itemId);
                 }}
               >
                 Cancel Listing
@@ -200,7 +199,7 @@ const MarketItem = () => {
               <Button
                 disabled={sold}
                 onClick={async () => {
-                  if (!price) return;
+                  if (!price || !itemId) return;
                   const data = await buyNft({
                     value: BigInt(price),
                     args: [nftContract, itemId],
@@ -208,11 +207,7 @@ const MarketItem = () => {
                   await waitForTransaction({
                     hash: data?.hash,
                   });
-                  await updateCollection({
-                    collection_id: collection?.collection_id,
-                    volume: BigInt(collection?.volume) + BigInt(price),
-                  });
-                  await deleteMarketItem(Number(itemId));
+                  await buyMarketItem(itemId);
                 }}
               >
                 Buy
@@ -288,17 +283,14 @@ const MarketItem = () => {
                   }}
                   onApprove={async (_, actions) => {
                     await actions.order?.capture();
+                    if (!itemId) return;
                     const data = await instantBuy({
                       args: [nftContract, itemId, true],
                     });
                     await waitForTransaction({
                       hash: data?.hash,
                     });
-                    await updateCollection({
-                      collection_id: collection?.collection_id,
-                      volume: BigInt(collection?.volume) + BigInt(price!),
-                    });
-                    await deleteMarketItem(Number(itemId));
+                    await buyMarketItem(itemId);
                   }}
                   onError={(err: any) =>
                     notifications.show({

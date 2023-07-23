@@ -87,9 +87,10 @@ export default function Loans() {
     queryFn: () => api.get('/pools'),
   });
 
-  const { mutateAsync: deleteLend } = useMutation({
-    mutationKey: ['delete-lend'],
-    mutationFn: (id?: number) => api.delete(`/loans/${id}`),
+  const { mutateAsync: deleteLoan } = useMutation({
+    mutationKey: ['delete-loan'],
+    mutationFn: ({ id, withPool }: { id?: number; withPool?: boolean }) =>
+      api.delete(`/loans/${id}?with-pool=${withPool}`),
     onSuccess: () => refetch(),
   });
 
@@ -124,7 +125,10 @@ export default function Loans() {
       hash: data?.hash,
     });
 
-    deleteLend(loan.loan_id);
+    await deleteLoan({
+      id: loan.loan_id,
+      withPool: false,
+    });
   };
 
   return (

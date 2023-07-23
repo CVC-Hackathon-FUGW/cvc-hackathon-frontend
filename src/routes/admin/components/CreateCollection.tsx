@@ -25,7 +25,7 @@ const CreateCollection = ({ opened, close }: CreateCollectionProps) => {
 
   const { ImageInput, uploadImage, isLoading: uploading } = useImageUploader();
 
-  const { mutate, isLoading } = useMutation({
+  const { mutateAsync: createCollection, isLoading } = useMutation({
     mutationKey: ['create-collection'],
     mutationFn: ({
       collection_name,
@@ -58,7 +58,7 @@ const CreateCollection = ({ opened, close }: CreateCollectionProps) => {
           const image = await uploadImage();
 
           if (image) {
-            mutate({ collection_name, token_address, image });
+            await createCollection({ collection_name, token_address, image });
           }
         })}
         className="flex flex-col gap-4"

@@ -13,7 +13,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
-import usePoolUpdate from 'src/hooks/usePoolUpdate';
 import api from 'src/services/api';
 import { Loan, Pool } from 'src/types';
 import { formatEther, parseEther, zeroAddress } from 'viem';
@@ -68,23 +67,20 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     );
   }, [apy, duration, values.offerAmount]);
 
-  const { mutateAsync: createLend } = useMutation({
+  const { mutateAsync: createLoan } = useMutation({
     mutationKey: ['create-lend'],
     mutationFn: (params: Loan) => api.post('/loans', params),
-  });
-
-  const { pool, mutateAsync: updatePool } = usePoolUpdate({ id: pool_id });
-
-  const { writeAsync: lend } = useContractWrite({
-    ...contractMortgage,
-    functionName: 'LenderOffer',
-    account: address,
     onSuccess: () => {
       close();
       navigate('/offers');
     },
   });
-  console.log(pool);
+
+  const { writeAsync: lend } = useContractWrite({
+    ...contractMortgage,
+    functionName: 'LenderOffer',
+    account: address,
+  });
 
   const handleLend = async ({ offerAmount = 0 }) => {
     const value = parseEther(offerAmount.toString());
@@ -95,7 +91,7 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
     await waitForTransaction({
       hash: data?.hash,
     });
-    await createLend({
+    await createLoan({
       amount: value,
       borrower: zeroAddress,
       lender: address,
@@ -105,11 +101,6 @@ export default function ModalLend({ opened, close, data }: ModalLendProps) {
       start_time: 0,
       token_id: 0,
       state: false,
-    });
-    await updatePool({
-      pool_id,
-      total_pool_amount:
-        BigInt(pool?.total_pool_amount?.toString() || '0') + value,
     });
   };
 

@@ -58,7 +58,7 @@ const Admin = () => {
     queryKey: ['get-marketItems'],
   });
 
-  const { mutate } = useMutation({
+  const { mutateAsync: deleteCollection } = useMutation({
     mutationFn: (id: number) => api.delete(`/marketCollections/${id}`),
     onSuccess: () => {
       refetch();
@@ -81,7 +81,7 @@ const Admin = () => {
     modals.openConfirmModal({
       title: 'Delete Collection',
       centered: true,
-      onConfirm: () => mutate(collection_id),
+      onConfirm: () => deleteCollection(collection_id),
       confirmProps: { color: 'red' },
       labels: {
         cancel: 'Cancel',

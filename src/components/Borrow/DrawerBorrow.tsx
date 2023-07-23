@@ -13,6 +13,7 @@ import {
 } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   abiNft,
   addressMortgage,
@@ -20,7 +21,6 @@ import {
 } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
-import usePoolUpdate from 'src/hooks/usePoolUpdate';
 import api from 'src/services/api';
 import { Loan, Nft, Pool } from 'src/types';
 import { tempImage } from 'src/utils/contains';
@@ -31,9 +31,8 @@ import {
   useContractWrite,
   useWaitForTransaction,
 } from 'wagmi';
-import NFTCollection from '../Marketplace/NFTCollection';
-import { useNavigate } from 'react-router-dom';
 import { waitForTransaction } from 'wagmi/actions';
+import NFTCollection from '../Marketplace/NFTCollection';
 
 interface ModalLendProps {
   opened: boolean;
@@ -87,15 +86,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
     onSuccess: () => setStep(1),
   });
 
-  const { pool, mutateAsync: updatePool } = usePoolUpdate({
-    id: pool_id,
-  });
-
-  const { mutateAsync: updateLoan } = useMutation({
-    mutationKey: ['update-loan'],
-    mutationFn: (params: Loan) => api.patch(`/loans`, params),
-  });
-
   const { writeAsync: borrow } = useContractWrite({
     ...contractMortgage,
     functionName: 'BorrowerTakeLoan',
@@ -106,6 +96,11 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       setStep(0);
       navigate('/loans');
     },
+  });
+
+  const { mutateAsync: borrowerTakeLoan } = useMutation({
+    mutationKey: ['update-loan'],
+    mutationFn: (params: Loan) => api.patch(`/borrower-take-loan`, params),
   });
 
   const loans = useMemo(() => {
@@ -270,14 +265,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                     hash: data?.hash,
                   });
 
-                  await updatePool({
-                    pool_id,
-                    total_pool_amount:
-                      BigInt(pool?.total_pool_amount?.toString() || '0') -
-                      BigInt(selectedLoan?.amount?.toString() || '0'),
-                  });
-
-                  await updateLoan({
+                  await borrowerTakeLoan({
                     loan_id: selectedLoan?.loan_id,
                     borrower: address,
                     amount: selectedLoan?.amount || 0n,

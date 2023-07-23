@@ -85,7 +85,7 @@ export default function Lend() {
         close={() => setPool(undefined)}
         data={pool}
       />
-      <div className="container" style={{ padding: '20px 70px' }}>
+      <div className="container">
         <div style={{ maxWidth: '990px' }}>
           <Title size="3.2rem">Make loan offers on NFT collections.</Title>
           <Text fz="lg">

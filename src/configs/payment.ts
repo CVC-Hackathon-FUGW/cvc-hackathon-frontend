@@ -26,7 +26,6 @@ export const getAccessToken = async () => {
     },
     {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Basic ${paypalAuthorization}`,
       },
     }

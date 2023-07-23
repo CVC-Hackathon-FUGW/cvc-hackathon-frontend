@@ -11,6 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use((request) => {
   request.transformRequest = (data) => JSONbig.stringify(data);
+  request.headers['Content-Type'] = 'application/json';
   return request;
 });
 
