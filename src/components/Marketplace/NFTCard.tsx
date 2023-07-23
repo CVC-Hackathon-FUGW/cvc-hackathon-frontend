@@ -40,7 +40,7 @@ const NFTCard = (props: NFTCardProps) => {
         padding="lg"
         radius="md"
         withBorder
-        className="cursor-pointer grid gap-1 w-full card"
+        className="cursor-pointer grid gap-1 card"
         onClick={() =>
           onClick?.({ nftContract: nftContract!, tokenId, ...rest })
         }
@@ -51,6 +51,7 @@ const NFTCard = (props: NFTCardProps) => {
             src={getNftSrc(data?.image)}
             alt={data?.name || 'NFT Image'}
             withPlaceholder
+            height={'25rem'}
           />
         </Card.Section>
         <Group position="apart" mt="md" mb="xs">

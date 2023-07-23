@@ -205,7 +205,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
           <LoadingOverlay visible={isLoading} />
         </Stepper.Step>
         <Stepper.Step label="Select a loan" description="Select a loan">
-          <div className="flex flex-row overflow-x-auto gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {loans?.map((loan) => (
               <Card
                 withBorder
