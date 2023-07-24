@@ -12,10 +12,19 @@ import 'src/styles/nft-card.css';
 interface NFTCardProps extends Partial<ContractNft> {
   selectedNft?: Nft;
   onClick?: (nft: Partial<ContractNft>) => void;
+  height?: string;
 }
 
 const NFTCard = (props: NFTCardProps) => {
-  const { tokenId, nftContract, selectedNft, onClick, price, ...rest } = props;
+  const {
+    tokenId,
+    nftContract,
+    selectedNft,
+    onClick,
+    price,
+    height = '20rem',
+    ...rest
+  } = props;
 
   const { data: uri } = useContractRead<unknown[], 'tokenURI', string>({
     address: nftContract,
@@ -51,7 +60,7 @@ const NFTCard = (props: NFTCardProps) => {
             src={getNftSrc(data?.image)}
             alt={data?.name || 'NFT Image'}
             withPlaceholder
-            height={'20rem'}
+            height={height}
           />
         </Card.Section>
         <Group position="apart" mt="md" mb="xs">

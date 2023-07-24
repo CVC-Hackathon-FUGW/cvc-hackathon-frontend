@@ -1,5 +1,8 @@
 import { AppShell, MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   EthereumClient,
   w3mConnectors,
@@ -8,15 +11,12 @@ import {
 import { Web3Modal } from '@web3modal/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { WagmiConfig, configureChains, createConfig } from 'wagmi';
+import MyFooter from './components/Layout/Footer';
 import MyHeader from './components/Layout/Header';
 import { cvcTestnet } from './configs/networks';
-import router from './routes';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { ModalsProvider } from '@mantine/modals';
-import { onError } from './helpers/contract-call';
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { paypalOptions } from './configs/payment';
+import { onError } from './helpers/contract-call';
+import router from './routes';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,7 +47,11 @@ function App() {
           <PayPalScriptProvider options={paypalOptions}>
             <BrowserRouter>
               <ModalsProvider>
-                <AppShell padding="md" header={<MyHeader />}>
+                <AppShell
+                  padding="md"
+                  header={<MyHeader />}
+                  footer={<MyFooter />}
+                >
                   <Routes>
                     {router.map((route) => (
                       <Route
@@ -64,8 +68,8 @@ function App() {
         </MantineProvider>
       </WagmiConfig>
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-      <Notifications className='pb-10' />
-      <ReactQueryDevtools position="bottom-right" />
+      <Notifications className="pb-10" />
+      {/* <ReactQueryDevtools position="bottom-right" /> */}
     </QueryClientProvider>
   );
 }

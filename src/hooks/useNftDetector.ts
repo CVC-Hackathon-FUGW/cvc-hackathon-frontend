@@ -2,14 +2,14 @@ import { abiNft } from 'src/configs/contract';
 import { Abi, Address, zeroAddress } from 'viem';
 import { useAccount, useContractRead, useContractReads } from 'wagmi';
 
-const useNftDetector = (nftAddress?: Address) => {
+const useNftDetector = (nftAddress?: Address, account?: Address) => {
   const { address } = useAccount();
 
   const { data: numberOfNFTs } = useContractRead({
     address: nftAddress,
     abi: abiNft,
     functionName: 'balanceOf',
-    args: [address],
+    args: [account || address],
     enabled: !!nftAddress,
     select: (data) => Number(data),
   });
@@ -21,7 +21,7 @@ const useNftDetector = (nftAddress?: Address) => {
       address: nftAddress,
       abi: abiNft as Abi,
       functionName: 'tokenOfOwnerByIndex',
-      args: [address || zeroAddress, BigInt(index)],
+      args: [account || address || zeroAddress, BigInt(index)],
     })),
     enabled: !!nftAddress,
     select: (data) => data.map(({ result }) => result),

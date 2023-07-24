@@ -7,6 +7,7 @@ import abiCheckIn from './abiCheckIn.json';
 export const addressMortgage = import.meta.env.VITE_CONTRACT_ADDRESS_MORTGAGE;
 export const addressMarket = import.meta.env.VITE_CONTRACT_ADDRESS_MARKET;
 export const addressCheckIn = import.meta.env.VITE_CONTRACT_ADDRESS_CHECK_IN;
+export const addressEvent = import.meta.env.VITE_EVENT_NFT_CONTRACT;
 
 export const adminAddress = import.meta.env.VITE_ADMIN_ADDRESS;
 

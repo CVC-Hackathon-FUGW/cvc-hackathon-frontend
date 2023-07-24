@@ -16,7 +16,7 @@ import { notifications } from '@mantine/notifications';
 import { IconCopy, IconPlugConnectedX } from '@tabler/icons-react';
 import { useWeb3Modal } from '@web3modal/react';
 import { useCallback, useEffect, useMemo } from 'react';
-import logo from 'src/assets/logo.png';
+import logo from '/logo.png';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import { useAccount, useDisconnect, useNetwork } from 'wagmi';
 import SwitchNetworkModal from './SwitchNetworkModal';
