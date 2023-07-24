@@ -137,14 +137,13 @@ export default function Offers() {
 
   return (
     <div className="container">
-      <div style={{ maxWidth: '1200px' }}>
+      <div style={{ maxWidth: '990' }}>
         <Title size="3.2rem">My offers and contracts</Title>
         <Text fz="lg">
-          Once your offer is accepted by a borrower, a secure contract is
-          created, freezing the NFT in their wallet. When the loan ends, you
-          will get paid the total SOL (loan with interest). In the event of a
-          default, you can foreclose, which transfers the collateral NFT to your
-          wallet.
+          When a borrower accepts your offer, the NFT will be sent to the smart
+          contract. You will receive payment for the entire XCR (debt with
+          interest) when the loan is paid off. You can foreclose in the event of
+          a default, which will transfer the collateral NFT to your wallet.
         </Text>
       </div>
       <div style={{ marginTop: '40px', marginBottom: '40px' }}>

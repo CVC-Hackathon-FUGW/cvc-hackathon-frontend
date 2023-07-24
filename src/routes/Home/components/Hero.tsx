@@ -27,7 +27,14 @@ const HeroImage = () => {
         </h1>
 
         <Text className={classes.description} color="dimmed">
-          Rental is a decentralized lending protocol that allows you to borrow
+          Riskless Lending is a decentralized lending protocol that allows you
+          to borrow an amount of XCR against your NFT. Moreover, we deliver a
+          marketplace for buying, offering NFT. If you don't have enough XCR to
+          buy NFTs, we provide you Paypal payment method to buy NFTs. We also
+          bring you a place to find some treasure by checkin daily. Each time
+          you checkin, you will receive 100RENT, and use RENT to covert into XCR
+          (to buy, offer, lend,...) or exchange to one of 20 random NFTs. Go
+          check our features now!
         </Text>
 
         <Group className={classes.controls}>
@@ -50,6 +57,26 @@ const HeroImage = () => {
             className={classes.control}
           >
             Borrow
+          </Button>
+          <Button
+            component="a"
+            size="xl"
+            className={classes.control}
+            variant="gradient"
+            gradient={{ from: 'blue', to: 'cyan' }}
+            href="/profile"
+          >
+            Profile
+          </Button>
+
+          <Button
+            component="a"
+            href="/marketplace"
+            size="xl"
+            variant="default"
+            className={classes.control}
+          >
+            Marketplace
           </Button>
         </Group>
       </Container>
@@ -95,7 +122,7 @@ const useStyles = createStyles((theme) => ({
 
   description: {
     marginTop: theme.spacing.xl,
-    fontSize: rem(24),
+    fontSize: rem(20),
 
     [theme.fn.smallerThan('sm')]: {
       fontSize: rem(18),

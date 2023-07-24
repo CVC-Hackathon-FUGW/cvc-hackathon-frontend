@@ -1,4 +1,4 @@
-import { Button, Title } from '@mantine/core';
+import { Button, Text, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { marketToContract } from 'src/helpers/transform.market-item';
@@ -54,6 +54,14 @@ export default function Marketplace() {
           List NFT
         </Button>
       </div>
+      <Text>
+        These are market items of this NFT Collection. You can click on each NFT
+        to view more detail. You can list NFT of this collection right here by
+        click List NFT button. The default listing price is 0.001 XCR each NFT.
+        Our system support you to make NFT offerable and support paypal payment
+        method. If you want to use paypal method, please go to profile and
+        signup to get Merchant ID, then come here to list your NFT!
+      </Text>
       <div className="flex flex-row items-center justify-center"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {(collectionId ? marketItemsAddress : marketItems)?.map(

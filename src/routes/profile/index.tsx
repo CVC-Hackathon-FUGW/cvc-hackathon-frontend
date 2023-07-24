@@ -71,26 +71,35 @@ const Profile = () => {
     functionName: 'exchangeToGift',
   });
   const nftIds = useNftDetector(addressEvent, addressCheckIn);
-  console.log(nftIds);
 
   return (
     <div className="container flex flex-col gap-4">
+      <Group position="center">
+        <Text weight="bold" size="2rem">
+          PayPal sign up
+        </Text>
+      </Group>
       <Card shadow="sm" padding="sm" radius="md">
-        <Group position="right">
-          {merchantId ? (
-            <PayPalMerchantId merchantId={merchantId} size="lg" />
-          ) : (
-            <Button
-              variant="light"
-              component="a"
-              href={sellerRedirectUrl}
-              target="_blank"
-            >
-              Sign up for
-              <PayPalMarks fundingSource="paypal" />
-            </Button>
-          )}
-        </Group>
+        <div className="flex flex-row items-center justify-between">
+          <Text>
+            Sign up to register a merchant id to start paypal payment method
+          </Text>
+          <Group>
+            {merchantId ? (
+              <PayPalMerchantId merchantId={merchantId} size="lg" />
+            ) : (
+              <Button
+                variant="light"
+                component="a"
+                href={sellerRedirectUrl}
+                target="_blank"
+              >
+                Sign up for
+                <PayPalMarks fundingSource="paypal" />
+              </Button>
+            )}
+          </Group>
+        </div>
       </Card>
       <Group position="center">
         <Text weight="bold" size="2rem">

@@ -1,6 +1,7 @@
 import { Avatar, Card, Text } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { Collection } from 'src/types';
+import { formatEther } from 'viem';
 
 export default function CollectionCard({
   collection,
@@ -44,7 +45,9 @@ export default function CollectionCard({
         </div>
         <div className="mt-4">
           <Text className="font-semibold text-gray-500">Volume:</Text>
-          <Text className="font-semibold">{collection.volume.toString()}</Text>
+          <Text className="font-semibold">
+            {formatEther(collection.volume)}
+          </Text>
         </div>
       </div>
     </Card>

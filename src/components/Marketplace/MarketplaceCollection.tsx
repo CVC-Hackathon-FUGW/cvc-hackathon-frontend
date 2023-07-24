@@ -1,4 +1,4 @@
-import { Input, Select, Title } from '@mantine/core';
+import { Input, Select, Text, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import _, { debounce } from 'lodash';
@@ -30,9 +30,12 @@ export default function MarketPlaceCollection() {
   });
   return (
     <div className="container flex flex-col gap-4">
-      <div className="flex flex-row items-center justify-between">
-        <Title>Browse NFT Collection</Title>
-      </div>
+      <Title>Browse NFT Collection</Title>
+      <Text maw={900}>
+        Browse NFT Collections that have been listed in our app. If you want to
+        list your NFT collection, please contact admin for listing fee and more
+        details.
+      </Text>
 
       <div>
         <div className="flex items-center gap-8">
