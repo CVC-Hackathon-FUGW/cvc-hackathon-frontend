@@ -76,6 +76,7 @@ const CreatePool = ({ opened, close }: CreatePoolProps) => {
                 is_active: true,
                 state: true,
                 token_address: tokenAddress as Address,
+                total_pool_amount: 0n,
               });
             }
           }
