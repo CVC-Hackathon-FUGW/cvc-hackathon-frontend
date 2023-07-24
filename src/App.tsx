@@ -64,7 +64,7 @@ function App() {
         </MantineProvider>
       </WagmiConfig>
       <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
-      <Notifications />
+      <Notifications className='pb-10' />
       <ReactQueryDevtools position="bottom-right" />
     </QueryClientProvider>
   );

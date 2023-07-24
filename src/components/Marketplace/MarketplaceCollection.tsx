@@ -33,14 +33,14 @@ export default function MarketPlaceCollection() {
       <div className="flex flex-row items-center justify-between">
         <Title>Browse NFT Collection</Title>
       </div>
+
       <div>
         <div className="flex items-center gap-8">
           <div className="mt-7 flex gap-1">
             <div>
               <Input
                 icon={<IconSearch />}
-                variant="filled"
-                size="sm"
+                size="md"
                 placeholder="search collectibles by name..."
                 w={500}
                 onChange={handleSearch}
@@ -53,6 +53,7 @@ export default function MarketPlaceCollection() {
             placeholder="Pick one"
             data={[{ value: 'volume', label: 'Volume' }]}
             onChange={(value: any) => setSortField(value)}
+            size="md"
           />
         </div>
       </div>

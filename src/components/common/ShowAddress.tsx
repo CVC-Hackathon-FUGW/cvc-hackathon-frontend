@@ -31,7 +31,8 @@ const ShowAddress = ({
       className={`${canBeCopied ? 'cursor-pointer' : ''}`}
       {...rest}
     >
-      {children} {truncateMiddle(address, { length })}
+
+      <span className='text-gray-500 font-semibold'>{children} </span>{truncateMiddle(address, { length })}
     </Text>
   );
 };
