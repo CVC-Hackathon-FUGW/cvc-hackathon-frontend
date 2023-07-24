@@ -127,11 +127,11 @@ const MarketItem = () => {
   });
   const { mutateAsync: buyMarketItem } = useMutation({
     mutationKey: ['buy-marketItem'],
-    mutationFn: (id: string) => api.post(`/buy/${id}`),
+    mutationFn: (id: string) => api.post(`/marketItems/buy/${id}`),
   });
   const { mutateAsync: acceptOfferItem } = useMutation({
     mutationKey: ['offer-marketItem'],
-    mutationFn: (id: string) => api.post(`/offer/${id}`),
+    mutationFn: (id: string) => api.post(`/marketItems/offer/${id}`),
   });
 
   return (

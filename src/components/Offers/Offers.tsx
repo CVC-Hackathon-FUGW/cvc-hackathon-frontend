@@ -88,7 +88,7 @@ export default function Offers() {
   const { mutateAsync: deleteLoan } = useMutation({
     mutationKey: ['delete-loan'],
     mutationFn: ({ id, withPool }: { id?: number; withPool?: boolean }) =>
-      api.delete(`/loans/${id}?with-pool=${withPool}`),
+      api.delete(`/loans/${id}${withPool ? '?with-pool==true' : ''}`),
   });
 
   const openRevokeModal = ({ pool_id, loan_id }: Loan) => {
