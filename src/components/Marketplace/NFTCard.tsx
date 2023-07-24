@@ -51,7 +51,7 @@ const NFTCard = (props: NFTCardProps) => {
             src={getNftSrc(data?.image)}
             alt={data?.name || 'NFT Image'}
             withPlaceholder
-            height={'25rem'}
+            height={'20rem'}
           />
         </Card.Section>
         <Group position="apart" mt="md" mb="xs">
