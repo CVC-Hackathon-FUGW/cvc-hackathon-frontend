@@ -152,7 +152,6 @@ export default function Loans() {
       <div style={{ marginTop: '40px', marginBottom: '40px' }}>
         <Input
           icon={<IconSearch />}
-          variant="filled"
           size="xl"
           placeholder="search collections..."
         />

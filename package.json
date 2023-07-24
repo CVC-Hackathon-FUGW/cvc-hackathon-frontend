@@ -25,6 +25,7 @@
     "@web3modal/react": "^2.6.2",
     "axios": "^1.4.0",
     "dayjs": "^1.11.9",
+    "embla-carousel-autoplay": "^8.0.0-rc11",
     "embla-carousel-react": "^8.0.0-rc07",
     "firebase": "^10.0.0",
     "json-bigint": "^1.0.0",

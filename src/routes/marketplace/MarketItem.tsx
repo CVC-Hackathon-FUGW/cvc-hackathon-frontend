@@ -1,4 +1,4 @@
-import { Avatar, Button, Image, Text, TextInput } from '@mantine/core';
+import { Avatar, Button, Card, Divider, Image, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { PayPalButtons } from '@paypal/react-paypal-js';
@@ -131,8 +131,8 @@ const MarketItem = () => {
   });
 
   return (
-    <div className="container grid place-items-center">
-      <div className="flex flex-row gap-6">
+    <Card className="container place-items-center bg-slate-100 w-[1000px]" shadow='lg' padding="lg" radius="md" h={550}>
+      <div className="flex justify-center pt-10 gap-20">
         <div className="w-72 flex flex-col gap-4">
           <Image src={getNftSrc(data?.image)} alt="Norway" radius="sm" />
           {isOwner ? (
@@ -209,49 +209,7 @@ const MarketItem = () => {
               >
                 Buy
               </Button>
-              {is_offerable && (
-                <form
-                  className="flex flex-col gap-1"
-                  onSubmit={onSubmit(async ({ offer }) => {
-                    const value = parseEther(offer.toString());
-                    await offerNft({
-                      value,
-                      args: [itemId],
-                    });
 
-                    await updateMarketItem({
-                      item_id: Number(itemId),
-                      current_offer_value: value,
-                      current_offerer: address,
-                    });
-                  })}
-                >
-                  <Text>
-                    Current offer:{' '}
-                    {Number(current_offer_value) > 0
-                      ? numCurrentOfferValue
-                      : 'No offer yet'}
-                  </Text>
-                  <ShowAddress
-                    address={
-                      current_offerer === zeroAddress
-                        ? 'Be the first!'
-                        : current_offerer
-                    }
-                    canBeCopied={current_offerer !== zeroAddress}
-                  >
-                    Current offerer:
-                  </ShowAddress>
-                  <TextInput
-                    label={'Offer'}
-                    min={numCurrentOfferValue}
-                    {...getInputProps('offer')}
-                  />
-                  <Button type="submit" color="teal" className="mt-1">
-                    Offer
-                  </Button>
-                </form>
-              )}
               {accept_visa_payment && (
                 <PayPalButtons
                   createOrder={(_, actions) => {
@@ -298,25 +256,77 @@ const MarketItem = () => {
           )}
         </div>
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-1">
-            <Avatar size="lg" radius="xl" src={collection?.image} />
-            <Text>{collectionName}</Text>
+          <div className="flex flex-row items-center gap-4">
+            <Avatar size="xl" radius="xl" src={collection?.image} />
+            <Text className='text-3xl font-semibold'>{collectionName}</Text>
           </div>
-          <Text size="xl" weight="bolder">
-            {data?.name}
-          </Text>
-          <Text size="lg" weight="bold">
-            XCR {formatEther(price || 0n)}
-          </Text>
-          <Text size="md" weight="bold">
+          <div className='flex justify-between mt-2'>
+            <Text className='text-2xl' weight="bolder">
+              {data?.name}
+            </Text>
+            <Text className='text-2xl text-orange-600' weight="bold">
+              XCR {formatEther(price || 0n)}
+            </Text>
+          </div>
+
+          <Text size="md" className='text-green-500' italic weight="bold">
             {dayjs(data?.date).format('DD/MM/YYYY')}
           </Text>
-          <ShowAddress address={seller || 'Has no owner'}>
+          <ShowAddress address={seller || 'Has no owner'} className='font-semibold'>
             Ownership:
           </ShowAddress>
+          <Divider my="sm" />
+          {is_offerable && (
+            <form
+              className="flex flex-col gap-1"
+              onSubmit={onSubmit(async ({ offer }) => {
+                const value = parseEther(offer.toString());
+                await offerNft({
+                  value,
+                  args: [itemId],
+                });
+
+                await updateMarketItem({
+                  item_id: Number(itemId),
+                  current_offer_value: value,
+                  current_offerer: address,
+                });
+              })}
+            >
+              <Text>
+                <span className='text-gray-500 font-semibold' >
+                  Current offer:{' '}
+                </span>
+
+                {Number(current_offer_value) > 0
+                  ? numCurrentOfferValue
+                  : 'No offer yet'}
+              </Text>
+              <ShowAddress
+                address={
+                  current_offerer === zeroAddress
+                    ? 'Be the first!'
+                    : current_offerer
+                }
+                canBeCopied={current_offerer !== zeroAddress}
+              >
+                Current offerer:
+              </ShowAddress>
+              <TextInput
+                placeholder='Offer'
+                min={numCurrentOfferValue}
+                pt={10}
+                {...getInputProps('offer')}
+              />
+              <Button type="submit" color="teal" className="mt-2.5">
+                Offer
+              </Button>
+            </form>
+          )}
         </div>
+
       </div>
-    </div>
+    </Card>
   );
 };
 

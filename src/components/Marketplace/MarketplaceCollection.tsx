@@ -8,6 +8,8 @@ import { Collection } from 'src/types';
 import CollectionCard from './CollectionCard';
 import { useDisclosure } from '@mantine/hooks';
 import CreateMarketItem from './CreateMarketItem';
+import { Carousel } from '@mantine/carousel';
+import CarouselSlide from '../common/CarouselSlide';
 
 export default function MarketPlaceCollection() {
   const [sortField, setSortField] = useState('');
@@ -33,21 +35,23 @@ export default function MarketPlaceCollection() {
   });
   return (
     <div className="container flex flex-col gap-4">
+      <CarouselSlide/>
       <CreateMarketItem opened={opened} onClose={close} />
-      <div className="flex flex-row items-center justify-between">
-        <Title>Browse NFT Collection</Title>
-        <Button onClick={open} size="lg" className="w-40">
+      <div className="flex flex-row items-center justify-between mt-10">
+        <Title variant="gradient" gradient={{ from: 'indigo', to: 'cyan' }}>Browse NFT Collection</Title>
+        <Button variant="gradient"  onClick={open} size="lg" className="w-40">
           List NFT
         </Button>
       </div>
+
       <div>
         <div className="flex items-center gap-8">
           <div className="mt-7 flex gap-1">
             <div>
               <Input
                 icon={<IconSearch />}
-                variant="filled"
-                size="sm"
+                
+                size="md"
                 placeholder="search collectibles by name..."
                 w={500}
                 onChange={handleSearch}
@@ -60,6 +64,7 @@ export default function MarketPlaceCollection() {
             placeholder="Pick one"
             data={[{ value: 'volume', label: 'Volume' }]}
             onChange={(value: any) => setSortField(value)}
+            size='md'
           />
         </div>
       </div>
