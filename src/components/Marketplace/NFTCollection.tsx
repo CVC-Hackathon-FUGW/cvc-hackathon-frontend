@@ -24,7 +24,7 @@ const NFTCollection = ({
       align="start"
     >
       {nftIds?.map((tokenId) => (
-        <Carousel.Slide key={tokenId.toString()}>
+        <Carousel.Slide key={tokenId?.toString()}>
           <NFTCard
             tokenId={tokenId}
             nftContract={nftContract}
