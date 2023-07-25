@@ -271,6 +271,7 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
                     borrower: address,
                     amount: selectedLoan?.amount || 0n,
                     start_time: Math.floor(Math.floor(Date.now() / 1000)),
+                    pool_id,
                     state: true,
                   });
                 }
