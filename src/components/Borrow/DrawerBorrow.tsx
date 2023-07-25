@@ -89,6 +89,11 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
   const { writeAsync: borrow } = useContractWrite({
     ...contractMortgage,
     functionName: 'BorrowerTakeLoan',
+  });
+
+  const { mutateAsync: borrowerTakeLoan } = useMutation({
+    mutationKey: ['update-loan'],
+    mutationFn: (params: Loan) => api.patch(`/borrower-take-loan`, params),
     onSuccess: () => {
       setSelectedLoan(null);
       reset();
@@ -96,11 +101,6 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
       setStep(0);
       navigate('/loans');
     },
-  });
-
-  const { mutateAsync: borrowerTakeLoan } = useMutation({
-    mutationKey: ['update-loan'],
-    mutationFn: (params: Loan) => api.patch(`/borrower-take-loan`, params),
   });
 
   const loans = useMemo(() => {
