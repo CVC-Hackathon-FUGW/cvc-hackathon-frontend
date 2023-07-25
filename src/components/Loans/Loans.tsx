@@ -1,18 +1,17 @@
-import { Button, Card, Input, Text, Title } from '@mantine/core';
-import { IconSearch } from '@tabler/icons-react';
+import { Button, Card, Text, Title } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
 import { calculateInterest } from 'src/helpers/cal-interest';
+import { calTimeRemain } from 'src/helpers/cal-time-remain';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import api from 'src/services/api';
 import { Loan, Pool } from 'src/types';
 import dayjs from 'src/utils/dayjs';
 import { formatEther, parseEther, zeroAddress } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
-import Collection from '../Lend/Collection';
-import { calTimeRemain } from 'src/helpers/cal-time-remain';
 import { waitForTransaction } from 'wagmi/actions';
+import Collection from '../Lend/Collection';
 
 const columns = [
   {
@@ -153,13 +152,6 @@ export default function Loans() {
             </Text>
           </Card>
         </div>
-      </div>
-      <div style={{ marginTop: '40px', marginBottom: '40px' }}>
-        <Input
-          icon={<IconSearch />}
-          size="xl"
-          placeholder="search collections..."
-        />
       </div>
       <DataTable
         records={loans?.filter(({ borrower }) => borrower === address)}

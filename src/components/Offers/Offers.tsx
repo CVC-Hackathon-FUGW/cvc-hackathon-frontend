@@ -1,6 +1,5 @@
-import { Button, Input, Text, Title } from '@mantine/core';
+import { Button, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { IconSearch } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { DataTable } from 'mantine-datatable';
 import { borrowPrice, contractMortgage } from 'src/configs/contract';
@@ -145,13 +144,6 @@ export default function Offers() {
           interest) when the loan is paid off. You can foreclose in the event of
           a default, which will transfer the collateral NFT to your wallet.
         </Text>
-      </div>
-      <div style={{ marginTop: '40px', marginBottom: '40px' }}>
-        <Input
-          icon={<IconSearch />}
-          size="xl"
-          placeholder="search collections..."
-        />
       </div>
       <DataTable
         records={loans?.filter(
