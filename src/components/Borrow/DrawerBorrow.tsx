@@ -93,7 +93,8 @@ export default function DrawerBorrow({ opened, close, data }: ModalLendProps) {
 
   const { mutateAsync: borrowerTakeLoan } = useMutation({
     mutationKey: ['borrower-take-loan'],
-    mutationFn: (params: Loan) => api.patch(`/borrower-take-loan`, params),
+    mutationFn: (params: Loan) =>
+      api.patch(`/loans/borrower-take-loan`, params),
     onSuccess: () => {
       setSelectedLoan(null);
       reset();
