@@ -9,7 +9,7 @@ export const paypalOptions: ReactPayPalScriptOptions = {
   clientId,
   components: 'buttons,marks',
   currency: 'USD',
-  disableFunding: 'card,credit',
+  // disableFunding: 'card,credit',
 };
 
 import axios from 'axios';
