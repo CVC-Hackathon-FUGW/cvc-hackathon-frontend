@@ -33,7 +33,6 @@ import PayPalMerchantId from '../common/PayPalMerchantId';
 import NFTCard from './NFTCard';
 import NFTCollection from './NFTCollection';
 import { ListNftContractParams, MarketNft } from './types';
-import { waitForTransaction } from 'wagmi/actions';
 
 interface CreateMarketItemProps {
   opened: boolean;
@@ -104,7 +103,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
     isOfferable = false,
     merchantId = '',
   }: ListNftContractParams) => {
-    const data = await listNft({
+    await listNft({
       args: [
         nftContract,
         tokenId,
@@ -113,9 +112,6 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
         isOfferable,
         merchantId,
       ],
-    });
-    await waitForTransaction({
-      hash: data?.hash,
     });
     await addMarketItem({
       accept_visa_payment: isVisaAccepted,
@@ -130,6 +126,7 @@ const CreateMarketItem = (props: CreateMarketItemProps) => {
       sold: false,
       merchant_id: merchantId,
     });
+
     onClose();
   };
 

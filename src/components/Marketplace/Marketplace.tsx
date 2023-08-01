@@ -40,6 +40,7 @@ export default function Marketplace() {
   return (
     <div className="container flex flex-col gap-4">
       <CreateMarketItem
+        key={`${opened}`}
         opened={opened}
         onClose={close}
         collection={collection}
