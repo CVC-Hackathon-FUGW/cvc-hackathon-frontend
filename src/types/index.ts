@@ -115,3 +115,17 @@ export interface WrappedPool {
   loan_max_amount: bigint;
   pool: Pool;
 }
+
+export interface Box {
+  id: number;
+  name: string;
+  image: string;
+  address: Address;
+}
+
+export interface Project {
+  id: number;
+  name: string;
+  image: string;
+  address: Address;
+}

@@ -46,6 +46,14 @@ const routes = [
     value: 'loans',
     label: 'Loans',
   },
+  {
+    value: 'box',
+    label: 'Box',
+  },
+  {
+    value: 'projects',
+    label: 'Projects',
+  },
 ];
 
 const adminRoutes = [
@@ -59,6 +67,10 @@ const userRoutes = [
   {
     value: 'profile',
     label: 'Profile',
+  },
+  {
+    value: 'investments',
+    label: 'Investments',
   },
 ];
 

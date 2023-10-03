@@ -12,6 +12,10 @@ import MarketplaceCollectionPage from './marketplaceCollection';
 import NftPage from './nft';
 import OffersPage from './offers';
 import SellerOnboarding from './seller-onboarding';
+import BoxPage from './box';
+import BoxItem from './box/BoxItem';
+import ProjectPage from './projects';
+import InvestmentsPage from './investments';
 
 const router: RouteProps[] = [
   {
@@ -67,6 +71,26 @@ const router: RouteProps[] = [
     path: '/seller-onboarding',
     element: <SellerOnboarding />,
   },
+  {
+    path: '/box',
+    element: <BoxPage />,
+  },
+  {
+    path: '/box/:itemId',
+    element: <BoxItem />,
+  },
+  {
+    path: '/investments',
+    element: <InvestmentsPage />,
+  },
+  {
+    path: '/projects',
+    element: <ProjectPage />,
+  },
+  // {
+  //   path: '/projects/:itemId',
+  //   element: <BoxItem />,
+  // },
 ];
 
 export default router;
