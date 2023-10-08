@@ -5,12 +5,16 @@ import abiMortgage from './abiMortgage.json';
 import abiNft from './abiNftEnum.json';
 import abiMarket from './abiNftMarket.json';
 import abiBoxInside from './abiBoxInside.json';
+import abiRaiseFund from './abiRaiseFund.json';
+import abiRaiseFundInside from './abiRaiseFundInside.json';
 
 export const addressMortgage = import.meta.env.VITE_CONTRACT_ADDRESS_MORTGAGE;
 export const addressMarket = import.meta.env.VITE_CONTRACT_ADDRESS_MARKET;
 export const addressCheckIn = import.meta.env.VITE_CONTRACT_ADDRESS_CHECK_IN;
 export const addressEvent = import.meta.env.VITE_EVENT_NFT_CONTRACT;
 export const addressBox = import.meta.env.VITE_BOX_CONTRACT;
+export const addressRaiseFund = import.meta.env
+  .VITE_CONTRACT_ADDRESS_RAISE_FUND;
 
 export const adminAddress = import.meta.env.VITE_ADMIN_ADDRESS;
 
@@ -38,7 +42,22 @@ export const contractBox = {
   onError,
 };
 
+export const contractRaiseFund = {
+  address: addressRaiseFund,
+  abi: abiRaiseFund,
+  onError,
+};
+
 export const borrowPrice = 1000000000000000n;
 export const boxPrice = 10000000000000000n;
 
-export { abiCheckIn, abiMarket, abiMortgage, abiNft, abiBox, abiBoxInside };
+export {
+  abiCheckIn,
+  abiMarket,
+  abiMortgage,
+  abiNft,
+  abiBox,
+  abiBoxInside,
+  abiRaiseFund,
+  abiRaiseFundInside,
+};

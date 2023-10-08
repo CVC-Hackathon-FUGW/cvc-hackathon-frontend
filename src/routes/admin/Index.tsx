@@ -8,7 +8,7 @@ import ShowAddress from 'src/components/common/ShowAddress';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import useAdmin from 'src/hooks/useAdmin';
 import api from 'src/services/api';
-import { BoxCollection, Collection, Pool } from 'src/types';
+import { BoxCollection, Collection, Pool, Project } from 'src/types';
 import { formatEther } from 'viem';
 import CreatePool from './components/CreatPool';
 import CreateCollection from './components/CreateCollection';
@@ -65,6 +65,10 @@ const Admin = () => {
   const { data: boxes } = useQuery<BoxCollection[]>({
     queryFn: () => api.get('/boxCollection'),
     queryKey: ['get-boxCollection'],
+  });
+  const { data: projects } = useQuery<Project[]>({
+    queryFn: () => api.get('/project'),
+    queryKey: ['get-project'],
   });
 
   const { mutateAsync: deleteCollection } = useMutation({
@@ -211,8 +215,29 @@ const Admin = () => {
       <Divider variant="dashed" className="my-5" />
       <Title>Projects</Title>
       <Group position="right">
-        <Button onClick={() => setCreateAction('project')}>Create Project</Button>
+        <Button onClick={() => setCreateAction('project')}>
+          Create Project
+        </Button>
       </Group>
+      <DataTable
+        records={projects || []}
+        columns={[
+          {
+            accessor: 'Image',
+            render: (value) => <Avatar src={value.project_image} />,
+          },
+          {
+            accessor: 'project_name',
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
+            render: (value) => <ShowAddress address={value.project_name} />,
+          },
+          {
+            accessor: 'project_address',
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
+            render: (value) => <ShowAddress address={value.project_address} />,
+          },
+        ]}
+      />
       <CreateProject
         opened={createAction === 'project'}
         close={() => setCreateAction(undefined)}

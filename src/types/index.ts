@@ -130,3 +130,14 @@ export interface BoxCollection {
   image: string;
   is_active: boolean;
 }
+
+export interface Project {
+  project_address: Address;
+  total_raise_amount: bigint;
+  due_time: number;
+  project_name: string;
+  project_description: string;
+  project_owner: Address;
+  project_image: string;
+  total_fund_raised: bigint;
+}

@@ -7,12 +7,14 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useMutation } from '@tanstack/react-query';
-import { contractBox } from 'src/configs/contract';
+import { addressCheckIn, contractRaiseFund } from 'src/configs/contract';
 import useImageUploader from 'src/hooks/useImageUploader';
 import api from 'src/services/api';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import { useAccount, useContractWrite, useWaitForTransaction } from 'wagmi';
 import { watchContractEvent } from 'wagmi/actions';
 import { DatePickerInput } from '@mantine/dates';
+import { parseEther } from 'viem';
+import dayjs from 'src/utils/dayjs';
 
 interface CreateProjectProps {
   opened: boolean;
@@ -20,13 +22,14 @@ interface CreateProjectProps {
 }
 
 const CreateProject = ({ opened, close }: CreateProjectProps) => {
+  const { address: project_owner } = useAccount();
+
   const { onSubmit, getInputProps } = useForm({
     initialValues: {
       project_name: '',
-      project_owner: '',
       project_description: '',
-      total_raise_amount: 0,
-      due_time: '',
+      total_raise_amount_num: '0',
+      due_time_string: '',
     },
   });
 
@@ -35,14 +38,14 @@ const CreateProject = ({ opened, close }: CreateProjectProps) => {
     isLoading,
     data,
   } = useContractWrite({
-    ...contractBox,
-    functionName: 'createBox',
+    ...contractRaiseFund,
+    functionName: 'createRaiseFund',
   });
 
   const { ImageInput, uploadImage, isLoading: uploading } = useImageUploader();
 
-  const { mutateAsync: createBox } = useMutation({
-    mutationKey: ['create-box'],
+  const { mutateAsync: createProject } = useMutation({
+    mutationKey: ['create-project'],
     mutationFn: (params: any) => api.post('/boxCollection', params),
   });
 
@@ -59,30 +62,50 @@ const CreateProject = ({ opened, close }: CreateProjectProps) => {
       position="right"
     >
       <form
-        onSubmit={onSubmit(async ({ due_time }) => {
-          const image = await uploadImage();
+        onSubmit={onSubmit(
+          async ({
+            due_time_string,
+            total_raise_amount_num,
+            project_name,
+            project_description,
+          }) => {
+            const project_image = await uploadImage();
+            const total_raise_amount = parseEther(total_raise_amount_num);
+            const due_time = dayjs(due_time_string).unix();
 
-          if (image) {
-            await create?.({
-              args: [],
-            });
+            if (project_image) {
+              await create?.({
+                args: [
+                  project_owner,
+                  addressCheckIn,
+                  total_raise_amount,
+                  due_time,
+                  project_name,
+                ],
+              });
 
-            // watchContractEvent(
-            //   {
-            //     ...contractBox,
-            //     eventName: 'ContractCreated',
-            //   },
-            //   (logs: any[]) => {
-            //     const box_collection_address = logs?.at(0)?.args?.newAddress;
-            //     return createBox({
-            //       box_collection_address,
-            //       origin_address: ,
-            //       image,
-            //     });
-            //   }
-            // );
+              watchContractEvent(
+                {
+                  ...contractRaiseFund,
+                  eventName: 'ContractCreated',
+                },
+                (logs: any[]) => {
+                  const project_address = logs?.at(0)?.args?.contractAddress;
+                  return createProject({
+                    project_address,
+                    total_raise_amount,
+                    due_time,
+                    project_name,
+                    project_description,
+                    project_owner,
+                    project_image,
+                    total_fund_raised: 0,
+                  });
+                }
+              );
+            }
           }
-        })}
+        )}
         className="flex flex-col gap-4"
       >
         <ImageInput />
@@ -100,7 +123,7 @@ const CreateProject = ({ opened, close }: CreateProjectProps) => {
         />
         <TextInput
           label="Total Raise Amount"
-          {...getInputProps('total_raise_amount', {
+          {...getInputProps('total_raise_amount_num', {
             type: 'input',
           })}
           type="number"
@@ -113,7 +136,7 @@ const CreateProject = ({ opened, close }: CreateProjectProps) => {
         />
         <DatePickerInput
           label="Due Time"
-          {...getInputProps('due_time', {
+          {...getInputProps('due_time_string', {
             type: 'input',
           })}
         />
