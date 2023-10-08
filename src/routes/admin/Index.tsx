@@ -14,6 +14,7 @@ import CreatePool from './components/CreatPool';
 import CreateCollection from './components/CreateCollection';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
+import CreateBox from './components/CreateBox';
 
 const poolColumns = [
   {
@@ -46,7 +47,9 @@ const poolColumns = [
 
 const Admin = () => {
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
-  const [createAction, setCreateAction] = useState<'pool' | 'collection'>();
+  const [createAction, setCreateAction] = useState<
+    'pool' | 'collection' | 'box'
+  >();
   const { isAdmin } = useAdmin();
   const { data: pools } = useQuery<Pool[]>({
     queryKey: ['pools'],
@@ -167,6 +170,16 @@ const Admin = () => {
         close={() => setEditingPool(null)}
         editingPool={editingPool}
         key={`${editingPool?.pool_id}`}
+      />
+
+      <Divider variant="dashed" className="my-5" />
+      <Title>Boxes</Title>
+      <Group position="right">
+        <Button onClick={() => setCreateAction('box')}>Create Box</Button>
+      </Group>
+      <CreateBox
+        opened={createAction === 'box'}
+        close={() => setCreateAction(undefined)}
       />
     </div>
   );
