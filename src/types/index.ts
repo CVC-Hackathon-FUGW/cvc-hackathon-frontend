@@ -130,6 +130,15 @@ export interface BoxCollection {
   image: string;
   is_active: boolean;
 }
+export interface Box {
+  box_price: bigint;
+  box_address: Address;
+  is_opened: boolean;
+  owner: Address;
+  box_id: number;
+  token_id: number;
+  is_active: boolean;
+}
 
 export interface Project {
   project_address: Address;

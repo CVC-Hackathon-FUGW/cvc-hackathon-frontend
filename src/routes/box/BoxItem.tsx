@@ -1,9 +1,10 @@
 import { Button, Image, Text, Title } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
+import BoxCollectionCard, { BoxCard } from 'src/components/Box/BoxCard';
 import { abiBoxInside, boxPrice } from 'src/configs/contract';
 import api from 'src/services/api';
-import { BoxCollection } from 'src/types';
+import { Box, BoxCollection } from 'src/types';
 import { formatEther } from 'viem';
 import { useAccount, useContractWrite } from 'wagmi';
 import { waitForTransaction } from 'wagmi/actions';
@@ -17,13 +18,15 @@ const BoxItem = () => {
     queryFn: async () => api.get(`/boxCollection/${itemId}`),
     enabled: !!itemId,
   });
-  const { data: ownedBoxes } = useQuery<BoxCollection[]>({
+  const { data: ownedBoxes } = useQuery<Box[]>({
     queryKey: ['ownedBoxes', boxItem?.box_collection_address],
     queryFn: async () =>
       api.get(`/box/address/${boxItem?.box_collection_address}`),
     enabled: !!boxItem?.box_collection_address,
-    select: (data) => data,
+    select: (data) =>
+      data?.filter((item) => item.owner === address && !item.is_opened),
   });
+
   console.log(ownedBoxes);
 
   const { writeAsync: mintBox } = useContractWrite({
@@ -76,6 +79,11 @@ const BoxItem = () => {
       </div>
       <div className="flex flex-col gap-4 w-full">
         <Title>Your Boxes</Title>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {ownedBoxes?.map((box) => (
+            <BoxCard key={Number(box.box_id)} box={box} />
+          ))}
+        </div>
       </div>
     </div>
   );
