@@ -10,14 +10,8 @@ import { useMutation } from '@tanstack/react-query';
 import { contractBox } from 'src/configs/contract';
 import useImageUploader from 'src/hooks/useImageUploader';
 import api from 'src/services/api';
-import { Pool } from 'src/types';
-import {
-  Address,
-  useContractEvent,
-  useContractWrite,
-  useWaitForTransaction,
-} from 'wagmi';
-import { waitForTransaction, watchContractEvent } from 'wagmi/actions';
+import { useContractWrite, useWaitForTransaction } from 'wagmi';
+import { watchContractEvent } from 'wagmi/actions';
 
 interface CreateBoxProps {
   opened: boolean;
@@ -40,14 +34,6 @@ const CreateBox = ({ opened, close }: CreateBoxProps) => {
     functionName: 'createBox',
   });
 
-  // useContractEvent({
-  //   ...contractBox,
-  //   eventName: 'ContractCreated',
-  //   listener: (data: any[]) => {
-  //     const box_collection_address = data?.at(0)?.args?.newAddress;
-
-  //   },
-  // });
   const { ImageInput, uploadImage, isLoading: uploading } = useImageUploader();
 
   const { mutateAsync: createBox } = useMutation({

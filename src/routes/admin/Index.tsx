@@ -8,13 +8,14 @@ import ShowAddress from 'src/components/common/ShowAddress';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import useAdmin from 'src/hooks/useAdmin';
 import api from 'src/services/api';
-import { Collection, Pool } from 'src/types';
+import { BoxCollection, Collection, Pool } from 'src/types';
 import { formatEther } from 'viem';
 import CreatePool from './components/CreatPool';
 import CreateCollection from './components/CreateCollection';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
 import CreateBox from './components/CreateBox';
+import CreateProject from './components/CreateProject';
 
 const poolColumns = [
   {
@@ -48,7 +49,7 @@ const poolColumns = [
 const Admin = () => {
   const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [createAction, setCreateAction] = useState<
-    'pool' | 'collection' | 'box'
+    'pool' | 'collection' | 'box' | 'project'
   >();
   const { isAdmin } = useAdmin();
   const { data: pools } = useQuery<Pool[]>({
@@ -59,6 +60,11 @@ const Admin = () => {
   const { data: marketCollections, refetch } = useQuery<Collection[]>({
     queryFn: () => api.get('/marketCollections'),
     queryKey: ['get-marketItems'],
+  });
+
+  const { data: boxes } = useQuery<BoxCollection[]>({
+    queryFn: () => api.get('/boxCollection'),
+    queryKey: ['get-boxCollection'],
   });
 
   const { mutateAsync: deleteCollection } = useMutation({
@@ -177,8 +183,38 @@ const Admin = () => {
       <Group position="right">
         <Button onClick={() => setCreateAction('box')}>Create Box</Button>
       </Group>
+      <DataTable
+        records={boxes || []}
+        columns={[
+          {
+            accessor: 'Image',
+            render: (value) => <Avatar src={value.image} />,
+          },
+          {
+            accessor: 'box_collection_address',
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
+            render: (value) => (
+              <ShowAddress address={value.box_collection_address} />
+            ),
+          },
+          {
+            accessor: 'origin_address',
+            cellsStyle: { color: 'green', fontWeight: 'bold' },
+            render: (value) => <ShowAddress address={value.origin_address} />,
+          },
+        ]}
+      />
       <CreateBox
         opened={createAction === 'box'}
+        close={() => setCreateAction(undefined)}
+      />
+      <Divider variant="dashed" className="my-5" />
+      <Title>Projects</Title>
+      <Group position="right">
+        <Button onClick={() => setCreateAction('project')}>Create Project</Button>
+      </Group>
+      <CreateProject
+        opened={createAction === 'project'}
         close={() => setCreateAction(undefined)}
       />
     </div>

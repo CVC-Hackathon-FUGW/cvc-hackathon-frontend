@@ -1,13 +1,12 @@
-import { Avatar, Card, Group, Image, Text } from '@mantine/core';
-import { getNftSrc } from 'src/helpers/get-nft-src';
+import { Avatar, Card, Text } from '@mantine/core';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import 'src/styles/nft-card.css';
-import { Box } from 'src/types';
+import { BoxCollection } from 'src/types';
 import { zeroAddress } from 'viem';
 
 interface NFTCardProps {
-  box?: Box;
-  onClick?: (nft: Partial<Box>) => void;
+  box?: BoxCollection;
+  onClick?: (nft: Partial<BoxCollection>) => void;
   height?: string;
 }
 
@@ -29,20 +28,20 @@ const BoxCard = (props: NFTCardProps) => {
             src={box?.image}
             radius="100%"
             size="90px"
-            className="absolute top-1/2"
+            className="absolute top-1/2 shadow"
           />
         </div>
 
         <div style={{ wordWrap: 'break-word' }} className="mt-6 p-5">
           <div className="flex justify-center text-xl font-bold mt-2">
             <Text className="content-center text-[#79699B]">
-              {box?.name || 'Box Name'}
+              {truncateMiddle(box?.box_collection_address) || 'Box Name'}
             </Text>
           </div>
           <div className="mt-4">
             <Text className="font-semibold text-gray-500">Address:</Text>
             <Text className="font-semibold">
-              {truncateMiddle(box?.address || zeroAddress)}
+              {truncateMiddle(box?.origin_address || zeroAddress)}
             </Text>
           </div>
         </div>

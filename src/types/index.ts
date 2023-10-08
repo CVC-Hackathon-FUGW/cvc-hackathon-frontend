@@ -116,16 +116,17 @@ export interface WrappedPool {
   pool: Pool;
 }
 
-export interface Box {
+export interface Project {
   id: number;
   name: string;
   image: string;
   address: Address;
 }
 
-export interface Project {
-  id: number;
-  name: string;
+export interface BoxCollection {
+  box_collection_id: number;
+  box_collection_address: Address;
+  origin_address: Address;
   image: string;
-  address: Address;
+  is_active: boolean;
 }
