@@ -17,7 +17,7 @@ import { waitForTransaction } from 'wagmi/actions';
 interface EditPoolProps {
   opened: boolean;
   close: () => void;
-  editingPool: Pool | null;
+  editingPool?: Pool;
 }
 
 const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
@@ -49,62 +49,69 @@ const EditPool = ({ opened, close, editingPool }: EditPoolProps) => {
   });
 
   return (
-    <Drawer opened={opened} onClose={close} title="Edit Pool" position="right">
-      <form
-        onSubmit={onSubmit(
-          async ({ APY, duration, state, collection_name }) => {
-            const _poolId = editingPool?.pool_id;
-
-            const data = await update?.({
-              args: [_poolId, BigInt(APY), BigInt(duration), state],
-            });
-            await waitForTransaction({
-              hash: data?.hash,
-            });
-            updatePool({
-              ...editingPool,
-              apy: BigInt(APY),
-              duration: BigInt(duration),
-              collection_name,
-              state,
-            });
-          }
-        )}
-        className="flex flex-col gap-4"
+    <>
+      <Drawer
+        opened={opened}
+        onClose={close}
+        title="Edit Pool"
+        position="right"
       >
-        <TextInput
-          label="Collection name"
-          {...getInputProps('collection_name', {
-            type: 'input',
-          })}
-        />
-        <TextInput
-          label="APY"
-          type="number"
-          {...getInputProps('APY', {
-            type: 'input',
-          })}
-        />
-        <TextInput
-          label="Duration"
-          type="number"
-          {...getInputProps('duration', {
-            type: 'input',
-          })}
-        />
-        <Switch
-          label="State"
-          {...getInputProps('state', {
-            type: 'checkbox',
-          })}
-        />
-        {/* TODO: add image upload */}
-        <Group position="right">
-          <Button type="submit">Create</Button>
-        </Group>
-        <LoadingOverlay visible={isLoading} overlayBlur={2} />
-      </form>
-    </Drawer>
+        <form
+          onSubmit={onSubmit(
+            async ({ APY, duration, state, collection_name }) => {
+              const _poolId = editingPool?.pool_id;
+
+              const data = await update?.({
+                args: [_poolId, BigInt(APY), BigInt(duration), state],
+              });
+              await waitForTransaction({
+                hash: data?.hash,
+              });
+              updatePool({
+                ...editingPool,
+                apy: BigInt(APY),
+                duration: BigInt(duration),
+                collection_name,
+                state,
+              });
+            }
+          )}
+          className="flex flex-col gap-4"
+        >
+          <TextInput
+            label="Collection name"
+            {...getInputProps('collection_name', {
+              type: 'input',
+            })}
+          />
+          <TextInput
+            label="APY"
+            type="number"
+            {...getInputProps('APY', {
+              type: 'input',
+            })}
+          />
+          <TextInput
+            label="Duration"
+            type="number"
+            {...getInputProps('duration', {
+              type: 'input',
+            })}
+          />
+          <Switch
+            label="State"
+            {...getInputProps('state', {
+              type: 'checkbox',
+            })}
+          />
+          {/* TODO: add image upload */}
+          <Group position="right">
+            <Button type="submit">Create</Button>
+          </Group>
+        </form>
+      </Drawer>
+      <LoadingOverlay visible={isLoading} overlayBlur={2} />
+    </>
   );
 };
 

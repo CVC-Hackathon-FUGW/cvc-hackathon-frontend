@@ -7,15 +7,18 @@ import { useState } from 'react';
 import ShowAddress from 'src/components/common/ShowAddress';
 import { truncateMiddle } from 'src/helpers/truncate-middle';
 import useAdmin from 'src/hooks/useAdmin';
+import { useIsMounted } from 'src/hooks/useIsMounted';
 import api from 'src/services/api';
-import { BoxCollection, Collection, Pool, Project } from 'src/types';
+import { BoxCollection, Collection, Package, Pool, Project } from 'src/types';
+import dayjs from 'src/utils/dayjs';
 import { formatEther } from 'viem';
 import CreatePool from './components/CreatPool';
+import CreateBox from './components/CreateBox';
 import CreateCollection from './components/CreateCollection';
+import CreatePackage from './components/CreatePackage';
+import CreateProject from './components/CreateProject';
 import EditPool from './components/EditPool';
 import UpdateFloorPrice from './components/UpdateFloorPrice';
-import CreateBox from './components/CreateBox';
-import CreateProject from './components/CreateProject';
 
 const poolColumns = [
   {
@@ -47,10 +50,12 @@ const poolColumns = [
 ];
 
 const Admin = () => {
-  const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [createAction, setCreateAction] = useState<
     'pool' | 'collection' | 'box' | 'project'
   >();
+  const [editingPool, setEditingPool] = useState<Pool>();
+  const [editingProject, setEditingProject] = useState<Project>();
+
   const { isAdmin } = useAdmin();
   const { data: pools } = useQuery<Pool[]>({
     queryKey: ['pools'],
@@ -177,7 +182,7 @@ const Admin = () => {
       />
       <EditPool
         opened={Boolean(editingPool)}
-        close={() => setEditingPool(null)}
+        close={() => setEditingPool(undefined)}
         editingPool={editingPool}
         key={`${editingPool?.pool_id}`}
       />
@@ -228,22 +233,86 @@ const Admin = () => {
           },
           {
             accessor: 'project_name',
-            cellsStyle: { color: 'green', fontWeight: 'bold' },
-            render: (value) => <ShowAddress address={value.project_name} />,
+            cellsStyle: { fontWeight: 'bold' },
           },
           {
             accessor: 'project_address',
             cellsStyle: { color: 'green', fontWeight: 'bold' },
             render: (value) => <ShowAddress address={value.project_address} />,
           },
+          {
+            accessor: 'total_raise_amount',
+          },
+          {
+            accessor: 'project_description',
+          },
+          {
+            accessor: 'project_owner',
+            render: (value) => <ShowAddress address={value.project_owner} />,
+          },
+          {
+            accessor: 'due_time',
+            render: (value) => (
+              <>{dayjs.unix(value.due_time).format('DD/MM/YYYY')}</>
+            ),
+          },
+          {
+            accessor: '',
+            render: (value) => (
+              <Button onClick={() => setEditingProject(value)}>
+                Create package
+              </Button>
+            ),
+          },
         ]}
+        rowExpansion={{
+          content: ({ record }) => <ProjectRowExpansion record={record} />,
+        }}
       />
       <CreateProject
         opened={createAction === 'project'}
         close={() => setCreateAction(undefined)}
+      />
+      <CreatePackage
+        opened={Boolean(editingProject)}
+        close={() => setEditingProject(undefined)}
+        editingProject={editingProject}
       />
     </div>
   );
 };
 
 export default Admin;
+
+const ProjectRowExpansion = ({ record }: { record: Project }) => {
+  const isMounted = useIsMounted();
+
+  const { data: packages } = useQuery<Package[]>({
+    queryKey: ['get-package', record.project_address],
+    queryFn: () => api.get(`/package/address/${record.project_address}`),
+    enabled: isMounted,
+  });
+
+  return (
+    <DataTable
+      records={packages || []}
+      className="pl-10"
+      columns={[
+        {
+          accessor: 'Image',
+          render: (value) => <Avatar src={value.package_image} />,
+        },
+        {
+          accessor: 'package_price',
+          cellsStyle: { fontWeight: 'bold', color: 'green' },
+        },
+        {
+          accessor: 'package_name',
+        },
+        {
+          accessor: 'package_description',
+        },
+      ]}
+    />
+  );
+};

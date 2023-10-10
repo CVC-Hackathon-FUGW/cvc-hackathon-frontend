@@ -1,16 +1,16 @@
 import { Card, Group, Image, Text } from '@mantine/core';
-import { getNftSrc } from 'src/helpers/get-nft-src';
+import { truncateMiddle } from 'src/helpers/truncate-middle';
 import 'src/styles/nft-card.css';
 import { Project } from 'src/types';
 
 interface NFTCardProps {
-  box?: Project;
+  project?: Project;
   onClick?: (nft: Partial<Project>) => void;
   height?: string;
 }
 
 const ProjectCard = (props: NFTCardProps) => {
-  const { box, onClick, height = '20rem' } = props;
+  const { project, onClick, height = '20rem' } = props;
   return (
     <div className="card-container">
       <Card
@@ -19,18 +19,33 @@ const ProjectCard = (props: NFTCardProps) => {
         radius="md"
         withBorder
         className="cursor-pointer grid gap-1 card"
-        onClick={() => onClick?.({ ...box })}
+        onClick={() => onClick?.({ ...project })}
       >
         <Card.Section>
           <Image
-            src={getNftSrc(box?.image)}
-            alt={box?.name || 'Box Image'}
+            src={project?.project_image}
+            alt={project?.project_name || 'Box Image'}
             withPlaceholder
             height={height}
           />
         </Card.Section>
         <Group position="apart" mt="md" mb="xs">
-          <Text weight={500}>{box?.name || 'Unnamed'}</Text>
+          <div className="">
+            <Text weight={300}>Project name</Text>
+            <Text weight={500}>{project?.project_name || 'Unnamed'}</Text>
+          </div>
+          <div className="">
+            <Text weight={300}>Project Owner</Text>
+            <Text weight={500}>{truncateMiddle(project?.project_owner)}</Text>
+          </div>
+          <div className="">
+            <Text weight={300}>Total raise amount</Text>
+            <Text weight={500}>{Number(project?.total_raise_amount)} RENT</Text>
+          </div>
+          <div className="">
+            <Text weight={300}>Total fund raised</Text>
+            <Text weight={500}>{Number(project?.total_fund_raised)} RENT</Text>
+          </div>
         </Group>
       </Card>
     </div>

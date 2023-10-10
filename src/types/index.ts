@@ -116,13 +116,6 @@ export interface WrappedPool {
   pool: Pool;
 }
 
-export interface Project {
-  id: number;
-  name: string;
-  image: string;
-  address: Address;
-}
-
 export interface BoxCollection {
   box_collection_id: number;
   box_collection_address: Address;
@@ -141,6 +134,7 @@ export interface Box {
 }
 
 export interface Project {
+  project_id: number;
   project_address: Address;
   total_raise_amount: bigint;
   due_time: number;
@@ -149,4 +143,16 @@ export interface Project {
   project_owner: Address;
   project_image: string;
   total_fund_raised: bigint;
+}
+
+export interface Package {
+  package_id: number;
+  package_name: string;
+  package_description: string;
+  package_image: string;
+  package_price: number;
+  project_name: string;
+  project_address: Address;
+  project_id: number;
+  is_active: boolean;
 }

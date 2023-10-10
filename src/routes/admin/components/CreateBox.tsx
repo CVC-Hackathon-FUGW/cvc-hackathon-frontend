@@ -47,47 +47,54 @@ const CreateBox = ({ opened, close }: CreateBoxProps) => {
   });
 
   return (
-    <Drawer opened={opened} onClose={close} title="Create Box" position="right">
-      <form
-        onSubmit={onSubmit(async ({ tokenAddress }) => {
-          const image = await uploadImage();
-
-          if (image) {
-            await create?.({
-              args: [tokenAddress],
-            });
-
-            watchContractEvent(
-              {
-                ...contractBox,
-                eventName: 'ContractCreated',
-              },
-              (logs: any[]) => {
-                const box_collection_address = logs?.at(0)?.args?.newAddress;
-                return createBox({
-                  box_collection_address,
-                  origin_address: tokenAddress,
-                  image,
-                });
-              }
-            );
-          }
-        })}
-        className="flex flex-col gap-4"
+    <>
+      <Drawer
+        opened={opened}
+        onClose={close}
+        title="Create Box"
+        position="right"
       >
-        <ImageInput />
-        <TextInput
-          label="Token address"
-          {...getInputProps('tokenAddress', {
-            type: 'input',
+        <form
+          onSubmit={onSubmit(async ({ tokenAddress }) => {
+            const image = await uploadImage();
+
+            if (image) {
+              await create?.({
+                args: [tokenAddress],
+              });
+
+              watchContractEvent(
+                {
+                  ...contractBox,
+                  eventName: 'ContractCreated',
+                },
+                (logs: any[]) => {
+                  const box_collection_address = logs?.at(0)?.args?.newAddress;
+                  return createBox({
+                    box_collection_address,
+                    origin_address: tokenAddress,
+                    image,
+                  });
+                }
+              );
+            }
           })}
-        />
-        <Group position="right">
-          <Button type="submit">Create</Button>
-        </Group>
-        <LoadingOverlay visible={isLoading || uploading} overlayBlur={2} />
-      </form>
-    </Drawer>
+          className="flex flex-col gap-4"
+        >
+          <ImageInput />
+          <TextInput
+            label="Token address"
+            {...getInputProps('tokenAddress', {
+              type: 'input',
+            })}
+          />
+          <Group position="right">
+            <Button type="submit">Create</Button>
+          </Group>
+        </form>
+      </Drawer>
+      <LoadingOverlay visible={isLoading || uploading} overlayBlur={2} />
+    </>
   );
 };
 

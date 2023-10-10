@@ -46,41 +46,43 @@ const CreateCollection = ({ opened, close }: CreateCollectionProps) => {
   });
 
   return (
-    <Drawer
-      opened={opened}
-      onClose={close}
-      title="Create Collection"
-      position="right"
-    >
-      <ImageInput />
-      <form
-        onSubmit={onSubmit(async ({ collection_name, token_address }) => {
-          const image = await uploadImage();
-
-          if (image) {
-            await createCollection({ collection_name, token_address, image });
-          }
-        })}
-        className="flex flex-col gap-4"
+    <>
+      <Drawer
+        opened={opened}
+        onClose={close}
+        title="Create Collection"
+        position="right"
       >
-        <TextInput
-          label="Collection Name"
-          {...getInputProps('collection_name', {
-            type: 'input',
+        <ImageInput />
+        <form
+          onSubmit={onSubmit(async ({ collection_name, token_address }) => {
+            const image = await uploadImage();
+
+            if (image) {
+              await createCollection({ collection_name, token_address, image });
+            }
           })}
-        />
-        <TextInput
-          label="Token Address"
-          {...getInputProps('token_address', {
-            type: 'input',
-          })}
-        />
-        <Group position="right">
-          <Button type="submit">Create</Button>
-        </Group>
-        <LoadingOverlay visible={isLoading || uploading} overlayBlur={2} />
-      </form>
-    </Drawer>
+          className="flex flex-col gap-4"
+        >
+          <TextInput
+            label="Collection Name"
+            {...getInputProps('collection_name', {
+              type: 'input',
+            })}
+          />
+          <TextInput
+            label="Token Address"
+            {...getInputProps('token_address', {
+              type: 'input',
+            })}
+          />
+          <Group position="right">
+            <Button type="submit">Create</Button>
+          </Group>
+        </form>
+      </Drawer>
+      <LoadingOverlay visible={isLoading || uploading} overlayBlur={2} />
+    </>
   );
 };
 

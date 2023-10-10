@@ -1,36 +1,16 @@
 import { Text, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
-import { MarketNft } from 'src/components/Marketplace/types';
+import { useNavigate } from 'react-router-dom';
 import ProjectCard from 'src/components/Project/ProjectCard';
-import { marketToContract } from 'src/helpers/transform.market-item';
 import api from 'src/services/api';
-import { Collection } from 'src/types';
+import { Project } from 'src/types';
 
 const ProjectPage = () => {
-  const { boxId } = useParams();
   const navigate = useNavigate();
 
-  const { data: marketItems } = useQuery({
-    queryKey: ['fetchMarketItems'],
-    queryFn: () => api.get<void, MarketNft[]>('/marketItems'),
-    select: (data) => data?.map((item) => marketToContract(item)) || [],
-  });
-
-  const { data: collection } = useQuery({
-    queryKey: ['fetchMarketItemsAddress', boxId],
-    queryFn: () => api.get<void, Collection>(`/marketCollections/${boxId}`),
-    enabled: !!boxId,
-  });
-
-  const { data: marketItemsAddress } = useQuery({
-    queryKey: ['marketItemAddress', collection?.token_address],
-    queryFn: () =>
-      api.get<void, MarketNft[]>(
-        `/marketItems/address/${collection?.token_address}`
-      ),
-    select: (data) => data?.map((item) => marketToContract(item)) || [],
-    enabled: !!collection?.token_address,
+  const { data: projects } = useQuery<Project[]>({
+    queryFn: () => api.get('/project'),
+    queryKey: ['get-project'],
   });
 
   return (
@@ -39,13 +19,12 @@ const ProjectPage = () => {
         <Title>Invest into Projects to gain products</Title>
       </div>
       <Text></Text>
-      <div className="flex flex-row items-center justify-center"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {(boxId ? marketItemsAddress : marketItems)?.map(({ ...rest }) => (
+        {projects?.map((project, index) => (
           <ProjectCard
-            key={Number(rest.itemId)}
-            {...rest}
-            onClick={() => navigate(`${rest.itemId}`)}
+            key={index}
+            project={project}
+            onClick={() => navigate(`${project.project_address}`)}
           />
         ))}
       </div>

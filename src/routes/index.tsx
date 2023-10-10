@@ -16,6 +16,7 @@ import BoxPage from './box';
 import BoxItem from './box/BoxItem';
 import ProjectPage from './projects';
 import InvestmentsPage from './investments';
+import ProjectItem from './projects/ProjectItem';
 
 const router: RouteProps[] = [
   {
@@ -87,10 +88,10 @@ const router: RouteProps[] = [
     path: '/projects',
     element: <ProjectPage />,
   },
-  // {
-  //   path: '/projects/:itemId',
-  //   element: <BoxItem />,
-  // },
+  {
+    path: '/projects/:project_address',
+    element: <ProjectItem />,
+  },
 ];
 
 export default router;

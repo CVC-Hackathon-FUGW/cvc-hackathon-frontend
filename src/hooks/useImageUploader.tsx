@@ -13,13 +13,13 @@ const useImageUploader = () => {
 
   const ImageInput = useCallback(
     () => (
-      <div className="relative mb-10 min-h-[15rem]">
+      <div className="relative mb-10 h-[15rem]">
         <Dropzone
           openRef={openRef}
           onDrop={(file) => setSelectedImage(file?.[0])}
-          className={`absolute z-10 w-full h-full hover:opacity-80 ${
-            selectedImage ? 'opacity-0' : 'opacity-100'
-          } transition-opacity duration-300 grid place-items-center`}
+          className={`absolute z-10 w-full h-full hover:opacity-80 
+          ${selectedImage ? 'opacity-0' : 'opacity-100'} 
+          transition-opacity duration-300 grid place-items-center`}
           radius="md"
           multiple={false}
           accept={IMAGE_MIME_TYPE}
@@ -77,6 +77,7 @@ const useImageUploader = () => {
         <Image
           src={selectedImage ? URL.createObjectURL(selectedImage) : ''}
           radius="md"
+          height={'15rem'}
         />
       </div>
     ),
