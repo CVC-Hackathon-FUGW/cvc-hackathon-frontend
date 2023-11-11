@@ -33,7 +33,7 @@ const columns = [
 export default function InvestmentsPage() {
   const { address } = useAccount();
 
-  const { data: investments, refetch } = useQuery<Project[]>({
+  const { data: investments } = useQuery<Project[]>({
     queryKey: ['investments', address],
     queryFn: () => api.get(`/participant/address/${address}`),
   });

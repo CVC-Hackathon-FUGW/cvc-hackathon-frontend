@@ -54,6 +54,10 @@ const routes = [
     value: 'projects',
     label: 'Projects',
   },
+  {
+    value: 'investments',
+    label: 'Investments',
+  },
 ];
 
 const adminRoutes = [
@@ -67,10 +71,6 @@ const userRoutes = [
   {
     value: 'profile',
     label: 'Profile',
-  },
-  {
-    value: 'investments',
-    label: 'Investments',
   },
 ];
 
