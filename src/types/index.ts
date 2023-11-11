@@ -143,6 +143,7 @@ export interface Project {
   project_owner: Address;
   project_image: string;
   total_fund_raised: bigint;
+  fund_attended: number;
 }
 
 export interface Package {
